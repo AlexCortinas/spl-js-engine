@@ -1,0 +1,37 @@
+{
+  "author": "Álex Cortiñas",
+  "babel": {
+    "presets": [
+      "es2015-node5"
+    ]
+  },
+  "bin": {
+    "spl-js-engine": "./src/index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/AlexCortinas/spl-js-engine/issues"
+  },
+  "dependencies": {
+    "babel-cli": "^6.7.5",
+    "babel-preset-es2015-node5": "^1.2.0",
+    "fs": "0.0.2"
+  },
+  "description": "Software Product Line JavaScript Derivation Engine",
+  "devDependencies": {
+    "babel-eslint": "^6.0.2",
+    "babel-register": "^6.7.2",
+    "eslint": "^2.7.0",
+    "mocha": "^2.4.5"
+  },
+  "homepage": "https://github.com/AlexCortinas/spl-js-engine#readme",
+  "name": "spl-js-engine",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexCortinas/spl-js-engine.git"
+  },
+  "scripts": {
+    "test": "mocha --ui qunit --compilers js:babel-register",
+    "eslint": "eslint src/** test/** || exit 0"
+  },
+  "version": "0.1.0"
+}
