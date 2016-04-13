@@ -6,11 +6,12 @@ export const getTestFileContent = (path, bin = null) =>
 
 export const getTestPath = (aPath) => `test/files/${aPath}`;
 
-export const createTmpFolder = () => {
-    fs.mkdirSync('test/files/tmp');
-};
-
 export const removeTmpFolder = () => {
-    walkDir('test/files/tmp', (file) => fs.unlinkSync(file));
-    fs.rmdirSync('test/files/tmp');
+    walkDir('test/files/tmp', (file, isFolder) => {
+        if (isFolder) {
+            fs.rmdirSync(file);
+        } else {
+            fs.unlinkSync(file);
+        }
+    });
 };
