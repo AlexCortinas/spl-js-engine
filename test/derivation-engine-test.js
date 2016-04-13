@@ -22,8 +22,6 @@ test('Create a project without feature selection or any custom data', () => {
 test('Create a project', () => {
     const engine = new DerivationEngine();
 
-    engine.addDelimiter('html', '<!--%', '-->');
+    engine.addDelimiter(['html', 'xml'], '<!--%', '-->');
     engine.addDelimiter('py', '#%', '%#');
-    engine.setFeatures([ 'featureA', 'featureB' ]);
-    engine.setData({ 'propA': 'one', 'propB': 23 });
 });
