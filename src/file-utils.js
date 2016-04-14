@@ -1,43 +1,43 @@
 import fs from 'fs';
 import path from 'path';
 
-export const existsFile = (filePath) => {
+export function existsFile(filePath) {
     try {
         return fs.statSync(filePath);
     } catch (e) {
         return false;
     }
-};
+}
 
-export const readFile = (filePath, bin = false) =>
-    fs.readFileSync(filePath, bin ? null : 'utf8');
+export function readFile(filePath, bin = false) {
+    return fs.readFileSync(filePath, bin ? null : 'utf8');
+}
 
-export const writeFile = (filePath, data, bin = false) => {
+export function writeFile(filePath, data, bin = false) {
     mkDirRecursively(path.dirname(filePath));
     fs.writeFileSync(filePath, data, bin ? null : 'utf8');
-};
+}
 
-const mkDirRecursively = (folderPath) => {
-    let stat = existsFile(path.dirname(folderPath));
+function mkDirRecursively(folderPath) {
+    const parentPath = path.dirname(folderPath);
 
-    if (!stat) {
-        mkDirRecursively(path.dirname(folderPath));
+    if (!existsFile(parentPath)) {
+        mkDirRecursively(parentPath);
     }
-    stat = existsFile(folderPath);
+
+    const stat = existsFile(folderPath);
 
     if (!stat) {
         fs.mkdirSync(folderPath);
     } else if (stat.isFile()) {
         throw `Found file on ${folderPath} while creating a folder`;
     }
-};
+}
 
-export const walkDir = (pathToWalk, cb) => {
+export function walkDir(pathToWalk, cb) {
     let stat = existsFile(pathToWalk);
 
-    if (!stat || stat.isFile()) {
-        return;
-    }
+    if (!stat || stat.isFile()) return;
 
     fs.readdirSync(pathToWalk).forEach((filePath) => {
         const fullFilePath = `${pathToWalk}${path.sep}${filePath}`;
@@ -51,4 +51,4 @@ export const walkDir = (pathToWalk, cb) => {
     });
 
     cb(pathToWalk, true);
-};
+}
