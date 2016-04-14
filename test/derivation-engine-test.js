@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { DerivationEngine } from '../src/index';
+import { DerivationEngine, readJsonFromFile } from '../src/index';
 
 import {
     getTestFileContent as f, getTestPath as p, removeTmpFolder
@@ -8,7 +8,7 @@ import {
 
 suite('Derivation Engine');
 
-before(removeTmpFolder);
+beforeEach(removeTmpFolder);
 
 test('Create a project without feature selection or any custom data', () => {
     const engine = new DerivationEngine();
@@ -22,6 +22,9 @@ test('Create a project without feature selection or any custom data', () => {
 test('Create a project', () => {
     const engine = new DerivationEngine();
 
-    engine.addDelimiter(['html', 'xml'], '<!--%', '-->');
-    engine.addDelimiter('py', '#%', '%#');
+    engine.setFeatureModel(readJsonFromFile(p('simpleSPL/model.yaml')));
+    engine.setConfig(readJsonFromFile(p('simpleSPL/config.yaml')));
+    engine.setProject(readJsonFromFile(p('simpleSPL/project.yaml')));
+
+    engine.generateProject(p('simpleSPL/code'), p('tmp/simpleProduct'));
 });
