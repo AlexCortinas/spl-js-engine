@@ -1,0 +1,12 @@
+    Usage: %s [args]
+
+    General options:
+      --help            # Print this info and generator's options and usage
+      --version         # Print version?
+      --featureModel    # [Required] Path to the feature model representation
+                            (json, yaml or xml).
+      --project         # Path to the project specification (json or yaml).
+      --config          # Path to the platform configuration (json or yaml).
+      --code            # [Required] Path to the annotated code.
+      --output          # Path to the output folder of the project. Default is
+                            'output'.
