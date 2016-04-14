@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import YAML from 'yamljs';
 
 export function existsFile(filePath) {
     try {
@@ -51,4 +52,28 @@ export function walkDir(pathToWalk, cb) {
     });
 
     cb(pathToWalk, true);
+}
+
+export function readJsonFromFile(path) {
+    const stat = existsFile(path);
+
+    if (!stat || !stat.isFile()) {
+        throw `${path} is not a file`;
+    }
+
+    const fileContent = readFile(path);
+
+    try {
+        return JSON.parse(fileContent);
+    } catch (e) {
+        // nothing to do
+    }
+
+    try {
+        return YAML.parse(fileContent);
+    } catch (e) {
+        // nothing to do
+    }
+
+    return undefined;
 }

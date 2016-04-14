@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import {
-    existsFile, readFile, walkDir, writeFile
+    existsFile, readJsonFromFile, readFile, walkDir, writeFile
 } from '../src/file-utils';
 
 import {
@@ -41,4 +41,37 @@ test('Testing writeFile', () => {
     writeFile(p('tmp/asdf.txt'), 'asdf\n');
     assert.strictEqual(readFile(p('tmp/tmp/asdf.txt')), 'asdf\n');
     assert.strictEqual(readFile(p('tmp/asdf.txt')), 'asdf\n');
+});
+
+test('Read JSON file', () => {
+    const expected = {
+        featureModel: {
+            struct: {
+                name: 'SimpleSPL',
+                mandatory: true,
+                abstract: true,
+                type: 'and',
+                features: [
+                    { name: 'featureA' },
+                    { name: 'featureB' },
+                    { name: 'featureC' }
+                ]
+            },
+            constraints: [
+                {
+                    type: 'implies',
+                    first: 'featureA',
+                    second: 'featureC'
+                }
+            ]
+        }
+    };
+    assert.deepEqual(readJsonFromFile(p('simpleSPL/model.json')), expected);
+});
+
+test('Read YAML file', () => {
+    assert.deepEqual(
+        readJsonFromFile(p('simpleSPL/model.yaml')),
+        readJsonFromFile(p('simpleSPL/model.json'))
+    );
 });
