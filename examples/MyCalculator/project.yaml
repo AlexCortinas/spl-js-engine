@@ -1,0 +1,8 @@
+features:
+  - decimal
+  - add
+  - subtract
+  - multiply
+  - divide
+data:
+  title: The Calculator
