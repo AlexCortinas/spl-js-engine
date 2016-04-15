@@ -1,0 +1,609 @@
+import assert from 'assert';
+import { pd } from 'pretty-data';
+
+import { FeatureModel, readJsonFromFile } from '../src/index';
+import { getTestPath as p, getTestFileContent as f } from './test-utils';
+
+suite('#FeatureModel Manual Creation');
+
+test('Should create a new feature model and throw exception for not adding ' +
+    'features', () => {
+
+    const fm = new FeatureModel('MyCalculator');
+
+    assert.strictEqual(fm.toString(), 'MyCalculator');
+    assert.throws(() => {
+        fm.validateFeatureModel();
+    }, /abstract feature cannot be leaf/);
+});
+
+test('Should create a new feature model with 2 mandatory features and 1 non ' +
+    'mandatory abstract feature', () => {
+
+    const fm = new FeatureModel('FMName');
+
+    fm.and([
+        {name: 'f1', mandatory: true},
+        {name: 'f2', mandatory: true},
+        {name: 'f3'}
+    ]);
+
+    assert.strictEqual(fm.toString(), 'FMName: { +f1 AND +f2 AND f3 }');
+    assert.doesNotThrow(() => {
+        fm.validateFeatureModel();
+    });
+});
+
+test('Should throw and exception for getting an feature that does not ' +
+    'exist', () => {
+
+    const fm = new FeatureModel('fm');
+
+    fm.and('f1').and('f2');
+
+    assert.strictEqual(fm.toString(), 'fm: { f1: { f2 } }');
+    assert.throws(() => {
+        fm.get('f3');
+    }, /feature f3 not found/);
+});
+
+test('Should create a new feature model and then add a new feature by ' +
+    'recovering a previous one', () => {
+
+    const fm = new FeatureModel('fm');
+
+    fm.and('f1');
+    fm.get('f1').and('f2');
+
+    assert.strictEqual(fm.toString(), 'fm: { f1: { f2 } }');
+});
+
+test('Should throw an error for a mandatory feature under an OR ' +
+    'feature', () => {
+
+    const fm = new FeatureModel('MyCalculator');
+    const operations = fm.and({name: 'Operations', abstract: true});
+
+    // Since the changes to make this library more "FeatureIDE XML format"
+    // friendly, the optional and alternatives features cannot be set to
+    // mandatory even if indicated.
+    operations.or({name: 'Add', mandatory: true});
+    operations.or('Subtract');
+    operations.or('Divide');
+    operations.or('Multiply');
+
+    // Trick to provoke the error
+    fm.get('Add').mandatory = true;
+
+    assert.throws(() => {
+        fm.validateFeatureModel();
+    }, /features with OR and XOR parent cannot be mandatory/);
+});
+
+test('Should create a new feature model with a xor features and 2 ' +
+    'alternatives', () => {
+
+    const fm = new FeatureModel('FMName');
+
+    fm.xor('f1');
+    fm.xor('f2');
+
+    assert.strictEqual(fm.toString(), 'FMName: { f1 XOR f2 }');
+    assert.doesNotThrow(() => {
+        fm.validateFeatureModel();
+    });
+});
+
+test('Should throw an exception for having an abstract node as leaf', () => {
+    const fm = new FeatureModel('FMName');
+
+    fm.xor(['f1', {name: 'f2', abstract: true}]);
+
+    assert.strictEqual(fm.toString(), 'FMName: { f1 XOR _f2 }');
+
+    assert.throws(() => {
+        fm.validateFeatureModel();
+    }, /abstract feature cannot be leaf/);
+});
+
+test('Should throw an exception by having an OR node without children0', () => {
+    const fm = new FeatureModel('FMName');
+
+    fm.and('f1');
+    // trick to provoke fail
+    fm.features[0].type = 'XOR';
+
+    assert.throws(() => {
+        fm.validateFeatureModel();
+    }, /OR and XOR features must have children/);
+});
+
+test('MyCalculator MD test', () => {
+    const fm = _createMyCalculatorFM();
+
+    assert.strictEqual(fm.toString(), 'MyCalculator: { ' +
+        '+Base: { _Operations: { ' +
+        'Add OR Subtract OR Multiply OR Divide } ' +
+        'AND _Capabilities: { Decimal } } }');
+
+    assert.doesNotThrow(() => {
+        fm.validateFeatureModel();
+    });
+});
+
+test('Should throw an exception for adding a feature with a repeated ' +
+     'name', () => {
+
+    const fm = new FeatureModel('FMName');
+    fm.and('f1').xor('f2');
+
+    assert.throws(() => {
+        fm.validateFeatureModel();
+    }, /feature name already exists/);
+});
+
+
+suite('#FeatureModel Parsing:');
+
+test('testing json generation without constraints', () => {
+    const fm = _createMyCalculatorFM();
+    const expected = readJsonFromFile(p('feature-model/model.json'));
+
+    assert.deepEqual(fm.toJson(), expected);
+});
+
+test('testing json parsing without constraints', () => {
+    const fm = FeatureModel.fromJson(
+        readJsonFromFile(p('feature-model/model.json'))
+    );
+    const expected = _createMyCalculatorFM();
+
+    assert.deepEqual(fm.toJson(), expected.toJson());
+});
+
+test('testing xml generation without constraints', () => {
+    const fm = _createMyCalculatorFM();
+    const expected = f('feature-model/model.xml');
+
+    // Using pretty-data to sort the xml in order to compare
+    assert.strictEqual(pd.xml(expected), pd.xml(fm.toXml()));
+});
+
+test('testing xml parsing without constraints', () => {
+    const fm = FeatureModel.fromXml(f('feature-model/model.xml'));
+    const expected = _createMyCalculatorFM();
+
+    assert.deepEqual(fm.toJson(), expected.toJson());
+});
+
+test('testing strict FeatureIDE xml parsing without constraints', () => {
+    const fm = FeatureModel.fromXml(
+        f('feature-model/model-strict-featureIDE.xml')
+    );
+    const expected = _createMyCalculatorFM();
+
+    assert.deepEqual(fm.toJson(), expected.toJson());
+});
+
+suite('#FeatureModel Config Validation:');
+
+test('Should get the proper complete list of features', () => {
+    const fm = _createMyCalculatorFM();
+    const featuresSelected = ['Add', 'Subtract', 'Decimal'];
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add',
+        'Subtract', 'Capabilities', 'Decimal'];
+    const allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should get the minium set even without choosing any feature', () => {
+    const fm = _createMyCalculatorFM();
+    const expected = ['MyCalculator', 'Base'];
+    const allSelected = fm.getAllFeaturesFromSelection();
+
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should get the proper complete list of features (lowercase)', () => {
+    const fm = _createMyCalculatorFM();
+    const featuresSelected = ['add', 'subtract', 'decimal'];
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add',
+        'Subtract', 'Capabilities', 'Decimal'];
+    const allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should pass config validation', () => {
+    const fm = new FeatureModel('FM');
+    const featuresSelected = ['f1', 'f2'];
+    const expected = ['FM', 'f1', 'f2'];
+    let allSelected;
+
+    fm.and(['f1', 'f2', 'f3']);
+
+    assert.doesNotThrow(() => {
+        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+    });
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should pass config validation with all the selected features', () => {
+    const fm = new FeatureModel('FM');
+    const featuresSelected = ['f1', 'f2'];
+
+    fm.and(['f1', 'f2', 'f3']);
+
+    assert.doesNotThrow(() => {
+        fm.getAllFeaturesFromSelection(featuresSelected);
+    });
+});
+
+test('Should throw exception of feature not found', () => {
+    const fm = new FeatureModel('FM');
+
+    fm.and(['f1', 'f2', 'f3']);
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['f4']);
+    }, /feature f4 not found/);
+});
+
+test('Should throw exception of features is alternative', () => {
+    const fm = new FeatureModel('FM');
+
+    fm.xor(['f1', 'f2', 'f3']);
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['f1', 'f2']);
+    }, /selected more than one features in alternative feature FM/);
+});
+
+test('Should throw exception of features is alternative (2)', () => {
+    const fm = new FeatureModel('FM');
+
+    const f1 = fm.and('f1');
+    fm.and('f2');
+
+    const f3 = f1.or('f3');
+    f1.or('f4');
+    f3.xor('f5');
+    f3.xor('f6');
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['f5', 'f6']);
+    }, /selected more than one features in alternative feature f3/);
+});
+
+test('Should include the mandatory features of included ones', () => {
+    const fm = new FeatureModel('FM');
+    const featuresSelected = ['f1'];
+    const expected = ['FM', 'f1', 'f2'];
+    let allSelected;
+
+    fm.and('f1').and({name: 'f2', mandatory: true});
+
+    assert.strictEqual(fm.toString(), 'FM: { f1: { +f2 } }');
+    assert.doesNotThrow(() => {
+        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+    });
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should include the mandatory features of included ones', () => {
+    const fm = new FeatureModel('FM');
+    const f1 = fm.and('f1');
+    const featuresSelected = ['f2'];
+    const expected = ['FM', 'f1', 'f2', 'f3'];
+    let allSelected;
+
+    f1.and('f2');
+    f1.and({name: 'f3', mandatory: true});
+
+    assert.strictEqual(fm.toString(), 'FM: { f1: { f2 AND +f3 } }');
+    assert.doesNotThrow(() => {
+        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+    });
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should include the mandatory features of included ones [2]', () => {
+    const fm = new FeatureModel('FM');
+    const featuresSelected = ['f6'];
+    const expected = ['FM', 'f1', 'f2', 'f3', 'f5', 'f6', 'f7'];
+    let allSelected;
+
+    fm.and('f1').and(['f2', {name: 'f3', mandatory: true}]);
+    fm.get('f2').xor(['f4', 'f5']);
+    fm.get('f5').and(['f6', {name: 'f7', mandatory: true}]);
+
+    assert.strictEqual(
+        fm.toString(),
+        'FM: { f1: { f2: { f4 XOR f5: { f6 AND +f7 } } AND +f3 } }'
+    );
+    assert.doesNotThrow(() => {
+        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+    });
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should throw an exception for alternative paths selected', () => {
+    const fm = new FeatureModel('fm');
+    const featuresSelected = ['f3', 'f6'];
+
+    fm.xor(['f1', 'f2']);
+    fm.get('f1').and(['f3', {name: 'f4', mandatory: true}]);
+    fm.get('f2').and('f5').or(['f6', 'f7']);
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(featuresSelected);
+    }, /selected more than one features in alternative feature fm/);
+});
+
+test('Should throw an exception for not xor option selected on mandatory ' +
+    'one', () => {
+
+    const fm = new FeatureModel('fm');
+
+    fm.and({name: 'fand', mandatory: true})
+        .xor(['f1','f2','f3']);
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection([]);
+    }, /missing child feature selected for mandatory XOR feature fand/);
+});
+
+//Lista de Constraints de FeatureIDE:
+//  * [Feature]
+//  * Not
+//  * And
+//  * Or
+//  * Implies
+//  * Iff
+//  * (
+//  * )
+suite('#FeatureModel: Contraints Definition:');
+
+test('Should define a new constraint', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(fm.constraint('Add'));
+    fm.getConstraints().length = 1;
+
+    assert.strictEqual(fm.getConstraints()[0].toString(), 'Add');
+});
+
+test('Should define a Feature constraint and return the set of minimum ' +
+    'features selected', () => {
+
+    const fm = _createMyCalculatorFM();
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add'];
+    let allSelected;
+
+    fm.addConstraint(fm.constraint('Add'));
+
+    assert.doesNotThrow(() => {
+        allSelected = fm.getAllFeaturesFromSelection(['Add']);
+    });
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should get the features properly since the constraint is met', () => {
+    const fm = _createMyCalculatorFM();
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
+    let allSelected;
+
+    fm.addConstraint(fm.constraint('Add').and(fm.constraint('Subtract')));
+    allSelected = fm.getAllFeaturesFromSelection(['Add', 'Subtract']);
+
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should throw an exception for not adding the second feature of an ' +
+    'and constraint', () => {
+
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').and(fm.constraint('Subtract'))
+    );
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['Add']);
+    }, /Constraint "(Add AND Subtract)" not met/);
+});
+
+test('Should get the features properly since the constraint is met', () => {
+    const fm = _createMyCalculatorFM();
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
+    let allSelected;
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+    );
+    allSelected = fm.getAllFeaturesFromSelection(['Add', 'Subtract']);
+
+    assert.deepEqual(allSelected, expected);
+});
+
+test('Should throw an exception for not adding the second feature of an ' +
+    'implication constraint', () => {
+
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+    );
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['Add']);
+    }, /Constraint "(Add => Subtract)" not met/);
+});
+
+test('Should get the features properly since the first part of the ' +
+    'implication is not met', () => {
+
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+    );
+
+    assert.doesNotThrow(() => {
+        fm.getAllFeaturesFromSelection();
+    });
+});
+
+test('testing iff will throw exception', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+            .iff(fm.constraint('Decimal'))
+    );
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['Add', 'Decimal']);
+    }, /Constraint "((Add => Subtract) <=> Decimal)" not met/);
+});
+
+test('testing iff will throw exception [2]', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+            .iff(fm.constraint('Decimal'))
+    );
+
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection(['Add', 'Subtract']);
+    }, /Constraint "((Add => Subtract) <=> Decimal)" not met/);
+});
+
+test('testing iff will pass', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+            .iff(fm.constraint('Decimal'))
+    );
+    assert.doesNotThrow(() => {
+        fm.getAllFeaturesFromSelection(['Decimal']);
+    });
+});
+
+test('testing iff will pass [2]', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+            .iff(fm.constraint('Decimal'))
+    );
+    assert.doesNotThrow(() => {
+        fm.getAllFeaturesFromSelection(['Add', 'Subtract', 'Decimal']);
+    });
+});
+
+test('testing or will throw exception', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add')
+            .or(fm.constraint('Subtract'))
+            .or(fm.constraint('Multiply'))
+            .or(fm.constraint('Divide'))
+    );
+    assert.throws(() => {
+        fm.getAllFeaturesFromSelection();
+    }, /Constraint "(((Add OR Subtract) OR Multiply) OR Divide)" not met/);
+});
+
+test('testing or will pass', () => {
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add')
+            .or(fm.constraint('Subtract'))
+            .or(fm.constraint('Multiply'))
+            .or(fm.constraint('Divide'))
+    );
+    assert.doesNotThrow(() => {
+        fm.getAllFeaturesFromSelection(['Multiply']);
+    });
+});
+
+suite('#FeatureModel Parsing Constraints:');
+
+test('testing json generation with constraints', () => {
+    const fm = _createMyCalculatorFMAndConstraints();
+    const expected = readJsonFromFile(
+        p('feature-model/model-with-constraints.json')
+    );
+
+    assert.strictEqual(fm.toJson(), expected);
+});
+
+test('testing json parsing with constraints', () => {
+    const jsonToParse = p('feature-model/model-with-constraints.json');
+    const fm = FeatureModel.fromJson(jsonToParse);
+    const expected = _createMyCalculatorFMAndConstraints();
+
+    assert.deepEqual(fm.toJson(), expected.toJson());
+});
+
+test('testing json parsing with feature constraints simplified', () => {
+    const jsonToParse = p('feature-model/model-with-constraints-2.json');
+    const fm = FeatureModel.fromJson(jsonToParse);
+    const expected = _createMyCalculatorFMAndConstraints();
+
+    assert.deepEqual(fm.toJson(), expected.toJson());
+});
+
+test('testing xml generation with constraints', () => {
+    const fm = _createMyCalculatorFMAndConstraints();
+    const expected = f('feature-model/model-with-constraints.xml');
+
+    assert.deepEqual(pd.xml(expected), pd.xml(fm.toXml()));
+});
+
+test('testing xml parsing with constraints', () => {
+    const fm = FeatureModel.fromXml(
+        f('feature-model/model-with-constraints.xml')
+    );
+    const expected = _createMyCalculatorFMAndConstraints();
+
+    assert.deepEqual(fm.toJson(), expected.toJson());
+});
+
+function _createMyCalculatorFM() {
+    const fm = new FeatureModel('MyCalculator');
+    const base = fm.and({name: 'Base', mandatory: true});
+    const operations = base.and({name: 'Operations', abstract: true});
+    const capabilities = base.and({name: 'Capabilities', abstract: true});
+
+    operations.or(['Add', 'Subtract', 'Multiply', 'Divide']);
+    capabilities.or('Decimal');
+
+    return fm;
+}
+
+function _createMyCalculatorFMAndConstraints() {
+    const fm = _createMyCalculatorFM();
+    const add = fm.constraint('Add');
+    const multiply = fm.constraint('Multiply');
+    const capabilities = fm.constraint('Capabilities');
+    const base = fm.constraint('Base');
+    const decimal = fm.constraint('Decimal');
+    const divide = fm.constraint('Divide');
+
+    fm.addConstraint(add.or(multiply));
+    fm.addConstraint(add.negated());
+    fm.addConstraint(add.negated().or(capabilities));
+    fm.addConstraint(capabilities.and(add));
+    fm.addConstraint(multiply.implies(base));
+    fm.addConstraint(capabilities.iff(decimal));
+    fm.addConstraint((decimal.implies(base)).implies(divide));
+
+    return fm;
+}
