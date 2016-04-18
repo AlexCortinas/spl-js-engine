@@ -7,7 +7,7 @@ import { getTestPath as p, getTestFileContent as f } from './test-utils';
 suite('#FeatureModel Manual Creation');
 
 test('Should create a new feature model and throw exception for not adding ' +
-    'features', () => {
+    'features since the root of a feature model is abstract', () => {
 
     const fm = new FeatureModel('MyCalculator');
 
@@ -106,7 +106,7 @@ test('Should throw an exception for having an abstract node as leaf', () => {
     }, /abstract feature cannot be leaf/);
 });
 
-test('Should throw an exception by having an OR node without children0', () => {
+test('Should throw an exception by having an OR node without children', () => {
     const fm = new FeatureModel('FMName');
 
     fm.and('f1');
@@ -138,8 +138,8 @@ test('Should throw an exception for adding a feature with a repeated ' +
     fm.and('f1').xor('f2');
 
     assert.throws(() => {
-        fm.validateFeatureModel();
-    }, /feature name already exists/);
+        fm.get('f2').or('f1');
+    }, /feature f1 already exists/);
 });
 
 

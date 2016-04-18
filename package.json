@@ -25,7 +25,8 @@
     "babel-eslint": "^6.0.2",
     "babel-register": "^6.7.2",
     "eslint": "^2.7.0",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "pretty-data": "^0.40.0"
   },
   "homepage": "https://github.com/AlexCortinas/spl-js-engine#readme",
   "name": "spl-js-engine",
