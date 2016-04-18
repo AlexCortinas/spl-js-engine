@@ -143,7 +143,7 @@ test('Should throw an exception for adding a feature with a repeated ' +
 });
 
 
-suite('#FeatureModel Parsing:');
+suite('#FeatureModel Basic Parsing (no constraints):');
 
 test('testing json generation without constraints', () => {
     const fm = _createMyCalculatorFM();

@@ -89,6 +89,10 @@ export class Feature {
         return str;
     }
 
+    ////////////////
+    // Validation //
+    ////////////////
+
     validateFeature() {
         const hasChildren = this.features.length !== 0;
 
@@ -117,7 +121,97 @@ export class Feature {
             }
         }
     }
+
+    /////////////////////////////
+    // Parsing and Loading XML //
+    /////////////////////////////
+
+    static fromXml(xml, parent, type) {
+        // parent[type] is parent.{and, or, xor},
+        // so we are creating a new child feature
+        const newFeature = parent[type](xml.attr);
+
+        // For each child feature of the new feature, we repeat the process
+        if (Array.isArray(xml.children)) {
+            xml.children.forEach(function(f) {
+                Feature.fromXml(f, newFeature, xml.name);
+            });
+        }
+
+        return newFeature;
+    }
+
+    toXml(parentNode) {
+        const type = this.type.toLowerCase();
+        const feature = parentNode.startElement(type);
+
+        feature.writeAttribute('name', this.name);
+        if (this.mandatory) {
+            feature.writeAttribute('mandatory', 'true');
+        }
+        if (this.abstract) {
+            feature.writeAttribute('abstract', 'true');
+        }
+
+        if (Array.isArray(this.features)) {
+            this.features.forEach(function(f) {
+                f.toXml(feature);
+            });
+        }
+
+        feature.endElement();
+    }
+
+    //////////////////////////////
+    // Parsing and Loading JSON //
+    //////////////////////////////
+
+    static fromJson(json, parent, type) {
+        // parent[type] is parent.{and, or, xor},
+        // so we are creating a new child feature
+        const newFeature = parent[type](json);
+
+        // For each child feature of the new feature, we repeat the process
+        if (Array.isArray(json.features)) {
+            json.features.forEach(function(v) {
+                Feature.fromJson(v, newFeature, json.type);
+            });
+        }
+
+        return newFeature;
+    }
+
+    toJson() {
+        const json = {
+            name: this.name
+        };
+
+        if (this.mandatory) {
+            json.mandatory = true;
+        }
+
+        if (this.abstract) {
+            json.abstract = true;
+        }
+
+        if (this.type !== TYPE.FEATURE) {
+            json.type = this.type.toLowerCase();
+        }
+
+        if (this.features.length > 0) {
+            json.features = [];
+            this.features.forEach(function(v) {
+                json.features.push(v.toJson());
+            });
+        }
+
+        return json;
+    }
 }
+
+/////////////////////
+// Private Methods //
+/////////////////////
 
 function _add(features) {
     if (Array.isArray(features)) {
