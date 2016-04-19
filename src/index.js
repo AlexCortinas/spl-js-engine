@@ -1,8 +1,8 @@
 #!/usr/bin/env babel-node
 
-export { DerivationEngine } from './derivation-engine';
+export DerivationEngine from './derivation-engine';
+export FeatureModel from './feature-model/feature-model';
 export { readJsonFromFile } from './file-utils';
-export { FeatureModel } from './feature-model/feature-model';
 
 import { cli } from './cli';
 

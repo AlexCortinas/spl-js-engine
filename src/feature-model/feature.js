@@ -1,6 +1,6 @@
 import TYPE from './feature-type';
 
-export class Feature {
+export default class Feature {
     constructor(name, { mandatory = false, abstract = false }, parent = null) {
         this.name = name;
         this.mandatory = mandatory;

@@ -1,6 +1,6 @@
 import { readFile, writeFile, walkDir } from './file-utils';
 
-export class DerivationEngine {
+export default class DerivationEngine {
     constructor() {
         this.delimiters = {};
     }

@@ -369,9 +369,8 @@ test('Should define a new constraint', () => {
     const fm = _createMyCalculatorFM();
 
     fm.addConstraint(fm.constraint('Add'));
-    fm.getConstraints().length = 1;
 
-    assert.strictEqual(fm.getConstraints()[0].toString(), 'Add');
+    assert.strictEqual(fm.constraints.toString(), '[ Add ]');
 });
 
 test('Should define a Feature constraint and return the set of minimum ' +
@@ -379,25 +378,28 @@ test('Should define a Feature constraint and return the set of minimum ' +
 
     const fm = _createMyCalculatorFM();
     const expected = ['MyCalculator', 'Base', 'Operations', 'Add'];
-    let allSelected;
 
     fm.addConstraint(fm.constraint('Add'));
 
     assert.doesNotThrow(() => {
-        allSelected = fm.completeFeatureSelection(['Add']);
+        assert.deepEqual(
+            fm.completeFeatureSelection(['Add']).sort(),
+            expected.sort()
+        );
     });
-    assert.deepEqual(allSelected.sort(), expected.sort());
+
 });
 
 test('Should get the features properly since the constraint is met', () => {
     const fm = _createMyCalculatorFM();
     const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
-    let allSelected;
 
     fm.addConstraint(fm.constraint('Add').and(fm.constraint('Subtract')));
-    allSelected = fm.completeFeatureSelection(['Add', 'Subtract']);
 
-    assert.deepEqual(allSelected.sort(), expected.sort());
+    assert.deepEqual(
+        fm.completeFeatureSelection(['Add', 'Subtract']).sort(),
+        expected.sort()
+    );
 });
 
 test('Should throw an exception for not adding the second feature of an ' +
@@ -411,7 +413,7 @@ test('Should throw an exception for not adding the second feature of an ' +
 
     assert.throws(() => {
         fm.completeFeatureSelection(['Add']);
-    }, /Constraint "(Add AND Subtract)" not met/);
+    }, /Constraints \(Add AND Subtract\) not met/);
 });
 
 test('Should get the features properly since the constraint is met', () => {
@@ -438,7 +440,7 @@ test('Should throw an exception for not adding the second feature of an ' +
 
     assert.throws(() => {
         fm.completeFeatureSelection(['Add']);
-    }, /Constraint "(Add => Subtract)" not met/);
+    }, /Constraints \(Add => Subtract\) not met/);
 });
 
 test('Should get the features properly since the first part of the ' +
@@ -465,7 +467,7 @@ test('testing iff will throw exception', () => {
 
     assert.throws(() => {
         fm.completeFeatureSelection(['Add', 'Decimal']);
-    }, /Constraint "((Add => Subtract) <=> Decimal)" not met/);
+    }, /Constraints \(\(Add => Subtract\) <=> Decimal\) not met/);
 });
 
 test('testing iff will throw exception [2]', () => {
@@ -478,7 +480,7 @@ test('testing iff will throw exception [2]', () => {
 
     assert.throws(() => {
         fm.completeFeatureSelection(['Add', 'Subtract']);
-    }, /Constraint "((Add => Subtract) <=> Decimal)" not met/);
+    }, /Constraints \(\(Add => Subtract\) <=> Decimal\) not met/);
 });
 
 test('testing iff will pass', () => {
@@ -516,7 +518,7 @@ test('testing or will throw exception', () => {
     );
     assert.throws(() => {
         fm.completeFeatureSelection();
-    }, /Constraint "(((Add OR Subtract) OR Multiply) OR Divide)" not met/);
+    }, /Constraints \(\(\(Add OR Subtract\) OR Multiply\) OR Divide\) not met/);
 });
 
 test('testing or will pass', () => {

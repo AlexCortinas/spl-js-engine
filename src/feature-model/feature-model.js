@@ -1,13 +1,16 @@
 import xmldoc from 'xmldoc';
 import XMLWriter from 'xml-writer';
 
-import { Feature } from './feature';
+import Feature from './feature';
+import ConstraintSet from './constraints/constraint-set.js';
 import TYPE from './feature-type';
+import Constraint from './constraints/constraint.js';
 
-export class FeatureModel extends Feature {
+export default class FeatureModel extends Feature {
     constructor(name) {
         super(name, { mandatory: true, abstract: true });
         this.featureList = [];
+        this.constraintSet = new ConstraintSet();
 
         this.addFeatureToFeatureList(this.name);
     }
@@ -54,7 +57,7 @@ export class FeatureModel extends Feature {
      * Returns the whole set of features required from a set of selected,
      * taking into account the constraints and relationships between features.
      *
-     * It is possible to create a product just from a few features, but then
+     * It is possible to create a product just constrafrom a few features, but then
      * the rest of the minimum required (the mandatory ones, for example), must
      * be added using this method.
      *
@@ -62,24 +65,27 @@ export class FeatureModel extends Feature {
      * selected features
      * @return {String[]} The array with the feature names of the resulting set
      */
-    completeFeatureSelection(selectedFeatures) {
+    completeFeatureSelection(namesOfSelectedFeatures) {
         this.validateFeatureModel();
 
-        if (!Array.isArray(selectedFeatures) || selectedFeatures.length == 0) {
-            selectedFeatures = [ this.name ];
+        if (!Array.isArray(namesOfSelectedFeatures) ||
+            namesOfSelectedFeatures.length == 0) {
+
+            namesOfSelectedFeatures = [ this.name ];
         }
 
         let errorCounter = 0;
         let auxLength = -1;
-        while (auxLength != selectedFeatures.length) {
-            auxLength = selectedFeatures.length;
+        while (auxLength != namesOfSelectedFeatures.length) {
+            auxLength = namesOfSelectedFeatures.length;
 
-            selectedFeatures =
+            namesOfSelectedFeatures =
                 this::_completeFeatureSelectionWithoutConstraints(
-                    selectedFeatures
+                    namesOfSelectedFeatures
                 );
-            //selectedFeatures = this.constraintSet.applyConstraints(
-            //selectedFeatures, this.featureList);
+
+            namesOfSelectedFeatures =
+                this.constraintSet.checkConstraints(namesOfSelectedFeatures);
 
             if (errorCounter++ > 1000) {
                 throw 'unknown error getting all the features from selection ' +
@@ -87,8 +93,28 @@ export class FeatureModel extends Feature {
             }
         }
 
-        this::_validateAlternativeFeaturesFromSelection(selectedFeatures);
-        return selectedFeatures;
+        this::_validateAlternativeFeaturesFromSelection(namesOfSelectedFeatures);
+        return namesOfSelectedFeatures;
+    }
+
+    //////////////////
+    // Constraints  //
+    //////////////////
+
+    addConstraint(constraint, negated) {
+        return this.constraintSet.addConstraint(constraint, negated);
+    }
+
+    get constraints() {
+        return this.constraintSet;
+    }
+
+    constraint(featureName) {
+        if (!this.exists(featureName)) {
+            throw `feature ${featureName} not found`;
+        }
+
+        return Constraint.create(featureName);
     }
 
     /////////////////////////////
@@ -185,7 +211,6 @@ function _getFeaturesFromNames(featureNames = []) {
 
 function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
     const featureSet = new Set(this::_getFeaturesFromNames(selectedFeatures));
-    const featureNamesSelected = [];
     let auxLenght = -1;
 
     while (auxLenght != featureSet.length) {
@@ -201,11 +226,7 @@ function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
         });
     }
 
-    featureSet.forEach(f => {
-        featureNamesSelected.push(f.name);
-    });
-
-    return featureNamesSelected;
+    return [...featureSet].map(f => f.name);
 }
 
 function _validateAlternativeFeaturesFromSelection(selectedFeatures) {
