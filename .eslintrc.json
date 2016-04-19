@@ -27,7 +27,7 @@
     ],
     "no-console": 0,
     "max-len": [
-        "error",
+        "warn",
         80,
         4
     ]
