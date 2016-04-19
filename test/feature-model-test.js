@@ -192,17 +192,17 @@ test('Should get the proper complete list of features', () => {
     const featuresSelected = ['Add', 'Subtract', 'Decimal'];
     const expected = ['MyCalculator', 'Base', 'Operations', 'Add',
         'Subtract', 'Capabilities', 'Decimal'];
-    const allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+    const allSelected = fm.completeFeatureSelection(featuresSelected);
 
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should get the minium set even without choosing any feature', () => {
     const fm = _createMyCalculatorFM();
     const expected = ['MyCalculator', 'Base'];
-    const allSelected = fm.getAllFeaturesFromSelection();
+    const allSelected = fm.completeFeatureSelection();
 
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should get the proper complete list of features (lowercase)', () => {
@@ -210,9 +210,9 @@ test('Should get the proper complete list of features (lowercase)', () => {
     const featuresSelected = ['add', 'subtract', 'decimal'];
     const expected = ['MyCalculator', 'Base', 'Operations', 'Add',
         'Subtract', 'Capabilities', 'Decimal'];
-    const allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+    const allSelected = fm.completeFeatureSelection(featuresSelected);
 
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should pass config validation', () => {
@@ -224,9 +224,9 @@ test('Should pass config validation', () => {
     fm.and(['f1', 'f2', 'f3']);
 
     assert.doesNotThrow(() => {
-        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+        allSelected = fm.completeFeatureSelection(featuresSelected);
     });
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should pass config validation with all the selected features', () => {
@@ -236,7 +236,7 @@ test('Should pass config validation with all the selected features', () => {
     fm.and(['f1', 'f2', 'f3']);
 
     assert.doesNotThrow(() => {
-        fm.getAllFeaturesFromSelection(featuresSelected);
+        fm.completeFeatureSelection(featuresSelected);
     });
 });
 
@@ -246,7 +246,7 @@ test('Should throw exception of feature not found', () => {
     fm.and(['f1', 'f2', 'f3']);
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['f4']);
+        fm.completeFeatureSelection(['f4']);
     }, /feature f4 not found/);
 });
 
@@ -256,7 +256,7 @@ test('Should throw exception of features is alternative', () => {
     fm.xor(['f1', 'f2', 'f3']);
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['f1', 'f2']);
+        fm.completeFeatureSelection(['f1', 'f2']);
     }, /selected more than one features in alternative feature FM/);
 });
 
@@ -272,7 +272,7 @@ test('Should throw exception of features is alternative (2)', () => {
     f3.xor('f6');
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['f5', 'f6']);
+        fm.completeFeatureSelection(['f5', 'f6']);
     }, /selected more than one features in alternative feature f3/);
 });
 
@@ -286,9 +286,9 @@ test('Should include the mandatory features of included ones', () => {
 
     assert.strictEqual(fm.toString(), 'FM: { f1: { +f2 } }');
     assert.doesNotThrow(() => {
-        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+        allSelected = fm.completeFeatureSelection(featuresSelected);
     });
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should include the mandatory features of included ones', () => {
@@ -303,9 +303,9 @@ test('Should include the mandatory features of included ones', () => {
 
     assert.strictEqual(fm.toString(), 'FM: { f1: { f2 AND +f3 } }');
     assert.doesNotThrow(() => {
-        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+        allSelected = fm.completeFeatureSelection(featuresSelected);
     });
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should include the mandatory features of included ones [2]', () => {
@@ -323,9 +323,9 @@ test('Should include the mandatory features of included ones [2]', () => {
         'FM: { f1: { f2: { f4 XOR f5: { f6 AND +f7 } } AND +f3 } }'
     );
     assert.doesNotThrow(() => {
-        allSelected = fm.getAllFeaturesFromSelection(featuresSelected);
+        allSelected = fm.completeFeatureSelection(featuresSelected);
     });
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should throw an exception for alternative paths selected', () => {
@@ -337,7 +337,7 @@ test('Should throw an exception for alternative paths selected', () => {
     fm.get('f2').and('f5').or(['f6', 'f7']);
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(featuresSelected);
+        fm.completeFeatureSelection(featuresSelected);
     }, /selected more than one features in alternative feature fm/);
 });
 
@@ -350,7 +350,7 @@ test('Should throw an exception for not xor option selected on mandatory ' +
         .xor(['f1','f2','f3']);
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection([]);
+        fm.completeFeatureSelection([]);
     }, /missing child feature selected for mandatory XOR feature fand/);
 });
 
@@ -384,9 +384,9 @@ test('Should define a Feature constraint and return the set of minimum ' +
     fm.addConstraint(fm.constraint('Add'));
 
     assert.doesNotThrow(() => {
-        allSelected = fm.getAllFeaturesFromSelection(['Add']);
+        allSelected = fm.completeFeatureSelection(['Add']);
     });
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should get the features properly since the constraint is met', () => {
@@ -395,9 +395,9 @@ test('Should get the features properly since the constraint is met', () => {
     let allSelected;
 
     fm.addConstraint(fm.constraint('Add').and(fm.constraint('Subtract')));
-    allSelected = fm.getAllFeaturesFromSelection(['Add', 'Subtract']);
+    allSelected = fm.completeFeatureSelection(['Add', 'Subtract']);
 
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should throw an exception for not adding the second feature of an ' +
@@ -410,7 +410,7 @@ test('Should throw an exception for not adding the second feature of an ' +
     );
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['Add']);
+        fm.completeFeatureSelection(['Add']);
     }, /Constraint "(Add AND Subtract)" not met/);
 });
 
@@ -422,9 +422,9 @@ test('Should get the features properly since the constraint is met', () => {
     fm.addConstraint(
         fm.constraint('Add').implies(fm.constraint('Subtract'))
     );
-    allSelected = fm.getAllFeaturesFromSelection(['Add', 'Subtract']);
+    allSelected = fm.completeFeatureSelection(['Add', 'Subtract']);
 
-    assert.deepEqual(allSelected, expected);
+    assert.deepEqual(allSelected.sort(), expected.sort());
 });
 
 test('Should throw an exception for not adding the second feature of an ' +
@@ -437,7 +437,7 @@ test('Should throw an exception for not adding the second feature of an ' +
     );
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['Add']);
+        fm.completeFeatureSelection(['Add']);
     }, /Constraint "(Add => Subtract)" not met/);
 });
 
@@ -451,7 +451,7 @@ test('Should get the features properly since the first part of the ' +
     );
 
     assert.doesNotThrow(() => {
-        fm.getAllFeaturesFromSelection();
+        fm.completeFeatureSelection();
     });
 });
 
@@ -464,7 +464,7 @@ test('testing iff will throw exception', () => {
     );
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['Add', 'Decimal']);
+        fm.completeFeatureSelection(['Add', 'Decimal']);
     }, /Constraint "((Add => Subtract) <=> Decimal)" not met/);
 });
 
@@ -477,7 +477,7 @@ test('testing iff will throw exception [2]', () => {
     );
 
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection(['Add', 'Subtract']);
+        fm.completeFeatureSelection(['Add', 'Subtract']);
     }, /Constraint "((Add => Subtract) <=> Decimal)" not met/);
 });
 
@@ -489,7 +489,7 @@ test('testing iff will pass', () => {
             .iff(fm.constraint('Decimal'))
     );
     assert.doesNotThrow(() => {
-        fm.getAllFeaturesFromSelection(['Decimal']);
+        fm.completeFeatureSelection(['Decimal']);
     });
 });
 
@@ -501,7 +501,7 @@ test('testing iff will pass [2]', () => {
             .iff(fm.constraint('Decimal'))
     );
     assert.doesNotThrow(() => {
-        fm.getAllFeaturesFromSelection(['Add', 'Subtract', 'Decimal']);
+        fm.completeFeatureSelection(['Add', 'Subtract', 'Decimal']);
     });
 });
 
@@ -515,7 +515,7 @@ test('testing or will throw exception', () => {
             .or(fm.constraint('Divide'))
     );
     assert.throws(() => {
-        fm.getAllFeaturesFromSelection();
+        fm.completeFeatureSelection();
     }, /Constraint "(((Add OR Subtract) OR Multiply) OR Divide)" not met/);
 });
 
@@ -529,7 +529,7 @@ test('testing or will pass', () => {
             .or(fm.constraint('Divide'))
     );
     assert.doesNotThrow(() => {
-        fm.getAllFeaturesFromSelection(['Multiply']);
+        fm.completeFeatureSelection(['Multiply']);
     });
 });
 

@@ -2,11 +2,14 @@ import xmldoc from 'xmldoc';
 import XMLWriter from 'xml-writer';
 
 import { Feature } from './feature';
+import TYPE from './feature-type';
 
 export class FeatureModel extends Feature {
     constructor(name) {
         super(name, { mandatory: true, abstract: true });
-        this.featureList = [ this.name ];
+        this.featureList = [];
+
+        this.addFeatureToFeatureList(this.name);
     }
 
     //////////////////////
@@ -22,7 +25,11 @@ export class FeatureModel extends Feature {
     }
 
     exists(featureName) {
-        return this.featureList.indexOf(featureName) != -1;
+        return this.featureList.indexOf(featureName.toLowerCase()) != -1;
+    }
+
+    addFeatureToFeatureList(featureName) {
+        this.featureList.push(featureName.toLowerCase());
     }
 
     ///////////////////////////
@@ -41,6 +48,47 @@ export class FeatureModel extends Feature {
 
     validateFeatureModel() {
         this.validateFeature();
+    }
+
+    /**
+     * Returns the whole set of features required from a set of selected,
+     * taking into account the constraints and relationships between features.
+     *
+     * It is possible to create a product just from a few features, but then
+     * the rest of the minimum required (the mandatory ones, for example), must
+     * be added using this method.
+     *
+     * @param  {String[]} selectedFeatures - An array with the names of the
+     * selected features
+     * @return {String[]} The array with the feature names of the resulting set
+     */
+    completeFeatureSelection(selectedFeatures) {
+        this.validateFeatureModel();
+
+        if (!Array.isArray(selectedFeatures) || selectedFeatures.length == 0) {
+            selectedFeatures = [ this.name ];
+        }
+
+        let errorCounter = 0;
+        let auxLength = -1;
+        while (auxLength != selectedFeatures.length) {
+            auxLength = selectedFeatures.length;
+
+            selectedFeatures =
+                this::_completeFeatureSelectionWithoutConstraints(
+                    selectedFeatures
+                );
+            //selectedFeatures = this.constraintSet.applyConstraints(
+            //selectedFeatures, this.featureList);
+
+            if (errorCounter++ > 1000) {
+                throw 'unknown error getting all the features from selection ' +
+                '(1000 iterations already made)';
+            }
+        }
+
+        this::_validateAlternativeFeaturesFromSelection(selectedFeatures);
+        return selectedFeatures;
     }
 
     /////////////////////////////
@@ -125,4 +173,58 @@ export class FeatureModel extends Feature {
 
         return json;
     }
+}
+
+/////////////////////
+// Private Methods //
+/////////////////////
+
+function _getFeaturesFromNames(featureNames = []) {
+    return featureNames.map(f => this.get(f));
+}
+
+function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
+    const featureSet = new Set(this::_getFeaturesFromNames(selectedFeatures));
+    const featureNamesSelected = [];
+    let auxLenght = -1;
+
+    while (auxLenght != featureSet.length) {
+        auxLenght = featureSet.length;
+
+        featureSet.forEach(f => {
+            if (f.parent != null) {
+                featureSet.add(f.parent);
+            }
+            f.features
+                .filter(child => child.mandatory)
+                .forEach(child => featureSet.add(child));
+        });
+    }
+
+    featureSet.forEach(f => {
+        featureNamesSelected.push(f.name);
+    });
+
+    return featureNamesSelected;
+}
+
+function _validateAlternativeFeaturesFromSelection(selectedFeatures) {
+    const features = this::_getFeaturesFromNames(selectedFeatures);
+
+    // cheking if two alternative features has been selected at the same time
+    features.filter(f1 => f1.parent && f1.parent.type === TYPE.XOR)
+        .forEach(f1 => {
+            if (features.filter(f2 => f1 != f2 && f1.parent == f2.parent).length > 0)
+                throw 'selected more than one features in alternative ' +
+                'feature ' + f1.parent.name;
+        });
+
+    // checking if mandatory xor/or feature has no child selected
+    features.filter(f1 => f1.mandatory)
+        .filter(f1 => f1.type === TYPE.XOR || f1.type === TYPE.OR)
+        .forEach(f1 => {
+            if (features.filter(f2 => f2.parent === f1).length < 1)
+                throw 'missing child feature selected for mandatory ' +
+                    f1.type + ' feature ' + f1.name;
+        });
 }

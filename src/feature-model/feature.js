@@ -15,7 +15,7 @@ export class Feature {
             if (featureModel.exists(name)){
                 throw `feature ${name} already exists`;
             }
-            featureModel.featureList.push(name);
+            featureModel.addFeatureToFeatureList(name);
         }
 
         if (mandatory && this.parent &&
