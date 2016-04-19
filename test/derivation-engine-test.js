@@ -15,8 +15,14 @@ test('Create a project without feature selection or any custom data', () => {
 
     engine.generateProject(p('simpleSPL/code'), p('tmp/simpleProduct'));
 
-    assert.strictEqual(f('simpleSPL/code/index.html'), f('tmp/simpleProduct/index.html'));
-    assert.strictEqual(f('simpleSPL/code/main.js'), f('tmp/simpleProduct/main.js'));
+    assert.strictEqual(
+        f('simpleSPL/code/index.html'),
+        f('tmp/simpleProduct/index.html')
+    );
+    assert.strictEqual(
+        f('simpleSPL/code/main.js'),
+        f('tmp/simpleProduct/main.js')
+    );
 });
 
 test('Create a project', () => {
