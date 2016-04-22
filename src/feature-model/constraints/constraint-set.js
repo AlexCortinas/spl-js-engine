@@ -12,6 +12,10 @@ export default class constraintSet {
         return constraint;
     }
 
+    hasConstraints() {
+        return this.constraints.length > 0;
+    }
+
     checkConstraints(namesOfSelectedFeatures) {
         const helper = new EvaluationHelper(namesOfSelectedFeatures);
 

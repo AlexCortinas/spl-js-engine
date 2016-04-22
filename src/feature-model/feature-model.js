@@ -40,9 +40,14 @@ export default class FeatureModel extends Feature {
     ///////////////////////////
 
     toString() {
+        let constraints = '';
+        if (this.constraintSet.hasConstraints()) {
+            constraints = '\nConstraints: ' + this.constraintSet.toString();
+        }
+
         // provided than feature model is always mandatory and abstract,
         // only +_ is required to be deleted from feature.toString()
-        return super.toString().substring(2);
+        return super.toString().substring(2) + constraints;
     }
 
     /////////////////
