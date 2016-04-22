@@ -129,7 +129,7 @@ export default class FeatureModel extends Feature {
     static fromXml(xml) {
         const doc = new xmldoc.XmlDocument(xml);
         const struct = doc.childNamed('struct');
-        // const constraints = doc.childNamed('constraints');
+        const constraints = doc.childNamed('constraints');
 
         if (struct == null) {
             throw 'Error parsing xml';
@@ -143,9 +143,9 @@ export default class FeatureModel extends Feature {
             });
         }
 
-        // if (constraints != null) {
-        //     fm.constraintSet.fromXml(constraints);
-        // }
+        if (constraints != null) {
+            fm.constraintSet.fromXml(constraints);
+        }
 
         return fm;
     }
@@ -164,7 +164,7 @@ export default class FeatureModel extends Feature {
         struct.endElement();
 
         constraints = feature.startElement('constraints');
-        // this.constraintSet.toXml(constraints);
+        this.constraintSet.toXml(constraints);
         constraints.endElement();
 
         feature.endElement();
@@ -185,9 +185,9 @@ export default class FeatureModel extends Feature {
             });
         }
 
-        // if (Array.isArray(json.featureModel.constraints)) {
-        //     fm.constraintSet.fromJson(json.featureModel.constraints);
-        // }
+        if (Array.isArray(json.featureModel.constraints)) {
+            fm.constraintSet.fromJson(json.featureModel.constraints);
+        }
 
         return fm;
     }
@@ -200,7 +200,7 @@ export default class FeatureModel extends Feature {
             }
         };
 
-        // json.featureModel.constraints = this.constraintSet.toJson();
+        json.featureModel.constraints = this.constraintSet.toJson();
 
         return json;
     }

@@ -543,20 +543,22 @@ test('testing json generation with constraints', () => {
         p('feature-model/model-with-constraints.json')
     );
 
-    assert.strictEqual(fm.toJson(), expected);
+    assert.deepEqual(fm.toJson(), expected);
 });
 
 test('testing json parsing with constraints', () => {
-    const jsonToParse = p('feature-model/model-with-constraints.json');
-    const fm = FeatureModel.fromJson(jsonToParse);
+    const fm = FeatureModel.fromJson(
+        readJsonFromFile(p('feature-model/model-with-constraints.json'))
+    );
     const expected = _createMyCalculatorFMAndConstraints();
 
     assert.deepEqual(fm.toJson(), expected.toJson());
 });
 
 test('testing json parsing with feature constraints simplified', () => {
-    const jsonToParse = p('feature-model/model-with-constraints-2.json');
-    const fm = FeatureModel.fromJson(jsonToParse);
+    const fm = FeatureModel.fromJson(
+        readJsonFromFile(p('feature-model/model-with-constraints-2.json'))
+    );
     const expected = _createMyCalculatorFMAndConstraints();
 
     assert.deepEqual(fm.toJson(), expected.toJson());

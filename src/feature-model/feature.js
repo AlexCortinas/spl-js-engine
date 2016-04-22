@@ -39,7 +39,7 @@ export default class Feature {
 
     /////////////////////
     // Adding Features //
-    /////////////////////1
+    /////////////////////
     and(features) {
         this.type = TYPE.AND;
         return this::_add(features);

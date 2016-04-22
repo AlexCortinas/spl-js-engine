@@ -1,4 +1,5 @@
 import EvaluationHelper from './evaluation-helper';
+import Constraint from './constraint';
 
 export default class constraintSet {
     constructor() {
@@ -31,5 +32,33 @@ export default class constraintSet {
 
     toString() {
         return `[ ${this.constraints.join(', ')} ]`;
+    }
+
+    //////////////////////////////
+    // Parsing and Loading JSON //
+    //////////////////////////////
+
+    toJson() {
+        return this.constraints.map(c => c.toJson());
+    }
+
+    fromJson(json) {
+        json.forEach(c => this.addConstraint(Constraint.fromJson(c)));
+    }
+
+    /////////////////////////////
+    // Parsing and Loading XML //
+    /////////////////////////////
+
+    toXml(parentNode) {
+        this.constraints.forEach(c => {
+            const rule = parentNode.startElement('rule');
+            c.toXml(rule);
+            rule.endElement();
+        });
+    }
+
+    fromXml(xml) {
+        xml.eachChild(c => this.addConstraint(Constraint.fromXml(c.firstChild)));
     }
 }
