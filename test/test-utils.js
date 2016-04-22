@@ -1,8 +1,8 @@
 import fs from 'fs';
-import { walkDir } from '../src/file-utils';
+import { readFile, walkDir } from '../src/file-utils';
 
 export const getTestFileContent = (path, bin = null) =>
-    fs.readFileSync(`test/files/${path}`, bin ? null : 'utf8');
+    readFile(`test/files/${path}`, bin);
 
 export const getTestPath = (aPath) => `test/files/${aPath}`;
 

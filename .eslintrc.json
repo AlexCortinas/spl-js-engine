@@ -25,6 +25,11 @@
       "error",
       "always"
     ],
-    "no-console": 0
+    "no-console": 0,
+    "max-len": [
+        "warn",
+        80,
+        4
+    ]
   }
 }
