@@ -6,6 +6,10 @@ export default class Constraint {
         return new FeatureConstraint(featureName);
     }
 
+    negated() {
+        return new NegatedConstraint(this);
+    }
+
     and(anotherConstraint) {
         return new AndConstraint(this, anotherConstraint);
     }
