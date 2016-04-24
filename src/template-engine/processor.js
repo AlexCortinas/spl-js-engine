@@ -19,13 +19,13 @@ export default class Processor {
         let cursor = 0;
         let match;
         const delimiter = this.getDelimiter(ext).regular;
-        
+
         while ((match = delimiter.exec(str)) !== null) {
             code += _newLine(str.slice(cursor, match.index));
             if (match[1] === '\n') {
                 // javascriptExpression is 'full-line' and starts at
                 // beginning of line, we should add the newline taken by regexp
-                code += 'r.push("\\n");\n';
+                code += 'lines.push("\\n");\n';
             }
             code += _newLine(match.slice(1).join(''), true);
             cursor = match.index + match[0].length ;
