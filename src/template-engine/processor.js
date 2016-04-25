@@ -11,7 +11,10 @@ export default class Processor {
     }
 
     getDelimiter(extension = 'default') {
-        return this.delimiters[extension];
+        if (this.delimiters[extension])
+            return this.delimiters[extension];
+        else
+            return this.delimiters.default;
     }
 
     process(str, ext) {
