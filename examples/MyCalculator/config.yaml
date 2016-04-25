@@ -7,12 +7,12 @@ delimiters:
     - jsp
     - xml
     start: "<!--%"
-    end: "-->"
+    end: "%-->"
   - extension:
     - js
     - java
     start: "/*%"
-    end: "*/"
+    end: "%*/"
   - extension:
     - py
     start: "#%"
