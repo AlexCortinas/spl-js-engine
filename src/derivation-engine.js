@@ -1,44 +1,59 @@
 import { readFile, writeFile, walkDir } from './file-utils';
+import FeatureModel from './feature-model/feature-model';
+import TemplateEngine from './template-engine/template-engine';
+
+const _extension = f => f.substring(f.lastIndexOf('.') + 1);
 
 export default class DerivationEngine {
     constructor() {
-        this.delimiters = {};
+        this.featureModel = null;
+        this.templateEngine = new TemplateEngine();
+        this.features = {};
+        this.data = {};
     }
 
     generateProject(inputPath, outputPath) {
+        const processor = this.templateEngine.createProcessor(this.features, this.data);
         walkDir(inputPath, (filePath, isFolder) => {
             if (!isFolder) {
                 writeFile(
                     filePath.replace(inputPath, outputPath),
-                    readFile(filePath));
+                    processor.process(readFile(filePath), _extension(filePath)));
             }
         });
     }
 
     setFeatureModel(featureModel) {
-        if (!featureModel) return;
-        // TODO
+        if (!featureModel) throw 'feature model must be provided';
+
+        if (typeof featureModel == 'string')
+            this.featureModel = FeatureModel.fromXml(featureModel);
+        else
+            this.featureModel = FeatureModel.fromJson(featureModel);
+
+        this.featureModel.validateFeatureModel();
     }
 
     setConfig(config) {
-        if (!config) return;
-        // TODO
+        if (Array.isArray(config.delimiters)) {
+            if (!this.featureModel) throw 'feature model not defined';
+
+            config.delimiters.forEach(d => {
+                d.extension.forEach(e => {
+                    this.templateEngine.addDelimiter(e, d.start, d.end);
+                });
+            });
+        }
+
+        // TODO ignore from config.json
     }
 
     setProject(project) {
-        if (!project) return;
-        // TODO
-    }
-}
+        // features list switch to feature object like struct
+        this.featureModel.completeFeatureSelection(project.features).forEach(f => {
+            this.features[f] = true;
+        });
 
-function _addSingleDelimiter(extension, start, end) {
-    this.delimiters[extension] = { start, end };
-}
-
-function _addDelimiter(extensions, start, end) {
-    if (Array.isArray(extensions)) {
-        extensions.forEach((e) => this::_addSingleDelimiter(e, start, end));
-    } else {
-        this::_addSingleDelimiter(extensions, start, end);
+        this.data = project.data || {};
     }
 }
