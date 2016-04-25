@@ -2,11 +2,9 @@ import meow from 'meow';
 import fs from 'fs';
 import path from 'path';
 
-import { DerivationEngine, readJsonFromFile } from './index';
+import { DerivationEngine, readJsonFromFile, readFile } from './index';
 
 export function cli() {
-    console.log('Running cli');
-
     const cli = meow({ help: false });
     const {
         featureModel,
@@ -27,7 +25,12 @@ export function cli() {
 
     const engine = new DerivationEngine();
 
-    engine.setFeatureModel(readJsonFromFile(featureModel));
+    const featureModelJson = readJsonFromFile(featureModel);
+    if (featureModelJson) {
+        engine.setFeatureModel(featureModelJson);
+    } else {
+        engine.setFeatureModel(readFile(featureModel));
+    }
 
     if (config) {
         engine.setConfig(readJsonFromFile(config));
