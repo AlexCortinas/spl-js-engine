@@ -17,8 +17,7 @@ export function cli() {
     if (cli.flags.help || !code || !featureModel) {
         console.log(
             fs.readFileSync(
-                path.join(__dirname, '../usage.txt'), 'utf8'),
-                _getCommandExecuted()
+                path.join(__dirname, '../usage.txt'), 'utf8')
             );
         process.exit(0);
     }
@@ -41,8 +40,4 @@ export function cli() {
     }
 
     engine.generateProject(code, output);
-}
-
-function _getCommandExecuted() {
-    return `${process.argv[0]} ${process.argv[1]}`;
 }

@@ -1,4 +1,4 @@
-    Usage: %s [args]
+    Usage: spl-js-engine [opts]
 
     General options:
       --help            # Print this info and generator's options and usage
