@@ -28,6 +28,10 @@ export default class Delimiter {
         this.feature = _featureExpression;
         this.data = _dataExpression;
     }
+
+    toString() {
+        return `Start: ${this.start}, End: ${this.end}`;
+    }
 }
 
 const _escapeRegExpStr = str => String(str).replace(/[-/|\\{}()[\]^$+*?.]/g, '\\$&');
