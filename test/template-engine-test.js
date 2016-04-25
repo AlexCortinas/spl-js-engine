@@ -5,6 +5,7 @@ import { getTestPath as p, getTestFileContent as f } from './test-utils';
 
 suite('TemplateEngine process feature');
 
+
 test('create processor', () => {
     const te = new TemplateEngine();
     const p = te.createProcessor();
@@ -79,6 +80,17 @@ test('process inline simple conditional false', () => {
     assert.strictEqual(
         p.process(f('template-engine/inline-conditional.js')),
         f('template-engine/inline-conditional-false.js')
+    );
+});
+
+test('process bower.json to set the name', () => {
+    const te = new TemplateEngine();
+    te.addDelimiter('json', '/*%', '%*/');
+    const p = te.createProcessor({}, { title: 'calculator' });
+
+    assert.strictEqual(
+        p.process(f('template-engine/bower.json')),
+        f('template-engine/bower-calculator.json')
     );
 });
 
