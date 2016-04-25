@@ -4,5 +4,5 @@ Annotated source of a absurd web calculator to generate with *spl-js-engine* too
 
 Once generated, it can be run with JAVA_HOME pointing to Java 8 and:
 
-* bower install
+* npm install
 * mvn spring-boot:run

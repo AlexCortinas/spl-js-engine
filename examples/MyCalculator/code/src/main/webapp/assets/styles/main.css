@@ -5,10 +5,6 @@
     display: table;
 }
 
-.calculator .column {
-    display: table-column;
-}
-
 .calculator .row {
     display: flex;
 }
@@ -39,4 +35,3 @@
 .calculator .functions-keyboard {
     display: table;
 }
-
