@@ -5,4 +5,4 @@ features:
   - multiply
   - divide
 data:
-  title: The Calculator
+  title: calculator-web
