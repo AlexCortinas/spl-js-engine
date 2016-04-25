@@ -1,7 +1,7 @@
 features:
   - decimal
   - add
-  - subtract
+  # - subtract
   - multiply
   - divide
 data:
