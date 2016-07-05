@@ -1,3 +1,4 @@
+import assert from 'assert';
 import fs from 'fs';
 import { readFile, walkDir } from '../src/file-utils';
 
@@ -13,5 +14,27 @@ export const removeTmpFolder = () => {
         } else {
             fs.unlinkSync(file);
         }
+    });
+};
+
+export const assertEqualFilesInFolders = (first, second) => {
+    const firstFiles = [];
+    const secondFiles = [];
+
+    walkDir(first, (file, isFolder) => {
+        if (!isFolder)
+            firstFiles.push(file.replace(first,''));
+    });
+    walkDir(second, (file, isFolder) => {
+        if (!isFolder)
+            secondFiles.push(file.replace(second,''));
+    });
+
+    assert.deepEqual(firstFiles.sort(), secondFiles.sort());
+    firstFiles.forEach((file) => {
+        assert.strictEqual(
+            readFile(`${first}${file}`),
+            readFile(`${second}${file}`)
+        );
     });
 };

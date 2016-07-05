@@ -1,9 +1,8 @@
-import assert from 'assert';
-
 import { DerivationEngine, readJsonFromFile } from '../src/index';
 
 import {
-    getTestFileContent as f, getTestPath as p, removeTmpFolder
+    getTestPath as p, removeTmpFolder,
+    assertEqualFilesInFolders
 } from './test-utils';
 
 suite('Derivation Engine');
@@ -16,14 +15,7 @@ test('Create a project without feature selection or any custom data', () => {
 
     engine.generateProject(p('simpleSPL/code'), p('tmp/simpleProduct'));
 
-    assert.strictEqual(
-        f('simpleSPL/code/index.html'),
-        f('tmp/simpleProduct/index.html')
-    );
-    assert.strictEqual(
-        f('simpleSPL/code/main.js'),
-        f('tmp/simpleProduct/main.js')
-    );
+    assertEqualFilesInFolders(p('simpleSPL/code'), p('tmp/simpleProduct'));
 });
 
 test('Create a project', () => {
@@ -34,4 +26,6 @@ test('Create a project', () => {
     engine.setProject(readJsonFromFile(p('simpleSPL/project.yaml')));
 
     engine.generateProject(p('simpleSPL/code'), p('tmp/simpleProduct'));
+
+    assertEqualFilesInFolders(p('simpleSPL/expected'), p('tmp/simpleProduct'));
 });
