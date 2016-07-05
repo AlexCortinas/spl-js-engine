@@ -10,6 +10,7 @@ export default class DerivationEngine {
         this.templateEngine = new TemplateEngine();
         this.features = {};
         this.data = {};
+        this.ignore = [];
     }
 
     generateProject(inputPath, outputPath) {
@@ -20,7 +21,7 @@ export default class DerivationEngine {
                     filePath.replace(inputPath, outputPath),
                     processor.process(readFile(filePath), _extension(filePath)));
             }
-        });
+        }, this.ignore);
     }
 
     setFeatureModel(featureModel) {
@@ -45,7 +46,9 @@ export default class DerivationEngine {
             });
         }
 
-        // TODO ignore from config.json
+        if (Array.isArray(config.ignore)) {
+            this.ignore = config.ignore;
+        }
     }
 
     setProject(project) {

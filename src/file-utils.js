@@ -35,12 +35,14 @@ function mkDirRecursively(folderPath) {
     }
 }
 
-export function walkDir(pathToWalk, cb) {
+export function walkDir(pathToWalk, cb, ignore = []) {
     let stat = existsFile(pathToWalk);
 
     if (!stat || stat.isFile()) return;
 
-    fs.readdirSync(pathToWalk).forEach((filePath) => {
+    fs.readdirSync(pathToWalk).filter(function(path) {
+        return ignore.indexOf(path) == -1;
+    }).forEach((filePath) => {
         const fullFilePath = `${pathToWalk}${path.sep}${filePath}`;
         stat = fs.statSync(fullFilePath);
 
