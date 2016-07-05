@@ -9,6 +9,7 @@ import {
 suite('Derivation Engine');
 
 beforeEach(removeTmpFolder);
+afterEach(removeTmpFolder);
 
 test('Create a project without feature selection or any custom data', () => {
     const engine = new DerivationEngine();

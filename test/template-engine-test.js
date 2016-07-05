@@ -5,7 +5,6 @@ import { getTestPath as p, getTestFileContent as f } from './test-utils';
 
 suite('TemplateEngine process feature');
 
-
 test('create processor', () => {
     const te = new TemplateEngine();
     const p = te.createProcessor();

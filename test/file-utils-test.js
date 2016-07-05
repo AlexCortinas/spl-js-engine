@@ -11,6 +11,7 @@ import {
 suite('File Utils');
 
 before(removeTmpFolder);
+after(removeTmpFolder);
 
 test('Testing existsFile', () => {
     assert.notEqual(existsFile(p('asdf.txt')), false);
