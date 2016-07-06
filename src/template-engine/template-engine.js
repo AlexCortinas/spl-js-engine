@@ -1,5 +1,6 @@
 import Processor from './processor';
 import Delimiter from './delimiter';
+import Analyser from './analyser';
 
 export default class TemplateEngine {
     constructor({ startDelimiter, endDelimiter } = {}) {
@@ -11,6 +12,10 @@ export default class TemplateEngine {
 
     createProcessor(features, data) {
         return new Processor(features, data, this.delimiters);
+    }
+
+    createAnalyser() {
+        return new Analyser();
     }
 
     addDelimiter(type, start, end) {
