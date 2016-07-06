@@ -1,20 +1,10 @@
-import Delimiter from './delimiter.js';
+import DelimiterAwareEntity from './delimiter-aware-entity.js';
 
-export default class Processor {
+export default class Processor extends DelimiterAwareEntity {
     constructor(features = {}, data = {}, delimiters = {}) {
+        super(delimiters);
         this.features = features;
         this.data = data;
-        this.delimiters = delimiters;
-        if (!this.delimiters.default) {
-            this.delimiters.default = new Delimiter();
-        }
-    }
-
-    getDelimiter(extension = 'default') {
-        if (this.delimiters[extension])
-            return this.delimiters[extension];
-        else
-            return this.delimiters.default;
     }
 
     process(str, ext) {
