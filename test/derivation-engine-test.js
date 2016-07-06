@@ -12,30 +12,30 @@ suite('Derivation Engine');
 beforeEach(removeTmpFolder);
 afterEach(removeTmpFolder);
 
-test('Create a project without feature selection or any custom data', () => {
+test('Create a product without feature selection or any custom data', () => {
     const engine = new DerivationEngine(p('simpleSPL/code'));
 
-    engine.generateProject(p('tmp/simpleProduct'));
+    engine.generateProduct(p('tmp/simpleProduct'));
 
     assertEqualFilesInFolders(p('simpleSPL/code'), p('tmp/simpleProduct'));
 });
 
-test('Trying to create a project without code path', () => {
+test('Trying to create a product without code path', () => {
     assert.throws(() => {
         new DerivationEngine();
     }, /Code path is required to create a Derivation Engine/);
 });
 
-test('Create a project', () => {
+test('Create a product', () => {
     const engine = new DerivationEngine(
         p('simpleSPL/code'),
         readJsonFromFile(p('simpleSPL/model.yaml')),
         readJsonFromFile(p('simpleSPL/config.yaml'))
     );
 
-    engine.generateProject(
+    engine.generateProduct(
         p('tmp/simpleProduct'),
-        readJsonFromFile(p('simpleSPL/project.yaml'))
+        readJsonFromFile(p('simpleSPL/product.yaml'))
     );
 
     assertEqualFilesInFolders(p('simpleSPL/expected'), p('tmp/simpleProduct'));

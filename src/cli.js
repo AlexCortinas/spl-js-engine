@@ -8,7 +8,7 @@ export function cli() {
     const cli = meow({ help: false });
     const {
         featureModel,
-        project,
+        product,
         config,
         code,
         output = 'output'
@@ -34,10 +34,10 @@ export function cli() {
 
     const engine = new DerivationEngine(code, featureModelJson, configJson);
 
-    let projectJson = {};
-    if (project) {
-        projectJson = readJsonFromFile(project);
+    let productJson = {};
+    if (product) {
+        productJson = readJsonFromFile(product);
     }
 
-    engine.generateProject(output, projectJson);
+    engine.generateProduct(output, productJson);
 }

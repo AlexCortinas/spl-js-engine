@@ -1,3 +1,3 @@
 #! /bin/env bash
 
-spl-js-engine --featureModel model.yaml --project project.yaml --config config.yaml --code code --output output
+spl-js-engine --featureModel model.yaml --product product.yaml --config config.yaml --code code --output output

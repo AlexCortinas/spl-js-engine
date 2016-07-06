@@ -20,13 +20,13 @@ export default class DerivationEngine {
             this.setConfig(config);
     }
 
-    generateProject(outputPath, project = {}) {
+    generateProduct(outputPath, product = {}) {
         const features = {};
-        const data = project.data || {};
+        const data = product.data || {};
 
-        if (project.features) {
+        if (product.features) {
             this.featureModel
-                .completeFeatureSelection(project.features)
+                .completeFeatureSelection(product.features)
                 .forEach(f => {
                     features[f] = true;
                 }

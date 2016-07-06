@@ -19,7 +19,7 @@ Generation of the product:
 ```
 cd examples/MyCalculator
 spl-js-engine --featureModel model.yaml \
-    --project project.yaml \
+    --product product.yaml \
     --config config.yaml \
     --code code \
     --output output
