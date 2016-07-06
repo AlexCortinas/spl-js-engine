@@ -5,20 +5,40 @@ import TemplateEngine from './template-engine/template-engine';
 const _extension = f => f.substring(f.lastIndexOf('.') + 1);
 
 export default class DerivationEngine {
-    constructor() {
+    constructor(codePath, featureModel, config) {
         this.featureModel = null;
-        this.templateEngine = new TemplateEngine();
-        this.features = {};
-        this.data = {};
         this.ignore = [];
+        this.templateEngine = new TemplateEngine();
+
+        if (!codePath) {
+            throw 'Code path is required to create a Derivation Engine';
+        }
+        this.codePath = codePath;
+        if (featureModel)
+            this.setFeatureModel(featureModel);
+        if (config)
+            this.setConfig(config);
     }
 
-    generateProject(inputPath, outputPath) {
-        const processor = this.templateEngine.createProcessor(this.features, this.data);
-        walkDir(inputPath, (filePath, isFolder) => {
+    generateProject(outputPath, project = {}) {
+        const features = {};
+        const data = project.data || {};
+
+        if (project.features) {
+            this.featureModel
+                .completeFeatureSelection(project.features)
+                .forEach(f => {
+                    features[f] = true;
+                }
+            );
+        }
+
+        const processor = this.templateEngine.createProcessor(features, data);
+
+        walkDir(this.codePath, (filePath, isFolder) => {
             if (!isFolder) {
                 writeFile(
-                    filePath.replace(inputPath, outputPath),
+                    filePath.replace(this.codePath, outputPath),
                     processor.process(readFile(filePath), _extension(filePath)));
             }
         }, this.ignore);
@@ -49,14 +69,5 @@ export default class DerivationEngine {
         if (Array.isArray(config.ignore)) {
             this.ignore = config.ignore;
         }
-    }
-
-    setProject(project) {
-        // features list switch to feature object like struct
-        this.featureModel.completeFeatureSelection(project.features).forEach(f => {
-            this.features[f] = true;
-        });
-
-        this.data = project.data || {};
     }
 }

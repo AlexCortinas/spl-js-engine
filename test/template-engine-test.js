@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { TemplateEngine } from '../src/index';
-import { getTestPath as p, getTestFileContent as f } from './test-utils';
+import { getTestFileContent as f } from './test-utils';
 
 suite('TemplateEngine process feature');
 

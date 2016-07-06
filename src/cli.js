@@ -22,22 +22,22 @@ export function cli() {
         process.exit(0);
     }
 
-    const engine = new DerivationEngine();
-
-    const featureModelJson = readJsonFromFile(featureModel);
-    if (featureModelJson) {
-        engine.setFeatureModel(featureModelJson);
-    } else {
-        engine.setFeatureModel(readFile(featureModel));
+    let featureModelJson = readJsonFromFile(featureModel);
+    if (!featureModelJson) {
+        featureModelJson = readFile(featureModel);
     }
 
+    let configJson = {};
     if (config) {
-        engine.setConfig(readJsonFromFile(config));
+        configJson = readJsonFromFile(config);
     }
 
+    const engine = new DerivationEngine(code, featureModelJson, configJson);
+
+    let projectJson = {};
     if (project) {
-        engine.setProject(readJsonFromFile(project));
+        projectJson = readJsonFromFile(project);
     }
 
-    engine.generateProject(code, output);
+    engine.generateProject(output, projectJson);
 }
