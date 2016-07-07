@@ -102,3 +102,25 @@ test('Get features and parameters of an annotated project', () => {
         [ 'main.js' ]
     );
 });
+
+test('Compare feature model vs analysed code results', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwithData/code'),
+        readJsonFromFile(p('simpleSPLwithData/model.yaml')),
+        readJsonFromFile(p('simpleSPLwithData/config.yaml'))
+    );
+
+    const report = engine.analyseAnnotations();
+
+    assert.deepEqual(
+        report.checkAnnotatedFeaturesConsistency(),
+        { abound: [], missing: [] }
+    );
+
+    assert.deepEqual(
+        report.checkAnnotatedDataConsistency(
+            readJsonFromFile(p('simpleSPLwithData/product.yaml'))
+        ),
+        { abound: [], missing: [] }
+    );
+});

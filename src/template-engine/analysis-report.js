@@ -1,6 +1,7 @@
 export default class AnalysisReport {
-    constructor() {
+    constructor(featureModel) {
         this.results = new Map();
+        this.featureModel = featureModel;
     }
 
     addAnalysis(filePath, result) {
@@ -65,5 +66,30 @@ export default class AnalysisReport {
         });
 
         return ret;
+    }
+
+    checkAnnotatedFeaturesConsistency() {
+        const found = Object.keys(this.short().feature);
+
+        const expected = this.featureModel.featureList
+            .map(featureName => this.featureModel.get(featureName))
+            .filter(feature => !feature.abstract)
+            .map(feature => feature.name);
+
+        return {
+            abound: found.filter(f => expected.indexOf(f) == -1),
+            missing: expected.filter(f => found.indexOf(f) == -1)
+        };
+    }
+
+    checkAnnotatedDataConsistency(productData) {
+        const found = Object.keys(this.short().data);
+
+        const expected = Object.keys(productData.data);
+
+        return {
+            abound: found.filter(f => expected.indexOf(f) == -1),
+            missing: expected.filter(f => found.indexOf(f) == -1)
+        };
     }
 }

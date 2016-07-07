@@ -26,30 +26,6 @@ export default class DerivationEngine {
         }
     }
 
-    generateProduct(outputPath, product = {}) {
-        const features = {};
-        const data = product.data || {};
-
-        if (product.features) {
-            this.featureModel
-                .completeFeatureSelection(product.features)
-                .forEach(f => {
-                    features[f] = true;
-                }
-            );
-        }
-
-        const processor = this.templateEngine.createProcessor(features, data);
-
-        walkDir(this.codePath, (fPath, isFolder) => {
-            if (!isFolder) {
-                writeFile(
-                    fPath.replace(this.codePath, outputPath),
-                    processor.process(readFile(fPath), _extension(fPath)));
-            }
-        }, this.ignore);
-    }
-
     setFeatureModel(featureModel) {
         if (!featureModel) throw 'feature model must be provided';
 
@@ -75,8 +51,32 @@ export default class DerivationEngine {
         }
     }
 
+    generateProduct(outputPath, product = {}) {
+        const features = {};
+        const data = product.data || {};
+
+        if (product.features) {
+            this.featureModel
+                .completeFeatureSelection(product.features)
+                .forEach(f => {
+                    features[f] = true;
+                }
+            );
+        }
+
+        const processor = this.templateEngine.createProcessor(features, data);
+
+        walkDir(this.codePath, (fPath, isFolder) => {
+            if (!isFolder) {
+                writeFile(
+                    fPath.replace(this.codePath, outputPath),
+                    processor.process(readFile(fPath), _extension(fPath)));
+            }
+        }, this.ignore);
+    }
+
     analyseAnnotations() {
-        const report = new AnalysisReport();
+        const report = new AnalysisReport(this.featureModel);
         const analyser = this.templateEngine.createAnalyser();
 
         walkDir(this.codePath, (filePath, isFolder) => {
