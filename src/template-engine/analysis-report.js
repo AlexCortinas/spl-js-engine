@@ -52,4 +52,18 @@ export default class AnalysisReport {
 
         return ret;
     }
+
+    filesByData(aProprety) {
+        const ret = [];
+
+        this.results.forEach((value, key) => {
+            for (const propertyname in value.data) {
+                if (propertyname == aProprety) {
+                    ret.push(key);
+                }
+            }
+        });
+
+        return ret;
+    }
 }
