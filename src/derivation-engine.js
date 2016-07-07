@@ -41,11 +41,11 @@ export default class DerivationEngine {
 
         const processor = this.templateEngine.createProcessor(features, data);
 
-        walkDir(this.codePath, (filePath, isFolder) => {
+        walkDir(this.codePath, (fPath, isFolder) => {
             if (!isFolder) {
                 writeFile(
-                    filePath.replace(this.codePath, outputPath),
-                    processor.process(readFile(filePath), _extension(filePath)));
+                    fPath.replace(this.codePath, outputPath),
+                    processor.process(readFile(fPath), _extension(fPath)));
             }
         }, this.ignore);
     }

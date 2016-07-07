@@ -62,9 +62,9 @@ export default class FeatureModel extends Feature {
      * Returns the whole set of features required from a set of selected,
      * taking into account the constraints and relationships between features.
      *
-     * It is possible to create a product just constrafrom a few features, but then
-     * the rest of the minimum required (the mandatory ones, for example), must
-     * be added using this method.
+     * It is possible to create a product just constrafrom a few features, but
+     * then the rest of the minimum required (the mandatory ones, for example),
+     * must be added using this method.
      *
      * @param  {String[]} selectedFeatures - An array with the names of the
      * selected features
@@ -98,7 +98,7 @@ export default class FeatureModel extends Feature {
             }
         }
 
-        this::_validateAlternativeFeaturesFromSelection(namesOfSelectedFeatures);
+        this::_validateAltFeaturesFromSelection(namesOfSelectedFeatures);
         return namesOfSelectedFeatures;
     }
 
@@ -234,13 +234,16 @@ function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
     return [...featureSet].map(f => f.name);
 }
 
-function _validateAlternativeFeaturesFromSelection(selectedFeatures) {
+function _validateAltFeaturesFromSelection(selectedFeatures) {
     const features = this::_getFeaturesFromNames(selectedFeatures);
 
     // cheking if two alternative features has been selected at the same time
     features.filter(f1 => f1.parent && f1.parent.type === TYPE.XOR)
         .forEach(f1 => {
-            if (features.filter(f2 => f1 != f2 && f1.parent == f2.parent).length > 0)
+            if (features
+                    .filter(f2 => f1 != f2 && f1.parent == f2.parent)
+                    .length > 0)
+
                 throw 'selected more than one features in alternative ' +
                 'feature ' + f1.parent.name;
         });

@@ -59,6 +59,7 @@ export default class constraintSet {
     }
 
     fromXml(xml) {
-        xml.eachChild(c => this.addConstraint(Constraint.fromXml(c.firstChild)));
+        xml.eachChild(c =>
+            this.addConstraint(Constraint.fromXml(c.firstChild)));
     }
 }

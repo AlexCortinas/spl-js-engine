@@ -18,7 +18,10 @@ test('process static templates', () => {
 
     assert.strictEqual(p.process('asdf'), 'asdf');
     assert.strictEqual(p.process('<p>'), '<p>');
-    assert.strictEqual(p.process('function(){\nasdf\n}'), 'function(){\nasdf\n}');
+    assert.strictEqual(
+        p.process('function(){\nasdf\n}'),
+        'function(){\nasdf\n}'
+    );
 });
 
 test('process static file templates', () => {
@@ -112,39 +115,45 @@ test('process different text with different custom delimiters', () => {
     const te = new TemplateEngine();
     te.addDelimiter('html', '<!--%', '-->');
     te.addDelimiter('py', '#%', '%#');
-    const askGreetProcessor = te.createProcessor({ask: true, greet: true});
-    const notAskByeProcessor = te.createProcessor({ask: false, bye: true});
-    const nothingProcessor = te.createProcessor();
+    const askGreetProc = te.createProcessor({ask: true, greet: true});
+    const notAskByeProc = te.createProcessor({ask: false, bye: true});
+    const nothingPro = te.createProcessor();
 
 
     assert.strictEqual(
-        askGreetProcessor.process(f('template-engine/custom-delimiter.py'), 'py'),
+        askGreetProc.process(f('template-engine/custom-delimiter.py'), 'py'),
         f('template-engine/custom-delimiter-ask.py')
     );
     assert.strictEqual(
-        notAskByeProcessor.process(f('template-engine/custom-delimiter.py'), 'py'),
+        notAskByeProc.process(f('template-engine/custom-delimiter.py'), 'py'),
         f('template-engine/custom-delimiter-not-ask.py')
     );
 
     assert.strictEqual(
-        askGreetProcessor.process(f('template-engine/custom-delimiter.html'), 'html'),
+        askGreetProc.process(
+            f('template-engine/custom-delimiter.html'),
+            'html'
+        ),
         f('template-engine/custom-delimiter-greet.html')
     );
     assert.strictEqual(
-        notAskByeProcessor.process(f('template-engine/custom-delimiter.html'), 'html'),
+        notAskByeProc.process(
+            f('template-engine/custom-delimiter.html'),
+            'html'
+        ),
         f('template-engine/custom-delimiter-bye.html')
     );
     assert.strictEqual(
-        nothingProcessor.process(f('template-engine/custom-delimiter.html'), 'html'),
+        nothingPro.process(f('template-engine/custom-delimiter.html'), 'html'),
         f('template-engine/custom-delimiter-nothing.html')
     );
 
     assert.strictEqual(
-        askGreetProcessor.process(f('template-engine/simple-conditional.js')),
+        askGreetProc.process(f('template-engine/simple-conditional.js')),
         f('template-engine/simple-conditional-true.js')
     );
     assert.strictEqual(
-        notAskByeProcessor.process(f('template-engine/simple-conditional.js')),
+        notAskByeProc.process(f('template-engine/simple-conditional.js')),
         f('template-engine/simple-conditional-false.js')
     );
 });

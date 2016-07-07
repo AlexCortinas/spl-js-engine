@@ -67,7 +67,10 @@ test('Get features and parameters of an annotated project', () => {
 
     assert.deepEqual(
         report.short(),
-        { feature: { featureA: 2, featureB: 1, featureC: 1 }, data: { aValue: 1 } }
+        {
+            feature: { featureA: 2, featureB: 1, featureC: 1 },
+            data: { aValue: 1 }
+        }
     );
 
     assert.deepEqual(

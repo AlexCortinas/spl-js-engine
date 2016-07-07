@@ -1,6 +1,7 @@
 const _DEFAULT_START_DELIMITER = '/*%';
 const _DEFAULT_END_DELIMITER = '%*/';
-const _jsExpression = /(^([ \n\t\r])*(var|if|for|else|switch|case|break|{|}|;))(.*)?/g;
+const _jsExpression =
+    /(^([ \n\t\r])*(var|if|for|else|switch|case|break|{|}|;))(.*)?/g;
 const _featureExpression = /feature.[^ |)&]*/g;
 const _dataExpression = /data.[^ |)&]*/g;
 
@@ -34,4 +35,5 @@ export default class Delimiter {
     }
 }
 
-const _escapeRegExpStr = str => String(str).replace(/[-/|\\{}()[\]^$+*?.]/g, '\\$&');
+const _escapeRegExpStr = str =>
+    String(str).replace(/[-/|\\{}()[\]^$+*?.]/g, '\\$&');
