@@ -15,7 +15,7 @@ export default class TemplateEngine {
     }
 
     createAnalyser() {
-        return new Analyser();
+        return new Analyser(this.delimiters);
     }
 
     addDelimiter(type, start, end) {

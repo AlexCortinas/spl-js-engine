@@ -1,6 +1,8 @@
 import { readFile, writeFile, walkDir } from './file-utils';
 import FeatureModel from './feature-model/feature-model';
 import TemplateEngine from './template-engine/template-engine';
+import AnalysisReport from './template-engine/analysis-report';
+import path from 'path';
 
 const _extension = f => f.substring(f.lastIndexOf('.') + 1);
 
@@ -14,10 +16,14 @@ export default class DerivationEngine {
             throw 'Code path is required to create a Derivation Engine';
         }
         this.codePath = codePath;
-        if (featureModel)
+
+        if (featureModel) {
             this.setFeatureModel(featureModel);
-        if (config)
+        }
+
+        if (config) {
             this.setConfig(config);
+        }
     }
 
     generateProduct(outputPath, product = {}) {
@@ -57,8 +63,6 @@ export default class DerivationEngine {
 
     setConfig(config) {
         if (Array.isArray(config.delimiters)) {
-            if (!this.featureModel) throw 'feature model not defined';
-
             config.delimiters.forEach(d => {
                 d.extension.forEach(e => {
                     this.templateEngine.addDelimiter(e, d.start, d.end);
@@ -69,5 +73,21 @@ export default class DerivationEngine {
         if (Array.isArray(config.ignore)) {
             this.ignore = config.ignore;
         }
+    }
+
+    analyseAnnotations() {
+        const report = new AnalysisReport();
+        const analyser = this.templateEngine.createAnalyser();
+
+        walkDir(this.codePath, (filePath, isFolder) => {
+            if (!isFolder) {
+                report.addAnalysis(
+                    filePath.replace(`${this.codePath}${path.sep}`, ''),
+                    analyser.analyse(readFile(filePath), _extension(filePath))
+                );
+            }
+        }, this.ignore);
+
+        return report;
     }
 }

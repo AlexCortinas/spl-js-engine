@@ -40,3 +40,40 @@ test('Create a product', () => {
 
     assertEqualFilesInFolders(p('simpleSPL/expected'), p('tmp/simpleProduct'));
 });
+
+test('Get features and parameters of an annotated project', () => {
+    const engine = new DerivationEngine(p('simpleSPL/code'));
+
+    engine.setConfig(readJsonFromFile(p('simpleSPL/config.yaml')));
+
+    const report = engine.analyseAnnotations();
+
+    assert.deepEqual(
+        report.short(),
+        { feature: { featureA: 2, featureB: 1, featureC: 1 }, data: {} }
+    );
+
+    assert.deepEqual(
+        report.long(),
+        {
+            'index.html': {
+                feature: { featureA: 1, featureB: 1, featureC: 1 },
+                data: {}
+            },
+            'main.js': {
+                feature: { featureA: 1 },
+                data: {}
+            }
+        }
+    );
+
+    assert.deepEqual(
+        report.filesByFeature('featureA'),
+        [ 'index.html', 'main.js' ]
+    );
+
+    assert.deepEqual(
+        report.filesByFeature('featureB'),
+        [ 'index.html' ]
+    );
+});
