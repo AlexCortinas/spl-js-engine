@@ -155,3 +155,41 @@ test('Compare fanalysis results in a not consistent project', () => {
         }
     );
 });
+
+test('Create a product with data parameters at several levels', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwithDataComplex/code'),
+        readJsonFromFile(p('simpleSPLwithDataComplex/model.yaml')),
+        readJsonFromFile(p('simpleSPLwithDataComplex/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('simpleSPLwithDataComplex/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(
+        p('simpleSPLwithDataComplex/expected'), p('tmp/simpleProduct'));
+});
+
+test('Consistency results for complex data', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwithDataComplex/code'),
+        readJsonFromFile(p('simpleSPLwithDataComplex/model.yaml')),
+        readJsonFromFile(p('simpleSPLwithDataComplex/config.yaml'))
+    );
+
+    const report = engine.analyseAnnotations();
+
+    assert.deepEqual(
+        report.checkAnnotatedFeaturesConsistency(),
+        { errors: 0, warnings: 0, abound: [], missing: [] }
+    );
+
+    assert.deepEqual(
+        report.checkAnnotatedDataConsistency(
+            readJsonFromFile(p('simpleSPLwithDataComplex/product.yaml'))
+        ),
+        { errors: 0, warnings: 0, abound: [], missing: [] }
+    );
+});

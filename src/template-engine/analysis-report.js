@@ -91,7 +91,7 @@ export default class AnalysisReport {
 
     checkAnnotatedDataConsistency(productData) {
         const found = Object.keys(this.short().data);
-        const expected = Object.keys(productData.data);
+        const expected = propertyNames(productData.data);
 
         const res = {
             abound: found.filter(f => expected.indexOf(f) == -1),
@@ -106,4 +106,28 @@ export default class AnalysisReport {
 
         return res;
     }
+}
+
+function propertyNames(obj, array, stack) {
+    if (!array) {
+        array = [];
+    }
+
+    Object.keys(obj).forEach(property => {
+        if (typeof obj[property] == 'object') {
+            propertyNames(
+                obj[property],
+                array,
+                stack ? stack + '.' + property
+                      : property
+            );
+        } else {
+            array.push(
+                stack ? stack + '.' + property
+                      : property
+            );
+        }
+    });
+
+    return array;
 }
