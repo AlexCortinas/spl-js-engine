@@ -124,3 +124,26 @@ test('Compare feature model vs analysed code results', () => {
         { abound: [], missing: [] }
     );
 });
+
+
+test('Compare fanalysis results in a not consistent project', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwrong/code'),
+        readJsonFromFile(p('simpleSPLwrong/model.yaml')),
+        readJsonFromFile(p('simpleSPLwrong/config.yaml'))
+    );
+
+    const report = engine.analyseAnnotations();
+
+    assert.deepEqual(
+        report.checkAnnotatedFeaturesConsistency(),
+        { abound: [ 'featureWrong' ], missing: [ 'featureA' ] }
+    );
+
+    assert.deepEqual(
+        report.checkAnnotatedDataConsistency(
+            readJsonFromFile(p('simpleSPLwrong/product.yaml'))
+        ),
+        { abound: [ 'wrongValue' ], missing: [ 'aValue' ] }
+    );
+});
