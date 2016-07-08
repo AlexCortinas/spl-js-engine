@@ -21,7 +21,7 @@ export default class Analyser extends DelimiterAwareEntity {
                 }
                 result.feature[featureAux]++;
             }
-            if ((dataMatch =
+            while ((dataMatch =
                 delimiter.data.exec(match.slice(1).join(''))) !== null) {
 
                 featureAux = dataMatch[0].replace('data.', '');
