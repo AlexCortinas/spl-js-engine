@@ -69,7 +69,7 @@ test('Get features and parameters of an annotated project', () => {
         report.short(),
         {
             feature: { featureA: 2, featureB: 1, featureC: 1 },
-            data: { aValue: 1 }
+            data: { aValue: 1, bValue: 1}
         }
     );
 
@@ -82,7 +82,7 @@ test('Get features and parameters of an annotated project', () => {
             },
             'main.js': {
                 feature: { featureA: 1 },
-                data: { aValue: 1 }
+                data: { aValue: 1, bValue: 1 }
             }
         }
     );
@@ -114,14 +114,14 @@ test('Compare feature model vs analysed code results', () => {
 
     assert.deepEqual(
         report.checkAnnotatedFeaturesConsistency(),
-        { abound: [], missing: [] }
+        { errors: 0, warnings: 0, abound: [], missing: [] }
     );
 
     assert.deepEqual(
         report.checkAnnotatedDataConsistency(
             readJsonFromFile(p('simpleSPLwithData/product.yaml'))
         ),
-        { abound: [], missing: [] }
+        { errors: 0, warnings: 0, abound: [], missing: [] }
     );
 });
 
@@ -137,13 +137,21 @@ test('Compare fanalysis results in a not consistent project', () => {
 
     assert.deepEqual(
         report.checkAnnotatedFeaturesConsistency(),
-        { abound: [ 'featureWrong' ], missing: [ 'featureA' ] }
+        {
+            errors: 2, warnings: 1,
+            abound: [ 'featureWrong', 'anotherFeatureWrong' ],
+            missing: [ 'featureA' ]
+        }
     );
 
     assert.deepEqual(
         report.checkAnnotatedDataConsistency(
             readJsonFromFile(p('simpleSPLwrong/product.yaml'))
         ),
-        { abound: [ 'wrongValue' ], missing: [ 'aValue' ] }
+        {
+            errors: 2, warnings: 1,
+            abound: [ 'wrongValue', 'anotherWrongValue' ],
+            missing: [ 'aValue' ]
+        }
     );
 });

@@ -3,3 +3,4 @@ features:
   - featureC
 data:
   aValue: hello!
+  bValue: bye!

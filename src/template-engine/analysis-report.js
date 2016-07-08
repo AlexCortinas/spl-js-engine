@@ -70,26 +70,40 @@ export default class AnalysisReport {
 
     checkAnnotatedFeaturesConsistency() {
         const found = Object.keys(this.short().feature);
-
         const expected = this.featureModel.featureList
             .map(featureName => this.featureModel.get(featureName))
             .filter(feature => !feature.abstract)
             .map(feature => feature.name);
 
-        return {
+        const res = {
             abound: found.filter(f => expected.indexOf(f) == -1),
             missing: expected.filter(f => found.indexOf(f) == -1)
         };
+
+        // features found in code but not in feature model are errors
+        res.errors = res.abound.length;
+
+        // feature in feature model not found are warnings
+        res.warnings = res.missing.length;
+
+        return res;
     }
 
     checkAnnotatedDataConsistency(productData) {
         const found = Object.keys(this.short().data);
-
         const expected = Object.keys(productData.data);
 
-        return {
+        const res = {
             abound: found.filter(f => expected.indexOf(f) == -1),
             missing: expected.filter(f => found.indexOf(f) == -1)
         };
+
+        // data parameters found in code but not in product spec are errors
+        res.errors = res.abound.length;
+
+        //data parameters in product spec but not in code are warnings
+        res.warnings = res.missing.length;
+
+        return res;
     }
 }
