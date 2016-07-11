@@ -109,6 +109,10 @@ export default class AnalysisReport {
 }
 
 function propertyNames(obj, array, stack) {
+    if (!obj) {
+        return [];
+    }
+
     if (!array) {
         array = [];
     }
