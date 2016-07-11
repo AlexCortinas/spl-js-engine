@@ -1,0 +1,140 @@
+{
+    "featureModel": {
+        "struct": {
+            "name": "GPL",
+            "mandatory": true,
+            "abstract": true,
+            "type": "and",
+            "features": [{
+                "name": "undirected"
+            }, {
+                "name": "weighted"
+            }, {
+                "name": "search",
+                "abstract": false,
+                "mandatory": false,
+                "type": "xor",
+                "features": [{
+                    "name": "dfs"
+                }, {
+                    "name": "bfs"
+                }]
+            }, {
+                "name": "algorithm",
+                "abstract": true,
+                "mandatory": true,
+                "type": "or",
+                "features": [{
+                    "name": "number"
+                }, {
+                    "name": "connected"
+                }, {
+                    "name": "stronglyConnected",
+                    "type": "and",
+                    "features": [{
+                        "name": "transpose",
+                        "mandatory": true
+                    }]
+                }, {
+                    "name": "cycle"
+                }, {
+                    "type": "or",
+                    "name": "mst",
+                    "features": [{
+                        "name": "mstPrim"
+                    }, {
+                        "name": "mstKruskal"
+                    }]
+                }, {
+                    "name": "shortest"
+                }]
+            }, {
+                "name": "execution",
+                "abstract": true,
+                "type": "and",
+                "features": [{
+                    "name": "prog"
+                }, {
+                    "name": "benchmark"
+                }]
+            }, {
+                "name": "implementation",
+                "abstract": true,
+                "mandatory": true,
+                "type": "xor",
+                "features": [{
+                    "name": "gnOnlyNeighbors"
+                }, {
+                    "name": "gNoEdges"
+                }, {
+                    "name": "genEdges"
+                }]
+            }]
+        },
+        "constraints": [{
+            "type": "implies",
+            "first": "connected",
+            "second": "undirected"
+        }, {
+            "type": "implies",
+            "first": "stronglyConnected",
+            "second": {
+                "type": "and",
+                "first": {
+                    "type": "not",
+                    "constraint": "undirected"
+                },
+                "second": "dfs"
+            }
+        }, {
+            "type": "implies",
+            "first": "cycle",
+            "second": "dfs"
+        }, {
+            "type": "implies",
+            "first": "mst",
+            "second": {
+                "type": "and",
+                "first": {
+                    "type": "not",
+                    "constraint": "search"
+                },
+                "second": {
+                    "type": "and",
+                    "first": "weighted",
+                    "second": "undirected"
+                }
+            }
+        }, {
+            "type": "implies",
+            "first": "Shortest",
+            "second": {
+                "type": "and",
+                "first": {
+                    "type": "not",
+                    "constraint": "search"
+                },
+                "second": {
+                    "type": "and",
+                    "first": "weighted",
+                    "second": {
+                        "type": "not",
+                        "constraint": "undirected"
+                    }
+                }
+            }
+        }, {
+            "type": "implies",
+            "first": {
+                "type": "or",
+                "first": "number",
+                "second": "connected"
+            },
+            "second": "search"
+        }, {
+            "type": "implies",
+            "first": "prog",
+            "second": "benchmark"
+        }]
+    }
+}

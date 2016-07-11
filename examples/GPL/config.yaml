@@ -1,0 +1,21 @@
+ignore:
+  - target
+  - .settings
+  - .project
+  - .classpath
+delimiters:
+  - extension:
+    - html
+    - jsp
+    - xml
+    start: "<!--%"
+    end: "%-->"
+  - extension:
+    - js
+    - java
+    start: "/*%"
+    end: "%*/"
+  - extension:
+    - py
+    start: "#%"
+    end: "%#"
