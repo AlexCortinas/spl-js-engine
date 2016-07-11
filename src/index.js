@@ -1,4 +1,4 @@
-#!/usr/bin/env babel-node
+#!/usr/bin/env node
 
 export DerivationEngine from './derivation-engine';
 export FeatureModel from './feature-model/feature-model';
