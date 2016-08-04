@@ -14,7 +14,7 @@ export default class Delimiter {
 
         this.regular = new RegExp('(([ \\r\\t])+\|\\n\|^)' +
             _escapeRegExpStr(this.start) +
-            '(([^' +
+            '([^=])(([^' +
             _escapeRegExpStr(this.end) +
             '])+?)' +
             _escapeRegExpStr(this.end) +

@@ -205,3 +205,15 @@ test('json with escaped values', () => {
         f('template-engine/menu.json')
     );
 });
+
+test('md file with some data', () => {
+    const te = new TemplateEngine();
+    const p = te.createProcessor({}, {
+        name: 'product'
+    });
+
+    assert.strictEqual(
+        p.process(f('template-engine/README.md')),
+        f('template-engine/README-product.md')
+    );
+});
