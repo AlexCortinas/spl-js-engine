@@ -52,9 +52,9 @@ const _jsLine = line => line.trim()
     .replace(/[ ]{2,}/g, ' ')
     .concat('\n');
 
-const _isInterpolatedValue = line => line.charAt(0) === '=';
+const _isInterpolatedValue = line => line.trim().charAt(0) === '=';
 
-const _interpolatedValue = line => `lines.push(${line.substr(1)});\n`;
+const _interpolatedValue = line => `lines.push(${line.trim().substr(1)});\n`;
 
 const _newLine = (line, isJavascript) => isJavascript ?
     _isInterpolatedValue(line) ?
