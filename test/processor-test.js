@@ -195,3 +195,13 @@ test('for loop', () => {
         'one: 1,\ntwo: 2'
     );
 });
+
+test('json with escaped values', () => {
+    const te = new TemplateEngine();
+    const p = te.createProcessor({}, {});
+
+    assert.strictEqual(
+        p.process(f('template-engine/menu.json')),
+        f('template-engine/menu.json')
+    );
+});
