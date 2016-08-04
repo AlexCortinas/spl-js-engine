@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "fs": "0.0.2",
+    "istextorbinary": "^2.1.0",
     "meow": "^3.7.0",
     "xml-writer": "^1.6.0",
     "xmldoc": "^0.4.0",

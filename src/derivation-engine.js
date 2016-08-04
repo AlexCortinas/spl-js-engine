@@ -3,6 +3,7 @@ import FeatureModel from './feature-model/feature-model';
 import TemplateEngine from './template-engine/template-engine';
 import AnalysisReport from './template-engine/analysis-report';
 import path from 'path';
+import isTextOrBinary from 'istextorbinary';
 
 const _extension = f => f.substring(f.lastIndexOf('.') + 1);
 
@@ -68,9 +69,16 @@ export default class DerivationEngine {
 
         walkDir(this.codePath, (fPath, isFolder) => {
             if (!isFolder) {
-                writeFile(
-                    fPath.replace(this.codePath, outputPath),
-                    processor.process(readFile(fPath), _extension(fPath)));
+                if (isTextOrBinary.isTextSync(fPath)) {
+                    writeFile(
+                        fPath.replace(this.codePath, outputPath),
+                        processor.process(readFile(fPath), _extension(fPath)));
+                } else {
+                    writeFile(
+                        fPath.replace(this.codePath, outputPath),
+                        readFile(fPath, true)
+                    );
+                }
             }
         }, this.ignore);
     }
@@ -79,12 +87,14 @@ export default class DerivationEngine {
         const report = new AnalysisReport(this.featureModel);
         const analyser = this.templateEngine.createAnalyser();
 
-        walkDir(this.codePath, (filePath, isFolder) => {
+        walkDir(this.codePath, (fPath, isFolder) => {
             if (!isFolder) {
-                report.addAnalysis(
-                    filePath.replace(`${this.codePath}${path.sep}`, ''),
-                    analyser.analyse(readFile(filePath), _extension(filePath))
-                );
+                if (isTextOrBinary.isTextSync(fPath)) {
+                    report.addAnalysis(
+                        fPath.replace(`${this.codePath}${path.sep}`, ''),
+                        analyser.analyse(readFile(fPath), _extension(fPath))
+                    );
+                }
             }
         }, this.ignore);
 
