@@ -31,20 +31,14 @@ export default class Processor extends DelimiterAwareEntity {
         return new Function('feature', 'data', code)(this.features, this.data);
     }
 }
-// first we change the written \[n|r|t] to remain as written in the
-// final output, and then we adapt the ones that are
-// properly [new lines|returns|tabs]
-// then we change quotes escaping them, and after that the quotes
-// that were initially escaped, currently with 2 escapes
+// first we escape the \ symbols in the text. Then we focus on special cases
+// that need to be escaped. 
 const _textLine = line => 'lines.push("'.concat(line
-        .replace(/\\n/g, '\\\\n')               // \n -> \\n
-        .replace(/\n/g, '\\n')                  // line feed \n -> \n
-        .replace(/\\r/g, '\\\\r')               // \r -> \\r
-        .replace(/\r/g, '\\r')                  // carriage return \r -> \r
-        .replace(/\\t/g, '\\\\t')               // \t -> \\t
-        .replace(/\t/g, '\\t')                  // new tab \t -> \t
-        .replace(/"/g, '\\"')                   // " -> \"
-        .replace(/\\\\\"/g, '\\\\\\\"'),        // \\" -> \\\"
+        .replace(/\\/g,  '\\\\')                  // \ -> \\
+        .replace(/\n/g, '\\n')                    // line feed \n -> \n
+        .replace(/\r/g, '\\r')                    // carriage return \r -> \r
+        .replace(/\t/g, '\\t')                    // new tab \t -> \t
+        .replace(/"/g, '\\"'),                    // " -> \"
     '");\n');
 
 const _jsLine = line => line.trim()
