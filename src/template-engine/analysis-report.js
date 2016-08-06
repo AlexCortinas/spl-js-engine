@@ -54,6 +54,42 @@ export default class AnalysisReport {
         return ret;
     }
 
+    filesByFeatureLong(aFeature, byCount) {
+        const ret = [];
+
+        this.results.forEach((value, key) => {
+            for (const featureName in value.feature) {
+                if (featureName == aFeature) {
+                    ret.push({ path: key, count: value.feature[featureName] });
+                }
+            }
+        });
+
+        if (byCount) {
+            ret.sort(sortByCount);
+        }
+
+        return ret;
+    }
+
+    featuresByFile(path, byCount) {
+        const ret = [];
+        const aux = this.results.get(path).feature;
+
+        for (const featureName in aux) {
+            ret.push({
+                featureName: featureName,
+                count: aux[featureName]
+            });
+        }
+
+        if (byCount) {
+            ret.sort(sortByCount);
+        }
+
+        return ret;
+    }
+
     filesByData(aProprety) {
         const ret = [];
 
@@ -106,7 +142,56 @@ export default class AnalysisReport {
 
         return res;
     }
+
+    listFeatures(byCount) {
+        const ret = [];
+        const aux = this.short().feature;
+
+        for (const featureName in aux) {
+            ret.push({
+                feature: featureName,
+                count: aux[featureName],
+                files: this.filesByFeatureLong(featureName, byCount)
+            });
+        }
+
+        if (byCount) {
+            ret.sort(sortByCount);
+        }
+
+        return ret;
+    }
+
+    listFiles(byCount) {
+        const ret = [];
+        const aux = this.long();
+        let element;
+
+        for (const filePath in aux) {
+            element = {
+                file: filePath,
+                count: Object.keys(aux[filePath].feature).length,
+                features: []
+            };
+            element.features.push({feature: 'aFeature', count: 2});
+            ret.push(element);
+        }
+
+        if (byCount) {
+            ret.sort(sortByCount);
+        }
+
+        return ret;
+    }
 }
+
+const sortByCount = (a,b) => {
+    if (a.count > b.count)
+        return -1;
+    if (a.count < b.count)
+        return 1;
+    return 0;
+};
 
 function propertyNames(obj, array, stack) {
     if (!obj) {

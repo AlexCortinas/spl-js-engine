@@ -39,6 +39,15 @@ export function cli() {
         productJson = readJsonFromFile(product);
     }
 
+    if (cli.input.indexOf('validate') != -1) {
+        validate(engine, productJson);
+    }
+
+    engine.generateProduct(output, productJson);
+    console.log(`Product generated at ${output}`);
+}
+
+function validate(engine, productJson) {
     const report = engine.analyseAnnotations();
     const featuresConsistency = report.checkAnnotatedFeaturesConsistency();
     const dataConsistency = report.checkAnnotatedDataConsistency(productJson);
@@ -63,6 +72,4 @@ export function cli() {
         console.log(dataConsistency);
         console.log('============================');
     }
-    engine.generateProduct(output, productJson);
-    console.log(`Product generated at ${output}`);
 }

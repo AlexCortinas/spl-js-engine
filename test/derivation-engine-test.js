@@ -193,3 +193,25 @@ test('Consistency results for complex data', () => {
         { errors: 0, warnings: 0, abound: [], missing: [] }
     );
 });
+
+suite('Analysis tools');
+
+test('Get files with more features involved', () => {
+    const engine = new DerivationEngine(
+        'examples/GPL/GraphProductLine',
+        readJsonFromFile('examples/GPL/model.json'),
+        readJsonFromFile('examples/GPL/config.yaml')
+    );
+
+    const report = engine.analyseAnnotations();
+
+    // TODO make a properly test
+    report.short();
+    report.long();
+    report.filesByFeature('weighted');
+    report.filesByFeatureLong('weighted', true);
+    report.featuresByFile('src/gpl/graph/Graph.java', true);
+    report.filesByData('asdf');
+    report.listFeatures(true);
+    report.listFiles(true);
+});
