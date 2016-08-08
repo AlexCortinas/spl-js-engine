@@ -7,7 +7,7 @@ export default class Processor extends DelimiterAwareEntity {
         this.data = data;
     }
 
-    process(str, ext) {
+    process(str, ext, context) {
         let code = 'var lines = [];\n';
         let cursor = 0;
         let match;
@@ -28,11 +28,11 @@ export default class Processor extends DelimiterAwareEntity {
         // eliminating superfluous spaces
         code = (code + 'return lines.join("");').replace(/[\r\t\n]/g, '');
 
-        return new Function('feature', 'data', code)(this.features, this.data);
+        return new Function('feature', 'data', 'context', code)(this.features, this.data, context);
     }
 }
 // first we escape the \ symbols in the text. Then we focus on special cases
-// that need to be escaped. 
+// that need to be escaped.
 const _textLine = line => 'lines.push("'.concat(line
         .replace(/\\/g,  '\\\\')                  // \ -> \\
         .replace(/\n/g, '\\n')                    // line feed \n -> \n
