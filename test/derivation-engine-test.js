@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { DerivationEngine, readJsonFromFile } from '../src/index';
+import { DerivationEngine, readJsonFromFile, readFile} from '../src/index';
 
 import {
     getTestPath as p, removeTmpFolder,
@@ -214,4 +214,21 @@ test('Get files with more features involved', () => {
     report.filesByData('asdf');
     report.listFeatures(true);
     report.listFiles(true);
+});
+
+suite('Generation of files');
+
+test('From list of strings with nesting', () => {
+    const engine = new DerivationEngine(
+        p('spl-generate/code'),
+        readJsonFromFile(p('spl-generate/model.yaml')),
+        readJsonFromFile(p('spl-generate/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('spl-generate/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('spl-generate/expected'), p('tmp/simpleProduct'));
 });
