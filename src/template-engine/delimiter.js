@@ -25,6 +25,13 @@ export default class Delimiter {
             '])+?)' +
             _escapeRegExpStr(this.end),'g');
 
+        this.header = new RegExp('^' +
+            _escapeRegExpStr(this.start) +
+            '@(([^' +
+            _escapeRegExpStr(this.end) +
+            '])+?)' +
+            _escapeRegExpStr(this.end),'g');
+
         this.js = _jsExpression;
         this.feature = _featureExpression;
         this.data = _dataExpression;
