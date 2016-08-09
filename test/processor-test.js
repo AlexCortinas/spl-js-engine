@@ -96,6 +96,17 @@ test('process bower.json to set the name', () => {
     );
 });
 
+test('process testing normalizer', () => {
+    const te = new TemplateEngine();
+    const p = te.createProcessor();
+
+    assert.strictEqual(p.process('/*%= normalize("asdf") %*/'), 'asdf');
+    assert.strictEqual(p.process('/*%= normalize("asdf asdf") %*/'), 'asdfAsdf');
+    assert.strictEqual(p.process('/*%= normalize("España") %*/'), 'espana');
+    assert.strictEqual(p.process('/*%= normalize("María") %*/'), 'maria');
+    assert.strictEqual(p.process('/*%= normalize("María _  José") %*/'), 'mariaJose');
+});
+
 suite('TemplateEngine process custom delimiters');
 
 test('process text with custom delimiters', () => {
