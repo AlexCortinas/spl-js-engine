@@ -1,6 +1,6 @@
-import DelimiterAwareEntity from './delimiter-aware-entity.js';
+import Engine from './engine.js';
 
-export default class Processor extends DelimiterAwareEntity {
+export default class Processor extends Engine {
     constructor(features = {}, data = {}, delimiters = {}) {
         super(delimiters);
         this.features = features;
@@ -8,17 +8,7 @@ export default class Processor extends DelimiterAwareEntity {
     }
 
     process(str, ext, context) {
-        let code = `
-            function normalize(str) {
-                return str
-                    .normalize('NFKD').replace(/[\u0300-\u036F]/g, '')
-                    .replace( /[-_]+/g, ' ')
-                    .replace(/[^\\w\\s]/gi, '')
-                    .replace(/\\s(.)/g, function($1) { return $1.toUpperCase(); })
-                    .replace(/\\s/g, '')
-                    .replace(/^(.)/, function($1) { return $1.toLowerCase(); });
-            }\n
-            var lines = [];\n`;
+        let code = this.getTemplateHelperMethods() + 'var lines = [];\n';
         let cursor = 0;
         let match;
         const delimiter = this.getDelimiter(ext).regular;
