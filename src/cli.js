@@ -22,17 +22,12 @@ export function cli() {
         process.exit(0);
     }
 
-    let featureModelJson = readJsonFromFile(featureModel);
-    if (!featureModelJson) {
-        featureModelJson = readFile(featureModel);
-    }
-
     let configJson = {};
     if (config) {
         configJson = readJsonFromFile(config);
     }
 
-    const engine = new DerivationEngine(code, featureModelJson, configJson);
+    const engine = new DerivationEngine(code, readFile(featureModel), configJson);
 
     let productJson = {};
     if (product) {

@@ -32,10 +32,15 @@ export default class DerivationEngine {
     setFeatureModel(featureModel) {
         if (!featureModel) throw 'feature model must be provided';
 
-        if (typeof featureModel == 'string')
-            this.featureModel = FeatureModel.fromXml(featureModel);
-        else
+        if (typeof featureModel == 'object') {
             this.featureModel = FeatureModel.fromJson(featureModel);
+        } else {
+            try {
+                this.featureModel = FeatureModel.fromJson(JSON.parse(featureModel));
+            } catch (e) {
+                this.featureModel = FeatureModel.fromXml(featureModel);
+            }
+        }
 
         this.featureModel.validateFeatureModel();
     }
