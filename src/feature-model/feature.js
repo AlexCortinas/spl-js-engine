@@ -71,6 +71,20 @@ export default class Feature {
             .pop();
     }
 
+    ///////////////////////
+    // Getting Features  //
+    ///////////////////////
+
+    getFeatures() {
+        if (this.features.length == 0) {
+            return this.name;
+        }
+
+        const ret = {};
+        ret[this.name] = this.features.map(el => el.getFeatures());
+        return ret;
+    }
+
     ///////////////////////////
     // String Representation //
     ///////////////////////////

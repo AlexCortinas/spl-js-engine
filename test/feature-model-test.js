@@ -580,6 +580,25 @@ test('testing xml parsing with constraints', () => {
     assert.deepEqual(fm.toJson(), expected.toJson());
 });
 
+suite('#FeatureModel Get Features:');
+
+test('getting all features', () => {
+    const fm = _createMyCalculatorFM();
+
+    assert.deepEqual(
+        fm.getFeatures(),
+        { 'MyCalculator': [ {
+            'Base': [ {
+                'Operations': [ 'Add', 'Subtract', 'Multiply', 'Divide' ]
+              }, {
+                'Capabilities': [ 'Decimal' ]
+              }
+            ]
+          } ]
+        }
+    );
+});
+
 function _createMyCalculatorFM() {
     const fm = new FeatureModel('MyCalculator');
     const base = fm.and({name: 'Base', mandatory: true});
