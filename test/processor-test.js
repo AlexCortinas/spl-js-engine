@@ -96,7 +96,7 @@ test('process bower.json to set the name', () => {
     );
 });
 
-test('process testing normalizer', () => {
+test.only('process testing normalizer', () => {
     const te = new TemplateEngine();
     const p = te.createProcessor();
 
@@ -105,6 +105,8 @@ test('process testing normalizer', () => {
     assert.strictEqual(p.process('/*%= normalize("España") %*/'), 'espana');
     assert.strictEqual(p.process('/*%= normalize("María") %*/'), 'maria');
     assert.strictEqual(p.process('/*%= normalize("María _  José") %*/'), 'mariaJose');
+    assert.strictEqual(p.process('/*%= normalize("España", true) %*/'), 'Espana');
+
 });
 
 suite('TemplateEngine process custom delimiters');
