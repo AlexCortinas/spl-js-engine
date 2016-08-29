@@ -196,6 +196,9 @@ test('Consistency results for complex data', () => {
 
 suite('Analysis tools');
 
+beforeEach(removeTmpFolder);
+afterEach(removeTmpFolder);
+
 test('Get files with more features involved', () => {
     const engine = new DerivationEngine(
         'examples/GPL/GraphProductLine',
@@ -218,6 +221,9 @@ test('Get files with more features involved', () => {
 
 suite('Generation of files');
 
+beforeEach(removeTmpFolder);
+afterEach(removeTmpFolder);
+
 test('From list of strings with nesting', () => {
     const engine = new DerivationEngine(
         p('spl-generate/code'),
@@ -231,4 +237,34 @@ test('From list of strings with nesting', () => {
     );
 
     assertEqualFilesInFolders(p('spl-generate/expected'), p('tmp/simpleProduct'));
+});
+
+test('Create folder', () => {
+    const engine = new DerivationEngine(
+        p('spl-generate-folder/code'),
+        readJsonFromFile(p('spl-generate-folder/model.yaml')),
+        readJsonFromFile(p('spl-generate-folder/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('spl-generate-folder/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('spl-generate-folder/expected'), p('tmp/simpleProduct'));
+});
+
+test('Checking escape of first character of end delimiter', () => {
+    const engine = new DerivationEngine(
+        p('spl-generate-escape/code'),
+        readJsonFromFile(p('spl-generate-escape/model.yaml')),
+        readJsonFromFile(p('spl-generate-escape/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('spl-generate-escape/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('spl-generate-escape/expected'), p('tmp/simpleProduct'));
 });

@@ -15,22 +15,28 @@ export default class Delimiter {
         this.regular = new RegExp('(([ \\r\\t])+\|\\n\|^)' +
             _escapeRegExpStr(this.start) +
             '([^=])(([^' +
-            _escapeRegExpStr(this.end) +
-            '])+?)' +
+            _escapeRegExpStr(this.end[0]) +
+            ']|\\\\' +
+            _escapeRegExpStr(this.end[0]) +
+            ')+?)' +
             _escapeRegExpStr(this.end) +
             '\\n\|' +
             _escapeRegExpStr(this.start) +
             '(([^' +
-            _escapeRegExpStr(this.end) +
-            '])+?)' +
-            _escapeRegExpStr(this.end),'g');
+            _escapeRegExpStr(this.end[0]) +
+            ']|\\\\' +
+            _escapeRegExpStr(this.end[0]) +
+            ')+?)' +
+            _escapeRegExpStr(this.end), 'g');
 
         this.header = new RegExp('^' +
             _escapeRegExpStr(this.start) +
             '@(([^' +
-            _escapeRegExpStr(this.end) +
-            '])+?)' +
-            _escapeRegExpStr(this.end),'g');
+            _escapeRegExpStr(this.end[0]) +
+            ']|\\\\' +
+            _escapeRegExpStr(this.end[0]) +
+            ')+?)' +
+            _escapeRegExpStr(this.end), 'g');
 
         this.js = _jsExpression;
         this.feature = _featureExpression;

@@ -8,6 +8,10 @@ Software Product Line JavaScript Derivation Engine
 * `npm test`: Run all test.
 * `spl-js-engine help`: Usage page.
 
+## Annotations
+
+* The first character of the end delimiter has to be escaped in anotations with the character \\.
+
 ## Examples
 
 ### My Calculator

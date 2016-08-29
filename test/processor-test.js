@@ -183,6 +183,16 @@ test('simple data', () => {
     );
 });
 
+test('simple data escaping first character of end delimiter', () => {
+    const te = new TemplateEngine();
+    const p = te.createProcessor({}, { property: 'asdf' });
+
+    assert.strictEqual(
+        p.process('/*%= data.property + "\\%" %*/'),
+        'asdf%'
+    );
+});
+
 test('nested data', () => {
     const te = new TemplateEngine();
     const p = te.createProcessor({}, { property: { one: 'one', two: 'two' } });
@@ -205,7 +215,23 @@ test('for loop', () => {
 
     assert.strictEqual(
         p.process(f('template-engine/for-loop.js')),
-        'one: 1,\ntwo: 2'
+        'one: 1,\ntwo: 2\n'
+    );
+});
+
+test('for loop escaping first character of end delimiter', () => {
+    const te = new TemplateEngine();
+    const p = te.createProcessor({}, {
+        property: [ {
+            name: 'one', value: 1
+        }, {
+            name: 'two', value: 2
+        }
+    ]});
+
+    assert.strictEqual(
+        p.process(f('template-engine/for-loop-escaped.js')),
+        'one%: 1,\ntwo%: 2\n'
     );
 });
 
