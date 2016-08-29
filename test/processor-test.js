@@ -96,7 +96,7 @@ test('process bower.json to set the name', () => {
     );
 });
 
-test.only('process testing normalizer', () => {
+test('process testing normalizer', () => {
     const te = new TemplateEngine();
     const p = te.createProcessor();
 
