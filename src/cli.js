@@ -11,6 +11,7 @@ export function cli() {
         product,
         config,
         code,
+        js,
         output = 'output'
     } = cli.flags;
 

@@ -10,10 +10,10 @@ const _fileName = f => path.basename(f);
 const _dir = f => path.dirname(f);
 
 export default class DerivationEngine {
-    constructor(codePath, featureModel, config) {
+    constructor(codePath, featureModel, config, extraJS) {
         this.featureModel = null;
         this.ignore = [];
-        this.templateEngine = new TemplateEngine();
+        this.templateEngine = new TemplateEngine({}, extraJS);
 
         if (!codePath) {
             throw 'Code path is required to create a Derivation Engine';
@@ -26,6 +26,10 @@ export default class DerivationEngine {
 
         if (config) {
             this.setConfig(config);
+        }
+
+        if (extraJS) {
+            this.extraJS = extraJS;
         }
     }
 

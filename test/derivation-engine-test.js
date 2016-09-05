@@ -57,6 +57,21 @@ test('Create a product with data', () => {
         p('simpleSPLwithData/expected'), p('tmp/simpleProduct'));
 });
 
+test('Create a product and use some extra js function', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwithExtraJS/code'),
+        readJsonFromFile(p('simpleSPLwithExtraJS/model.yaml')),
+        readJsonFromFile(p('simpleSPLwithExtraJS/config.yaml')),
+        readFile(p('simpleSPLwithExtraJS/js.js'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('simpleSPLwithExtraJS/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('simpleSPLwithExtraJS/expected'), p('tmp/simpleProduct'));
+});
 
 test('Get features and parameters of an annotated project', () => {
     const engine = new DerivationEngine(p('simpleSPLwithData/code'));

@@ -1,11 +1,12 @@
 import Delimiter from './delimiter.js';
 
 export default class Engine {
-    constructor(delimiters = {}) {
+    constructor(delimiters = {}, extraJS = '') {
         this.delimiters = delimiters;
         if (!this.delimiters.default) {
             this.delimiters.default = new Delimiter();
         }
+        this.extraJS = extraJS;
     }
 
     getDelimiter(extension = 'default') {
@@ -24,6 +25,10 @@ export default class Engine {
                         .replace(/\\s(.)/g, function($1) { return $1.toUpperCase(); })
                         .replace(/\\s/g, '')
                         .replace(/^(.)/, function($1) { return upper ? $1.toUpperCase() : $1.toLowerCase(); });
-                }\n`;
+                }\n
+                function log(str) {
+                    console.log(str);
+                }\n
+                ${this.extraJS}`;
     }
 }

@@ -1,8 +1,8 @@
 import Engine from './engine.js';
 
 export default class FileGenerator extends Engine {
-    constructor(features = {}, data = {}, delimiters = {}) {
-        super(delimiters);
+    constructor(features = {}, data = {}, delimiters = {}, extraJS = '') {
+        super(delimiters, extraJS);
         this.features = features;
         this.data = data;
     }
