@@ -1,0 +1,6 @@
+ignore:
+delimiters:
+  - extension:
+    - txt
+    start: "/*%"
+    end: "%*/"

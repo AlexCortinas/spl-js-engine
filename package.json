@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/AlexCortinas/spl-js-engine#readme",
   "name": "spl-js-engine",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AlexCortinas/spl-js-engine.git"

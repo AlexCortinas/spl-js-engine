@@ -1,6 +1,6 @@
-import DelimiterAwareEntity from './delimiter-aware-entity.js';
+import Engine from './engine.js';
 
-export default class Analyser extends DelimiterAwareEntity {
+export default class Analyser extends Engine {
     constructor(delimiters = {}) {
         super(delimiters);
     }

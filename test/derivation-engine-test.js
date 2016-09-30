@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { DerivationEngine, readJsonFromFile } from '../src/index';
+import { DerivationEngine, readJsonFromFile, readFile} from '../src/index';
 
 import {
     getTestPath as p, removeTmpFolder,
@@ -57,6 +57,21 @@ test('Create a product with data', () => {
         p('simpleSPLwithData/expected'), p('tmp/simpleProduct'));
 });
 
+test('Create a product and use some extra js function', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwithExtraJS/code'),
+        readJsonFromFile(p('simpleSPLwithExtraJS/model.yaml')),
+        readJsonFromFile(p('simpleSPLwithExtraJS/config.yaml')),
+        readFile(p('simpleSPLwithExtraJS/js.js'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('simpleSPLwithExtraJS/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('simpleSPLwithExtraJS/expected'), p('tmp/simpleProduct'));
+});
 
 test('Get features and parameters of an annotated project', () => {
     const engine = new DerivationEngine(p('simpleSPLwithData/code'));
@@ -196,6 +211,9 @@ test('Consistency results for complex data', () => {
 
 suite('Analysis tools');
 
+beforeEach(removeTmpFolder);
+afterEach(removeTmpFolder);
+
 test('Get files with more features involved', () => {
     const engine = new DerivationEngine(
         'examples/GPL/GraphProductLine',
@@ -214,4 +232,54 @@ test('Get files with more features involved', () => {
     report.filesByData('asdf');
     report.listFeatures(true);
     report.listFiles(true);
+});
+
+suite('Generation of files');
+
+beforeEach(removeTmpFolder);
+afterEach(removeTmpFolder);
+
+test('From list of strings with nesting', () => {
+    const engine = new DerivationEngine(
+        p('spl-generate/code'),
+        readJsonFromFile(p('spl-generate/model.yaml')),
+        readJsonFromFile(p('spl-generate/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('spl-generate/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('spl-generate/expected'), p('tmp/simpleProduct'));
+});
+
+test('Create folder', () => {
+    const engine = new DerivationEngine(
+        p('spl-generate-folder/code'),
+        readJsonFromFile(p('spl-generate-folder/model.yaml')),
+        readJsonFromFile(p('spl-generate-folder/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('spl-generate-folder/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('spl-generate-folder/expected'), p('tmp/simpleProduct'));
+});
+
+test('Checking escape of first character of end delimiter', () => {
+    const engine = new DerivationEngine(
+        p('spl-generate-escape/code'),
+        readJsonFromFile(p('spl-generate-escape/model.yaml')),
+        readJsonFromFile(p('spl-generate-escape/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('spl-generate-escape/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('spl-generate-escape/expected'), p('tmp/simpleProduct'));
 });

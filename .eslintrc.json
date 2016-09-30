@@ -28,7 +28,7 @@
     "no-console": 0,
     "max-len": [
         "warn",
-        80,
+        120,
         4
     ]
   }
