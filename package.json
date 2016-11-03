@@ -39,9 +39,9 @@
     "url": "git+https://github.com/AlexCortinas/spl-js-engine.git"
   },
   "scripts": {
-    "test": "mocha --ui qunit --compilers js:babel-register",
-    "eslint": "eslint src/** test/** || exit 0",
-    "build": "babel src --out-dir dist",
+    "test": "node ./node_modules/.bin/mocha --ui qunit --compilers js:babel-register",
+    "eslint": "node ./node_modules/.bin/eslint src/** test/** || exit 0",
+    "build": "node ./node_modules/.bin/babel src --out-dir dist",
     "prepublish": "npm run build"
   },
   "version": "0.1.0"
