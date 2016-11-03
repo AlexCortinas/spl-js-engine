@@ -28,7 +28,7 @@ export function cli() {
         configJson = readJsonFromFile(config);
     }
 
-    const engine = new DerivationEngine(code, readFile(featureModel), configJson);
+    const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(js));
 
     let productJson = {};
     if (product) {
