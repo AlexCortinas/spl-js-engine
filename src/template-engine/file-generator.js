@@ -7,18 +7,19 @@ export default class FileGenerator extends Engine {
         this.data = data;
     }
 
-    filesToCreate(fileContent, extension, fileName, context) {
+    filesToCreate(fileContent, extension, fileName, basePath, context) {
         const delimiter = this.getDelimiter(extension).header;
         const match = delimiter.exec(fileContent);
 
         if (!match) {
-            return [ { fileContent, fileName, context } ];
+            return [ { fileContent, fileName, basePath, context } ];
         } else {
-            const f = new Function('feature', 'data', 'fileName', 'context',
+            const f = new Function('feature', 'data', 'fileName', 'basePath', 'context',
                 this.getTemplateHelperMethods() + match[1]);
-            const fresults = f(this.features, this.data, fileName, context);
+            const fresults = f(this.features, this.data, fileName, basePath, context);
             const newFileContent = fileContent.replace(delimiter, '').replace(/^[\n\r\t]/, '');
-            return flatten(fresults.map(r => this.filesToCreate(newFileContent, extension, r.fileName, r.context)));
+            return flatten(fresults.map(
+                r => this.filesToCreate(newFileContent, extension, r.fileName, r.basePath, r.context)));
         }
     }
 }

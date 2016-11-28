@@ -93,7 +93,7 @@ export default class DerivationEngine {
 
             fileContent = readFile(fPath);
             fileGenerator
-                .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), {})
+                .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), outputPath, {})
                 .forEach(r => {
                     writeFile(
                         _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName,
