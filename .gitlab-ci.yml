@@ -3,3 +3,5 @@ image: node:7.3.0
 all_tests:
   script:
     - npm install
+  only:
+    - master
