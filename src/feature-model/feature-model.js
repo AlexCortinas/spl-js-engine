@@ -249,7 +249,7 @@ function _validateAltFeaturesFromSelection(selectedFeatures) {
         });
 
     // checking if mandatory xor/or feature has no child selected
-    features.filter(f1 => f1.mandatory)
+    features.filter(f1 => f1.mandatory || selectedFeatures.indexOf(f1.name) != -1)
         .filter(f1 => f1.type === TYPE.XOR || f1.type === TYPE.OR)
         .forEach(f1 => {
             if (features.filter(f2 => f2.parent === f1).length < 1)

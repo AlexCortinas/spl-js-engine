@@ -354,6 +354,19 @@ test('Should throw an exception for not xor option selected on mandatory ' +
     }, /missing child feature selected for mandatory XOR feature fand/);
 });
 
+test('Should throw an exception for not or option selected on mandatory ' +
+    'one', () => {
+
+    const fm = new FeatureModel('fm');
+
+    fm.and(['featureA', {name: 'featureB', mandatory: false}]);
+    fm.get('featureB').or(['sonA', 'sonB']);
+
+    assert.throws(() => {
+        fm.completeFeatureSelection(['featureB']);
+    }, /missing child feature selected for mandatory OR feature featureB/);
+});
+
 //Lista de Constraints de FeatureIDE:
 //  * [Feature]
 //  * Not
