@@ -7,7 +7,7 @@ import {
     assertEqualFilesInFolders
 } from './test-utils';
 
-suite('Derivation Engine');
+suite('#DerivationEngine');
 
 beforeEach(removeTmpFolder);
 afterEach(removeTmpFolder);
@@ -209,7 +209,37 @@ test('Consistency results for complex data', () => {
     );
 });
 
-suite('Analysis tools');
+test('Checking "binarity" of unknown extensions not in config', () => {
+    const engine = new DerivationEngine(
+        p('checkBinary/code'),
+        readJsonFromFile(p('checkBinary/model.yaml')),
+        readJsonFromFile(p('checkBinary/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/checkBinary'),
+        readJsonFromFile(p('checkBinary/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('checkBinary/expected'), p('tmp/checkBinary'));
+});
+
+test('Avoid checking "binarity" of extensions in config', () => {
+    const engine = new DerivationEngine(
+        p('checkBinary/code'),
+        readJsonFromFile(p('checkBinary/model.yaml')),
+        readJsonFromFile(p('checkBinary/config-including.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/checkBinary'),
+        readJsonFromFile(p('checkBinary/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('checkBinary/expected-including'), p('tmp/checkBinary'));
+});
+
+suite('#DerivationEngine: Analysis tools');
 
 beforeEach(removeTmpFolder);
 afterEach(removeTmpFolder);
@@ -234,7 +264,7 @@ test('Get files with more features involved', () => {
     report.listFiles(true);
 });
 
-suite('Generation of files');
+suite('#DerivationEngine: Generation of files');
 
 beforeEach(removeTmpFolder);
 afterEach(removeTmpFolder);

@@ -24,6 +24,16 @@ test('process static templates', () => {
     );
 });
 
+test('process binary file', () => {
+    const te = new TemplateEngine();
+    const p = te.createProcessor();
+
+    assert.strictEqual(
+        p.process(f('template-engine/binary.png')),
+        f('template-engine/binary.png')
+    );
+});
+
 test('process static file templates', () => {
     const te = new TemplateEngine();
     const p = te.createProcessor();
