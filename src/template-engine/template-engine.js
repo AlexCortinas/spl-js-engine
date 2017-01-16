@@ -27,4 +27,8 @@ export default class TemplateEngine {
     addDelimiter(type, start, end) {
         this.delimiters[type] = new Delimiter(start, end);
     }
+
+    delimiterFor(extension) {
+        return this.delimiters[extension];
+    }
 }

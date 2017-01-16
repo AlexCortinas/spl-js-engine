@@ -83,7 +83,7 @@ export default class DerivationEngine {
         walkDir(this.codePath, (fPath, isFolder) => {
             if (isFolder) return;
 
-            if (!isTextOrBinary.isTextSync(fPath)) {
+            if (!this.fileIsText(fPath)) {
                 writeFile(
                         fPath.replace(this.codePath, outputPath),
                         readFile(fPath, true)
@@ -108,7 +108,7 @@ export default class DerivationEngine {
 
         walkDir(this.codePath, (fPath, isFolder) => {
             if (!isFolder) {
-                if (isTextOrBinary.isTextSync(fPath)) {
+                if (this.fileIsText(fPath)) {
                     report.addAnalysis(
                         fPath.replace(`${this.codePath}${path.sep}`, ''),
                         analyser.analyse(readFile(fPath), _extension(fPath))
@@ -118,5 +118,9 @@ export default class DerivationEngine {
         }, this.ignore);
 
         return report;
+    }
+
+    fileIsText(fPath) {
+        return this.templateEngine.delimiterFor(_extension(fPath)) || isTextOrBinary.isTextSync(fPath);
     }
 }
