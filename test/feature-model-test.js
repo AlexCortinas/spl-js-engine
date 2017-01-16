@@ -415,20 +415,6 @@ test('Should get the features properly since the constraint is met', () => {
     );
 });
 
-test('Should throw an exception for not adding the second feature of an ' +
-    'and constraint', () => {
-
-    const fm = _createMyCalculatorFM();
-
-    fm.addConstraint(
-        fm.constraint('Add').and(fm.constraint('Subtract'))
-    );
-
-    assert.throws(() => {
-        fm.completeFeatureSelection(['Add']);
-    }, /Constraints \(Add AND Subtract\) not met/);
-});
-
 test('Should get the features properly since the constraint is met', () => {
     const fm = _createMyCalculatorFM();
     const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
@@ -440,20 +426,6 @@ test('Should get the features properly since the constraint is met', () => {
     allSelected = fm.completeFeatureSelection(['Add', 'Subtract']);
 
     assert.deepEqual(allSelected.sort(), expected.sort());
-});
-
-test('Should throw an exception for not adding the second feature of an ' +
-    'implication constraint', () => {
-
-    const fm = _createMyCalculatorFM();
-
-    fm.addConstraint(
-        fm.constraint('Add').implies(fm.constraint('Subtract'))
-    );
-
-    assert.throws(() => {
-        fm.completeFeatureSelection(['Add']);
-    }, /Constraints \(Add => Subtract\) not met/);
 });
 
 test('Should get the features properly since the first part of the ' +
@@ -468,32 +440,6 @@ test('Should get the features properly since the first part of the ' +
     assert.doesNotThrow(() => {
         fm.completeFeatureSelection();
     });
-});
-
-test('testing iff will throw exception', () => {
-    const fm = _createMyCalculatorFM();
-
-    fm.addConstraint(
-        fm.constraint('Add').implies(fm.constraint('Subtract'))
-            .iff(fm.constraint('Decimal'))
-    );
-
-    assert.throws(() => {
-        fm.completeFeatureSelection(['Add', 'Decimal']);
-    }, /Constraints \(\(Add => Subtract\) <=> Decimal\) not met/);
-});
-
-test('testing iff will throw exception [2]', () => {
-    const fm = _createMyCalculatorFM();
-
-    fm.addConstraint(
-        fm.constraint('Add').implies(fm.constraint('Subtract'))
-            .iff(fm.constraint('Decimal'))
-    );
-
-    assert.throws(() => {
-        fm.completeFeatureSelection(['Add', 'Subtract']);
-    }, /Constraints \(\(Add => Subtract\) <=> Decimal\) not met/);
 });
 
 test('testing iff will pass', () => {
@@ -593,6 +539,109 @@ test('testing xml parsing with constraints', () => {
     assert.deepEqual(fm.toJson(), expected.toJson());
 });
 
+suite('#FeatureModel: constraint expansion');
+
+test('implication expand', () => {
+    const expected = ['fm', 'featureA', 'featureB'];
+
+    const fm = new FeatureModel('fm');
+    fm.and(['featureA', 'featureB']);
+    fm.addConstraint(
+        fm.constraint('featureA').implies(fm.constraint('featureB')));
+
+    assert.deepEqual(fm.completeFeatureSelection(['featureA']).sort(), expected.sort());
+});
+
+test('Should not throw an exception for not adding the second feature of an ' +
+    'implication constraint since it is expanded', () => {
+
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
+
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+    );
+
+    assert.deepEqual(
+        fm.completeFeatureSelection(['Add']).sort(),
+        expected.sort()
+    );
+});
+
+test('testing iff will not throw exception since it is expanded', () => {
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract', 'Decimal', 'Capabilities'];
+
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+            .iff(fm.constraint('Decimal'))
+    );
+
+    assert.deepEqual(
+        fm.completeFeatureSelection(['Add', 'Decimal']).sort(),
+        expected.sort()
+    );
+});
+
+test('iff expand', () => {
+    const expected = ['fm', 'featureA', 'featureB'];
+
+    const fm = new FeatureModel('fm');
+    fm.and(['featureA', 'featureB']);
+    fm.addConstraint(
+        fm.constraint('featureA').iff(fm.constraint('featureB')));
+
+    assert.deepEqual(fm.completeFeatureSelection(['featureA']).sort(), expected.sort());
+    assert.deepEqual(fm.completeFeatureSelection(['featureB']).sort(), expected.sort());
+});
+
+test('testing iff will not throw exception since it is expanded [2]', () => {
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract', 'Decimal', 'Capabilities'];
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').implies(fm.constraint('Subtract'))
+            .iff(fm.constraint('Decimal'))
+    );
+
+    assert.deepEqual(
+        fm.completeFeatureSelection(['Add', 'Subtract']).sort(),
+        expected.sort()
+    );
+});
+
+test('and expand', () => {
+    const expected = ['fm', 'featureA', 'featureB'];
+
+    const fm = new FeatureModel('fm');
+    fm.and(['featureA', 'featureB']);
+    fm.addConstraint(
+        fm.constraint('featureA').and(fm.constraint('featureB')));
+
+    assert.deepEqual(fm.completeFeatureSelection([]).sort(), expected.sort());
+    assert.deepEqual(fm.completeFeatureSelection(['featureA']).sort(), expected.sort());
+    assert.deepEqual(fm.completeFeatureSelection(['featureB']).sort(), expected.sort());
+});
+
+test('Should not throw an exception for not adding the second feature of an ' +
+    'and constraint since it is expanded', () => {
+
+    const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
+
+    const fm = _createMyCalculatorFM();
+
+    fm.addConstraint(
+        fm.constraint('Add').and(fm.constraint('Subtract'))
+    );
+
+    assert.deepEqual(
+        fm.completeFeatureSelection(['Add']).sort(),
+        expected.sort()
+    );
+});
+
 suite('#FeatureModel Get Features:');
 
 test('getting all features', () => {
@@ -603,12 +652,10 @@ test('getting all features', () => {
         { 'MyCalculator': [ {
             'Base': [ {
                 'Operations': [ 'Add', 'Subtract', 'Multiply', 'Divide' ]
-              }, {
+            }, {
                 'Capabilities': [ 'Decimal' ]
-              }
-            ]
-          } ]
-        }
+            } ]
+        } ] }
     );
 });
 
