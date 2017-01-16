@@ -213,6 +213,14 @@ class AndConstraint extends BinaryConstraint {
     }
 
     evaluate(helper) {
+        if (!this.first.evaluate(helper) && this.first.constructor.name == 'FeatureConstraint') {
+            helper.add(this.first.toString());
+        }
+
+        if (!this.second.evaluate(helper) && this.second.constructor.name == 'FeatureConstraint') {
+            helper.add(this.second.toString());
+        }
+
         return this.first.evaluate(helper) && this.second.evaluate(helper);
     }
 
@@ -263,8 +271,18 @@ class ImplicationConstraint extends BinaryConstraint {
     evaluate(helper) {
         const equivalentConstraint =
             new OrConstraint(new NegatedConstraint(this.first), this.second);
+        let result = equivalentConstraint.evaluate(helper);
 
-        return equivalentConstraint.evaluate(helper);
+        if (!result) {
+            if (this.first.evaluate(helper)) {
+                if (this.second.constructor.name == 'FeatureConstraint') {
+                    helper.add(this.second.toString());
+                }
+                result = equivalentConstraint.evaluate(helper);
+            }
+        }
+
+        return result;
     }
 
     static fromJson(json) {
@@ -289,7 +307,10 @@ class IffConstraint extends BinaryConstraint {
 
     evaluate(helper) {
         const equivalentConstraint =
-            new NegatedConstraint(new XorConstraint(this.first, this.second));
+            new AndConstraint(
+                new ImplicationConstraint(this.first, this.second),
+                new ImplicationConstraint(this.second, this.first)
+            );
 
         return equivalentConstraint.evaluate(helper);
     }

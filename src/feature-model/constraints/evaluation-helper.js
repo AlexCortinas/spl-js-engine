@@ -13,6 +13,10 @@ export default class EvaluationHelper {
         return this._added.has(featureName);
     }
 
+    add(featureName) {
+        this._added.add(featureName);
+    }
+
     get added() {
         return [...this._added];
     }
