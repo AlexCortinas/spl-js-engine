@@ -313,3 +313,18 @@ test('Checking escape of first character of end delimiter', () => {
 
     assertEqualFilesInFolders(p('spl-generate-escape/expected'), p('tmp/simpleProduct'));
 });
+
+test('Omitting empty files', () => {
+    const engine = new DerivationEngine(
+        p('simpleSPLwithEmptyFiles/code'),
+        readJsonFromFile(p('simpleSPLwithEmptyFiles/model.yaml')),
+        readJsonFromFile(p('simpleSPLwithEmptyFiles/config.yaml'))
+    );
+
+    engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('simpleSPLwithEmptyFiles/product.yaml'))
+    );
+
+    assertEqualFilesInFolders(p('simpleSPLwithEmptyFiles/expected'), p('tmp/simpleProduct'));
+});
