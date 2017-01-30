@@ -1,16 +1,17 @@
 # spl-js-engine
 Software Product Line JavaScript Derivation Engine
 
+## Requirements
+
+* Node (> v6.9.4)
+* NPM (> 3.10.10)
+
 ## Instructions
 
 * `npm install`: Installation.
-* `npm link`: Globally link the client so `spl-js-engine` can be run.
+* `[sudo] npm link`: Globally link the client so `spl-js-engine` can be run.
 * `npm test`: Run all test.
 * `spl-js-engine help`: Usage page.
-
-## Annotations
-
-* The first character of the end delimiter has to be escaped in anotations with the character \\.
 
 ## Examples
 
