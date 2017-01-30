@@ -85,9 +85,9 @@ export default class DerivationEngine {
 
             if (!this.fileIsText(fPath)) {
                 writeFile(
-                        fPath.replace(this.codePath, outputPath),
-                        readFile(fPath, true)
-                    );
+                    fPath.replace(this.codePath, outputPath),
+                    readFile(fPath, true)
+                );
                 return;
             }
 
