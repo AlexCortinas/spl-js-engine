@@ -9,9 +9,6 @@
   "bin": {
     "spl-js-engine": "./dist/index.js"
   },
-  "bugs": {
-    "url": "https://github.com/AlexCortinas/spl-js-engine/issues"
-  },
   "dependencies": {
     "fs": "0.0.2",
     "istextorbinary": "^2.1.0",
@@ -31,13 +28,9 @@
     "mocha": "^2.4.5",
     "pretty-data": "^0.40.0"
   },
-  "homepage": "https://github.com/AlexCortinas/spl-js-engine#readme",
+  "license": "MIT",
   "name": "spl-js-engine",
   "main": "dist/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AlexCortinas/spl-js-engine.git"
-  },
   "scripts": {
     "test": "node ./node_modules/mocha/bin/mocha --ui qunit --compilers js:babel-register",
     "eslint": "node ./node_modules/eslint/bin/eslint src/** test/** || exit 0",
