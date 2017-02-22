@@ -1,7 +1,7 @@
 export default {
-    AND: 'AND',
-    OR: 'OR',
-    XOR: 'XOR',
-    ALT: 'ALT',
-    FEATURE: 'FEATURE'
+  AND: 'AND',
+  OR: 'OR',
+  XOR: 'XOR',
+  ALT: 'ALT',
+  FEATURE: 'FEATURE'
 };

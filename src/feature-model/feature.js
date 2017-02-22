@@ -1,226 +1,226 @@
 import TYPE from './feature-type';
 
 export default class Feature {
-    constructor(name, { mandatory = false, abstract = false }, parent = null) {
-        this.name = name;
-        this.mandatory = mandatory;
-        this.abstract = abstract;
-        this.parent = parent;
+  constructor(name, {mandatory = false, abstract = false}, parent = null) {
+    this.name = name;
+    this.mandatory = mandatory;
+    this.abstract = abstract;
+    this.parent = parent;
 
-        this.features = [];
-        this.type = TYPE.FEATURE;
+    this.features = [];
+    this.type = TYPE.FEATURE;
 
-        const featureModel = this.getFeatureModel();
-        if (featureModel !== this) {
-            if (featureModel.exists(name)){
-                throw `feature ${name} already exists`;
-            }
-            featureModel.addFeatureToFeatureList(name);
-        }
-
-        if (mandatory && this.parent &&
-            (this.parent.type === TYPE.XOR || this.parent.type === TYPE.OR)) {
-            // If the parent is an OR or XOR, this feature cannot be mandatory.
-            // At first, this was not taken into account, but FeatureIDE XML
-            // structure for feature models sets the optional and alternative
-            // features as mandatory.
-            // So, to prevent bigger issues, we check instead of just setting
-            // the mandatory property.
-            this.mandatory = false;
-        }
+    const featureModel = this.getFeatureModel();
+    if (featureModel !== this) {
+      if (featureModel.exists(name)) {
+        throw `feature ${name} already exists`;
+      }
+      featureModel.addFeatureToFeatureList(name);
     }
 
-    getFeatureModel() {
-        if (!this.parent) {
-            return this;
-        }
-        return this.parent.getFeatureModel();
+    if (mandatory && this.parent &&
+      (this.parent.type === TYPE.XOR || this.parent.type === TYPE.OR)) {
+      // If the parent is an OR or XOR, this feature cannot be mandatory.
+      // At first, this was not taken into account, but FeatureIDE XML
+      // structure for feature models sets the optional and alternative
+      // features as mandatory.
+      // So, to prevent bigger issues, we check instead of just setting
+      // the mandatory property.
+      this.mandatory = false;
+    }
+  }
+
+  getFeatureModel() {
+    if (!this.parent) {
+      return this;
+    }
+    return this.parent.getFeatureModel();
+  }
+
+  /////////////////////
+  // Adding Features //
+  /////////////////////
+  and(features) {
+    this.type = TYPE.AND;
+    return this::_add(features);
+  }
+
+  or(features) {
+    this.type = TYPE.OR;
+    return this::_add(features);
+  }
+
+  xor(features) {
+    this.type = TYPE.XOR;
+    return this::_add(features);
+  }
+
+  // Alternative is just another name for XOR
+  alt(features) {
+    this.xor(features);
+  }
+
+  get(featureName) {
+    if (_compareString(this.name, featureName)) {
+      return this;
     }
 
-    /////////////////////
-    // Adding Features //
-    /////////////////////
-    and(features) {
-        this.type = TYPE.AND;
-        return this::_add(features);
+    return this.features
+      .map(f => f.get(featureName))
+      .filter(f => f)
+      .pop();
+  }
+
+  ///////////////////////
+  // Getting Features  //
+  ///////////////////////
+
+  getFeatures() {
+    if (this.features.length == 0) {
+      return this.name;
     }
 
-    or(features) {
-        this.type = TYPE.OR;
-        return this::_add(features);
+    const ret = {};
+    ret[this.name] = this.features.map(el => el.getFeatures());
+    return ret;
+  }
+
+  ///////////////////////////
+  // String Representation //
+  ///////////////////////////
+  toString() {
+    let str = (this.abstract ? '_' : '') +
+      (this.mandatory ? '+' : '') +
+      this.name;
+
+    if (this.features.length > 0) {
+      str +=
+        ': { ' +
+        this.features.map(f => f.toString()).join(` ${this.type} `) +
+        ' }';
     }
 
-    xor(features) {
-        this.type = TYPE.XOR;
-        return this::_add(features);
+    return str;
+  }
+
+  ////////////////
+  // Validation //
+  ////////////////
+
+  validateFeature() {
+    const hasChildren = this.features.length !== 0;
+
+    if (!hasChildren) {
+      // Abstract feature cannot be leaf
+      if (this.abstract) {
+        throw 'abstract feature cannot be leaf';
+      }
+    } else {
+      // Validate all its children features
+      this.features.forEach(f => {
+        f.validateFeature();
+      });
     }
 
-    // Alternative is just another name for XOR
-    alt(features) {
-        this.xor(features);
+    if (this.type === TYPE.OR || this.type === TYPE.XOR) {
+      if (!hasChildren) {
+        throw 'OR and XOR features must have children';
+      } else {
+        this.features.forEach(function (f) {
+          if (f.mandatory) {
+            throw 'features with OR and XOR parent cannot be ' +
+            'mandatory';
+          }
+        });
+      }
+    }
+  }
+
+  /////////////////////////////
+  // Parsing and Loading XML //
+  /////////////////////////////
+
+  static fromXml(xml, parent, type) {
+    // parent[type] is parent.{and, or, xor},
+    // so we are creating a new child feature
+    const newFeature = parent[type](xml.attr);
+
+    // For each child feature of the new feature, we repeat the process
+    if (Array.isArray(xml.children)) {
+      xml.children.forEach(function (f) {
+        Feature.fromXml(f, newFeature, xml.name);
+      });
     }
 
-    get(featureName) {
-        if (_compareString(this.name, featureName)) {
-            return this;
-        }
+    return newFeature;
+  }
 
-        return this.features
-            .map(f => f.get(featureName))
-            .filter(f => f)
-            .pop();
+  toXml(parentNode) {
+    const type = this.type.toLowerCase();
+    const feature = parentNode.startElement(type);
+
+    feature.writeAttribute('name', this.name);
+    if (this.mandatory) {
+      feature.writeAttribute('mandatory', 'true');
+    }
+    if (this.abstract) {
+      feature.writeAttribute('abstract', 'true');
     }
 
-    ///////////////////////
-    // Getting Features  //
-    ///////////////////////
-
-    getFeatures() {
-        if (this.features.length == 0) {
-            return this.name;
-        }
-
-        const ret = {};
-        ret[this.name] = this.features.map(el => el.getFeatures());
-        return ret;
+    if (Array.isArray(this.features)) {
+      this.features.forEach(function (f) {
+        f.toXml(feature);
+      });
     }
 
-    ///////////////////////////
-    // String Representation //
-    ///////////////////////////
-    toString() {
-        let str = (this.abstract ? '_' : '') +
-            (this.mandatory ? '+' : '') +
-            this.name;
+    feature.endElement();
+  }
 
-        if (this.features.length > 0) {
-            str +=
-                ': { ' +
-                this.features.map(f => f.toString()).join(` ${this.type} `) +
-                ' }';
-        }
+  //////////////////////////////
+  // Parsing and Loading JSON //
+  //////////////////////////////
 
-        return str;
+  static fromJson(json, parent, type) {
+    // parent[type] is parent.{and, or, xor},
+    // so we are creating a new child feature
+    const newFeature = parent[type](json);
+
+    // For each child feature of the new feature, we repeat the process
+    if (Array.isArray(json.features)) {
+      json.features.forEach(function (v) {
+        Feature.fromJson(v, newFeature, json.type);
+      });
     }
 
-    ////////////////
-    // Validation //
-    ////////////////
+    return newFeature;
+  }
 
-    validateFeature() {
-        const hasChildren = this.features.length !== 0;
+  toJson() {
+    const json = {
+      name: this.name
+    };
 
-        if (!hasChildren) {
-            // Abstract feature cannot be leaf
-            if (this.abstract) {
-                throw 'abstract feature cannot be leaf';
-            }
-        } else {
-            // Validate all its children features
-            this.features.forEach(f => {
-                f.validateFeature();
-            });
-        }
-
-        if (this.type === TYPE.OR || this.type === TYPE.XOR) {
-            if (!hasChildren) {
-                throw 'OR and XOR features must have children';
-            } else {
-                this.features.forEach(function(f) {
-                    if (f.mandatory) {
-                        throw 'features with OR and XOR parent cannot be ' +
-                            'mandatory';
-                    }
-                });
-            }
-        }
+    if (this.mandatory) {
+      json.mandatory = true;
     }
 
-    /////////////////////////////
-    // Parsing and Loading XML //
-    /////////////////////////////
-
-    static fromXml(xml, parent, type) {
-        // parent[type] is parent.{and, or, xor},
-        // so we are creating a new child feature
-        const newFeature = parent[type](xml.attr);
-
-        // For each child feature of the new feature, we repeat the process
-        if (Array.isArray(xml.children)) {
-            xml.children.forEach(function(f) {
-                Feature.fromXml(f, newFeature, xml.name);
-            });
-        }
-
-        return newFeature;
+    if (this.abstract) {
+      json.abstract = true;
     }
 
-    toXml(parentNode) {
-        const type = this.type.toLowerCase();
-        const feature = parentNode.startElement(type);
-
-        feature.writeAttribute('name', this.name);
-        if (this.mandatory) {
-            feature.writeAttribute('mandatory', 'true');
-        }
-        if (this.abstract) {
-            feature.writeAttribute('abstract', 'true');
-        }
-
-        if (Array.isArray(this.features)) {
-            this.features.forEach(function(f) {
-                f.toXml(feature);
-            });
-        }
-
-        feature.endElement();
+    if (this.type !== TYPE.FEATURE) {
+      json.type = this.type.toLowerCase();
     }
 
-    //////////////////////////////
-    // Parsing and Loading JSON //
-    //////////////////////////////
-
-    static fromJson(json, parent, type) {
-        // parent[type] is parent.{and, or, xor},
-        // so we are creating a new child feature
-        const newFeature = parent[type](json);
-
-        // For each child feature of the new feature, we repeat the process
-        if (Array.isArray(json.features)) {
-            json.features.forEach(function(v) {
-                Feature.fromJson(v, newFeature, json.type);
-            });
-        }
-
-        return newFeature;
+    if (this.features.length > 0) {
+      json.features = [];
+      this.features.forEach(function (v) {
+        json.features.push(v.toJson());
+      });
     }
 
-    toJson() {
-        const json = {
-            name: this.name
-        };
-
-        if (this.mandatory) {
-            json.mandatory = true;
-        }
-
-        if (this.abstract) {
-            json.abstract = true;
-        }
-
-        if (this.type !== TYPE.FEATURE) {
-            json.type = this.type.toLowerCase();
-        }
-
-        if (this.features.length > 0) {
-            json.features = [];
-            this.features.forEach(function(v) {
-                json.features.push(v.toJson());
-            });
-        }
-
-        return json;
-    }
+    return json;
+  }
 }
 
 /////////////////////
@@ -228,30 +228,30 @@ export default class Feature {
 /////////////////////
 
 function _add(features) {
-    if (Array.isArray(features)) {
-        // features is an array with many features
-        features.forEach(f => this::_add(f));
-        return;
-    }
+  if (Array.isArray(features)) {
+    // features is an array with many features
+    features.forEach(f => this::_add(f));
+    return;
+  }
 
-    let newNode = null;
-    if (typeof features == 'string') {
-        // features is the name of a new feature
-        newNode = new Feature(features, {}, this);
-    } else {
-        // features is the JSON of a new feature
-        newNode = new Feature(features.name, features, this);
-    }
+  let newNode = null;
+  if (typeof features == 'string') {
+    // features is the name of a new feature
+    newNode = new Feature(features, {}, this);
+  } else {
+    // features is the JSON of a new feature
+    newNode = new Feature(features.name, features, this);
+  }
 
-    this.features.push(newNode);
-    return newNode;
+  this.features.push(newNode);
+  return newNode;
 }
 
 function _compareString(s1, s2) {
-    if (typeof s1 != 'string' || typeof s2 != 'string' ||
-        s1 == null || s2 == null) {
+  if (typeof s1 != 'string' || typeof s2 != 'string' ||
+    s1 == null || s2 == null) {
 
-        throw '_compareString: parameter is undefined, null or non string';
-    }
-    return s1.toLowerCase() === s2.toLowerCase();
+    throw '_compareString: parameter is undefined, null or non string';
+  }
+  return s1.toLowerCase() === s2.toLowerCase();
 }

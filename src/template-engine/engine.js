@@ -1,23 +1,23 @@
 import Delimiter from './delimiter.js';
 
 export default class Engine {
-    constructor(delimiters = {}, extraJS = '') {
-        this.delimiters = delimiters;
-        if (!this.delimiters.default) {
-            this.delimiters.default = new Delimiter();
-        }
-        this.extraJS = extraJS;
+  constructor(delimiters = {}, extraJS = '') {
+    this.delimiters = delimiters;
+    if (!this.delimiters.default) {
+      this.delimiters.default = new Delimiter();
     }
+    this.extraJS = extraJS;
+  }
 
-    getDelimiter(extension = 'default') {
-        if (this.delimiters[extension])
-            return this.delimiters[extension];
-        else
-            return this.delimiters.default;
-    }
+  getDelimiter(extension = 'default') {
+    if (this.delimiters[extension])
+      return this.delimiters[extension];
+    else
+      return this.delimiters.default;
+  }
 
-    getTemplateHelperMethods() {
-        return `function normalize(str, upper) {
+  getTemplateHelperMethods() {
+    return `function normalize(str, upper) {
                     return str
                         .normalize('NFKD').replace(/[\u0300-\u036F]/g, '')
                         .replace( /[-_]+/g, ' ')
@@ -30,5 +30,5 @@ export default class Engine {
                     console.log(str);
                 }\n
                 ${this.extraJS}`;
-    }
+  }
 }
