@@ -1,5 +1,5 @@
 import assert from 'assert';
-import {existsFile, readJsonFromFile, readFile, walkDir, writeFile} from '../src/file-utils';
+import {existsFile, readJsonFromFile, readFile, walkDir, writeFile} from '../src/loader/file-utils';
 import {getTestPath as p, removeTmpFolder} from './test-utils';
 
 suite('File Utils');

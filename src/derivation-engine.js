@@ -1,4 +1,4 @@
-import {readFile, writeFile, walkDir} from './file-utils';
+import {readFile, writeFile, walkDir} from './loader/file-utils';
 import FeatureModel from './feature-model/feature-model';
 import TemplateEngine from './template-engine/template-engine';
 import AnalysisReport from './template-engine/analysis-report';
