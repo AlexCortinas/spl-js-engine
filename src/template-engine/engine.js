@@ -29,6 +29,8 @@ export default class Engine {
                 function log(str) {
                     console.log(str);
                 }\n
+                function comment(str) {
+                }\n
                 ${this.extraJS}`;
   }
 }
