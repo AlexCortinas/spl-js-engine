@@ -108,16 +108,18 @@ export default class DerivationEngine {
   }
 
   loadZip(zipFile) {
+    var promises = [];
     this.zip = zipFile;
-    this.zip.files['extra.js'].async('string').then(extrajs => {
+    promises.push(this.zip.files['extra.js'].async('string').then(extrajs => {
       this.templateEngine = new TemplateEngine({}, extrajs);
-    });
-    this.zip.files['config.json'].async('string').then(config => {
+    }));
+    promises.push(this.zip.files['config.json'].async('string').then(config => {
       this.setConfig(JSON.parse(config));
-    });
-    this.zip.files['model.xml'].async('string').then(model => {
+    }));
+    promises.push(this.zip.files['model.xml'].async('string').then(model => {
       this.setFeatureModel(model);
-    });
+    }));
+    return Promise.all(promises);
   }
 
   setFeatureModel(featureModel) {
