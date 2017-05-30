@@ -4,7 +4,7 @@ export DerivationEngine from './derivation-engine';
 export FeatureModel from './feature-model/feature-model';
 export TemplateEngine from './template-engine/template-engine';
 
-export {readJsonFromFile, readFile} from './loader/file-utils';
+export {readJsonFromFile, readFile} from './file-utils';
 
 import {cli} from './cli';
 

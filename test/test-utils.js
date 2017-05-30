@@ -1,6 +1,6 @@
 import assert from 'assert';
 import fs from 'fs';
-import {readFile, walkDir} from '../src/loader/file-utils';
+import {readFile, walkDir} from '../src/file-utils';
 
 export const getTestFileContent = (path, bin = null) =>
   readFile(`test/files/${path}`, bin);
