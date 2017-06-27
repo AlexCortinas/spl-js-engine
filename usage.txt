@@ -9,7 +9,7 @@
                             (json, yaml or xml).
       --product         # Path to the product specification (json or yaml).
       --config          # Path to the platform configuration (json or yaml).
-      --js              # Path to the extra js file
+      --extra           # Path to the extra js file
       --code            # [Required] Path to the annotated code.
       --output          # Path to the output folder of the product. Default is
                             'output'.

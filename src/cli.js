@@ -10,7 +10,7 @@ export function cli() {
     product,
     config,
     code,
-    js,
+    extra,
     output = 'output'
   } = cli.flags;
 
@@ -27,7 +27,7 @@ export function cli() {
     configJson = readJsonFromFile(config);
   }
 
-  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(js));
+  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra));
 
   let productJson = {};
   if (product) {
