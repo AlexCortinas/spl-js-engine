@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yamljs';
+import stripBom from 'strip-bom';
+
 
 export function existsFile(filePath) {
   try {
@@ -11,7 +13,11 @@ export function existsFile(filePath) {
 }
 
 export function readFile(filePath, bin = false) {
-  return fs.readFileSync(filePath, bin ? null : 'utf8');
+  if (bin) {
+    return fs.readFileSync(filePath, null);
+  } else {
+    return stripBom(fs.readFileSync(filePath, 'utf8'));
+  }
 }
 
 export function writeFile(filePath, data, bin = false) {
