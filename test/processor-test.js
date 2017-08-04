@@ -267,3 +267,16 @@ test('md file with some data', () => {
     f('template-engine/README-product.md')
   );
 });
+
+test('using first char of final delimiter', () => {
+  const te = new TemplateEngine({
+    startDelimiter: '###<',
+    endDelimiter: '>###'
+  });
+  const p = te.createProcessor();
+
+  assert.strictEqual(
+    p.process('###< if (6 > 5) { >###asdf###< } >###'),
+    'asdf'
+  );
+});

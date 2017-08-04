@@ -23,7 +23,7 @@ export default class Delimiter {
       '\\n\|' +
       _escapeRegExpStr(this.start) +
       '(([^' +
-      _escapeRegExpStr(this.end[0]) +
+      // _escapeRegExpStr(this.end[0]) +
       ']|\\\\' +
       _escapeRegExpStr(this.end[0]) +
       ')+?)' +
