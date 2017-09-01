@@ -1,8 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import YAML from 'yamljs';
 import stripBom from 'strip-bom';
-
 
 export function existsFile(filePath) {
   try {
@@ -74,12 +72,6 @@ export function readJsonFromFile(path) {
 
   try {
     return JSON.parse(fileContent);
-  } catch (e) {
-    // nothing to do
-  }
-
-  try {
-    return YAML.parse(fileContent);
   } catch (e) {
     // nothing to do
   }

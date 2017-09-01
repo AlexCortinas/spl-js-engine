@@ -23,9 +23,9 @@ Generation of the product:
 
 ```
 cd examples/MyCalculator
-spl-js-engine --featureModel model.yaml \
-    --product product.yaml \
-    --config config.yaml \
+spl-js-engine --featureModel model.json \
+    --product product.json \
+    --config config.json \
     --js extra.js \
     --code code \
     --output output

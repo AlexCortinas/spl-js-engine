@@ -4,6 +4,7 @@ import TemplateEngine from './template-engine/template-engine';
 import AnalysisReport from './template-engine/analysis-report';
 import path from 'path';
 import isTextOrBinary from 'istextorbinary';
+import JSZip from 'jszip';
 
 const _extension = f => f.substring(f.lastIndexOf('.') + 1);
 const _fileName = f => path.basename(f);
@@ -14,10 +15,6 @@ export default class DerivationEngine {
     this.featureModel = null;
     this.ignore = [];
     this.templateEngine = new TemplateEngine({}, extraJS);
-
-    if (!codePath) {
-      throw 'Code path is required to create a Derivation Engine';
-    }
     this.codePath = codePath;
 
     if (featureModel) {
@@ -31,36 +28,60 @@ export default class DerivationEngine {
     if (extraJS) {
       this.extraJS = extraJS;
     }
+
   }
 
-  setFeatureModel(featureModel) {
-    if (!featureModel) throw 'feature model must be provided';
+  generateZip(product = {}) {
+    const features = {};
+    const data = product.data || {};
+    let fileContent;
 
-    if (typeof featureModel == 'object') {
-      this.featureModel = FeatureModel.fromJson(featureModel);
-    } else {
-      try {
-        this.featureModel = FeatureModel.fromJson(JSON.parse(featureModel));
-      } catch (e) {
-        this.featureModel = FeatureModel.fromXml(featureModel);
-      }
-    }
-
-    this.featureModel.validateFeatureModel();
-  }
-
-  setConfig(config) {
-    if (Array.isArray(config.delimiters)) {
-      config.delimiters.forEach(d => {
-        d.extension.forEach(e => {
-          this.templateEngine.addDelimiter(e, d.start, d.end);
+    if (product.features) {
+      this.featureModel
+        .completeFeatureSelection(product.features)
+        .forEach(f => {
+          features[f] = true;
         });
-      });
     }
 
-    if (Array.isArray(config.ignore)) {
-      this.ignore = config.ignore;
-    }
+    const fileGenerator = this.templateEngine.createFileGenerator(features, data);
+    const processor = this.templateEngine.createProcessor(features, data);
+
+    const output = new JSZip();
+    const promises = [];
+
+    // only taking files in 'code/'
+    const codePath = 'code/';
+    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(codePath));
+
+    filePaths.forEach(fPath => {
+      promises.push( // storing all promises to wait for then later
+        this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : 'blob').then(fileContent => {
+          if (fileContent == '') return ; // avoiding folders
+
+          if (!this.fileIsText(fPath)) { // binary files
+            // FIXME: the filter of binary files is not working properly with files without extension
+            return output.file(fPath.substr(5), fileContent);
+          }
+
+          fileGenerator
+            .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), '', {})
+            .forEach(r => {
+              const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
+              const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
+              if (generatedContent) {
+                return output.file(generatedFilePath, generatedContent);
+              }
+            });
+        })
+      );
+    });
+
+    return Promise.all(promises).then(() => output);
+  }
+
+  writeToZip(zip, path, content) {
+
   }
 
   generateProduct(outputPath, product = {}) {
@@ -99,6 +120,51 @@ export default class DerivationEngine {
             processor.process(r.fileContent, _extension(fPath), r.context));
         });
     }, this.ignore);
+  }
+
+  loadZip(zipFile) {
+    var promises = [];
+    this.zip = zipFile;
+    promises.push(this.zip.files['extra.js'].async('string').then(extrajs => {
+      this.templateEngine = new TemplateEngine({}, extrajs);
+    }));
+    promises.push(this.zip.files['config.json'].async('string').then(config => {
+      this.setConfig(JSON.parse(config));
+    }));
+    promises.push(this.zip.files['model.xml'].async('string').then(model => {
+      this.setFeatureModel(model);
+    }));
+    return Promise.all(promises);
+  }
+
+  setFeatureModel(featureModel) {
+    if (!featureModel) throw 'feature model must be provided';
+
+    if (typeof featureModel == 'object') {
+      this.featureModel = FeatureModel.fromJson(featureModel);
+    } else {
+      try {
+        this.featureModel = FeatureModel.fromJson(JSON.parse(featureModel));
+      } catch (e) {
+        this.featureModel = FeatureModel.fromXml(featureModel);
+      }
+    }
+
+    this.featureModel.validateFeatureModel();
+  }
+
+  setConfig(config) {
+    if (Array.isArray(config.delimiters)) {
+      config.delimiters.forEach(d => {
+        d.extension.forEach(e => {
+          this.templateEngine.addDelimiter(e, d.start, d.end);
+        });
+      });
+    }
+
+    if (Array.isArray(config.ignore)) {
+      this.ignore = config.ignore;
+    }
   }
 
   analyseAnnotations() {

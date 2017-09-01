@@ -15,22 +15,16 @@ test('Create a product without feature selection or any custom data', () => {
   assertEqualFilesInFolders(p('simpleSPL/code'), p('tmp/simpleProduct'));
 });
 
-test('Trying to create a product without code path', () => {
-  assert.throws(() => {
-    new DerivationEngine();
-  }, /Code path is required to create a Derivation Engine/);
-});
-
 test('Create a product', () => {
   const engine = new DerivationEngine(
     p('simpleSPL/code'),
-    readJsonFromFile(p('simpleSPL/model.yaml')),
-    readJsonFromFile(p('simpleSPL/config.yaml'))
+    readJsonFromFile(p('simpleSPL/model.json')),
+    readJsonFromFile(p('simpleSPL/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('simpleSPL/product.yaml'))
+    readJsonFromFile(p('simpleSPL/product.json'))
   );
 
   assertEqualFilesInFolders(p('simpleSPL/expected'), p('tmp/simpleProduct'));
@@ -39,13 +33,13 @@ test('Create a product', () => {
 test('Create a product with data', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwithData/code'),
-    readJsonFromFile(p('simpleSPLwithData/model.yaml')),
-    readJsonFromFile(p('simpleSPLwithData/config.yaml'))
+    readJsonFromFile(p('simpleSPLwithData/model.json')),
+    readJsonFromFile(p('simpleSPLwithData/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('simpleSPLwithData/product.yaml'))
+    readJsonFromFile(p('simpleSPLwithData/product.json'))
   );
 
   assertEqualFilesInFolders(
@@ -55,14 +49,14 @@ test('Create a product with data', () => {
 test('Create a product and use some extra js function', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwithExtraJS/code'),
-    readJsonFromFile(p('simpleSPLwithExtraJS/model.yaml')),
-    readJsonFromFile(p('simpleSPLwithExtraJS/config.yaml')),
+    readJsonFromFile(p('simpleSPLwithExtraJS/model.json')),
+    readJsonFromFile(p('simpleSPLwithExtraJS/config.json')),
     readFile(p('simpleSPLwithExtraJS/js.js'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('simpleSPLwithExtraJS/product.yaml'))
+    readJsonFromFile(p('simpleSPLwithExtraJS/product.json'))
   );
 
   assertEqualFilesInFolders(p('simpleSPLwithExtraJS/expected'), p('tmp/simpleProduct'));
@@ -71,7 +65,7 @@ test('Create a product and use some extra js function', () => {
 test('Get features and parameters of an annotated project', () => {
   const engine = new DerivationEngine(p('simpleSPLwithData/code'));
 
-  engine.setConfig(readJsonFromFile(p('simpleSPLwithData/config.yaml')));
+  engine.setConfig(readJsonFromFile(p('simpleSPLwithData/config.json')));
 
   const report = engine.analyseAnnotations();
 
@@ -116,8 +110,8 @@ test('Get features and parameters of an annotated project', () => {
 test('Compare feature model vs analysed code results', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwithData/code'),
-    readJsonFromFile(p('simpleSPLwithData/model.yaml')),
-    readJsonFromFile(p('simpleSPLwithData/config.yaml'))
+    readJsonFromFile(p('simpleSPLwithData/model.json')),
+    readJsonFromFile(p('simpleSPLwithData/config.json'))
   );
 
   const report = engine.analyseAnnotations();
@@ -129,7 +123,7 @@ test('Compare feature model vs analysed code results', () => {
 
   assert.deepEqual(
     report.checkAnnotatedDataConsistency(
-      readJsonFromFile(p('simpleSPLwithData/product.yaml'))
+      readJsonFromFile(p('simpleSPLwithData/product.json'))
     ),
     {errors: 0, warnings: 0, abound: [], missing: []}
   );
@@ -139,8 +133,8 @@ test('Compare feature model vs analysed code results', () => {
 test('Compare fanalysis results in a not consistent project', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwrong/code'),
-    readJsonFromFile(p('simpleSPLwrong/model.yaml')),
-    readJsonFromFile(p('simpleSPLwrong/config.yaml'))
+    readJsonFromFile(p('simpleSPLwrong/model.json')),
+    readJsonFromFile(p('simpleSPLwrong/config.json'))
   );
 
   const report = engine.analyseAnnotations();
@@ -156,7 +150,7 @@ test('Compare fanalysis results in a not consistent project', () => {
 
   assert.deepEqual(
     report.checkAnnotatedDataConsistency(
-      readJsonFromFile(p('simpleSPLwrong/product.yaml'))
+      readJsonFromFile(p('simpleSPLwrong/product.json'))
     ),
     {
       errors: 2, warnings: 1,
@@ -169,13 +163,13 @@ test('Compare fanalysis results in a not consistent project', () => {
 test('Create a product with data parameters at several levels', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwithDataComplex/code'),
-    readJsonFromFile(p('simpleSPLwithDataComplex/model.yaml')),
-    readJsonFromFile(p('simpleSPLwithDataComplex/config.yaml'))
+    readJsonFromFile(p('simpleSPLwithDataComplex/model.json')),
+    readJsonFromFile(p('simpleSPLwithDataComplex/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('simpleSPLwithDataComplex/product.yaml'))
+    readJsonFromFile(p('simpleSPLwithDataComplex/product.json'))
   );
 
   assertEqualFilesInFolders(
@@ -185,8 +179,8 @@ test('Create a product with data parameters at several levels', () => {
 test('Consistency results for complex data', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwithDataComplex/code'),
-    readJsonFromFile(p('simpleSPLwithDataComplex/model.yaml')),
-    readJsonFromFile(p('simpleSPLwithDataComplex/config.yaml'))
+    readJsonFromFile(p('simpleSPLwithDataComplex/model.json')),
+    readJsonFromFile(p('simpleSPLwithDataComplex/config.json'))
   );
 
   const report = engine.analyseAnnotations();
@@ -198,7 +192,7 @@ test('Consistency results for complex data', () => {
 
   assert.deepEqual(
     report.checkAnnotatedDataConsistency(
-      readJsonFromFile(p('simpleSPLwithDataComplex/product.yaml'))
+      readJsonFromFile(p('simpleSPLwithDataComplex/product.json'))
     ),
     {errors: 0, warnings: 0, abound: [], missing: []}
   );
@@ -207,13 +201,13 @@ test('Consistency results for complex data', () => {
 test('Checking "binarity" of unknown extensions not in config', () => {
   const engine = new DerivationEngine(
     p('checkBinary/code'),
-    readJsonFromFile(p('checkBinary/model.yaml')),
-    readJsonFromFile(p('checkBinary/config.yaml'))
+    readJsonFromFile(p('checkBinary/model.json')),
+    readJsonFromFile(p('checkBinary/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/checkBinary'),
-    readJsonFromFile(p('checkBinary/product.yaml'))
+    readJsonFromFile(p('checkBinary/product.json'))
   );
 
   assertEqualFilesInFolders(p('checkBinary/expected'), p('tmp/checkBinary'));
@@ -222,13 +216,13 @@ test('Checking "binarity" of unknown extensions not in config', () => {
 test('Avoid checking "binarity" of extensions in config', () => {
   const engine = new DerivationEngine(
     p('checkBinary/code'),
-    readJsonFromFile(p('checkBinary/model.yaml')),
-    readJsonFromFile(p('checkBinary/config-including.yaml'))
+    readJsonFromFile(p('checkBinary/model.json')),
+    readJsonFromFile(p('checkBinary/config-including.json'))
   );
 
   engine.generateProduct(
     p('tmp/checkBinary'),
-    readJsonFromFile(p('checkBinary/product.yaml'))
+    readJsonFromFile(p('checkBinary/product.json'))
   );
 
   assertEqualFilesInFolders(p('checkBinary/expected-including'), p('tmp/checkBinary'));
@@ -243,7 +237,7 @@ test('Get files with more features involved', () => {
   const engine = new DerivationEngine(
     'examples/GPL/GraphProductLine',
     readJsonFromFile('examples/GPL/model.json'),
-    readJsonFromFile('examples/GPL/config.yaml')
+    readJsonFromFile('examples/GPL/config.json')
   );
 
   const report = engine.analyseAnnotations();
@@ -267,13 +261,13 @@ afterEach(removeTmpFolder);
 test('From list of strings with nesting', () => {
   const engine = new DerivationEngine(
     p('spl-generate/code'),
-    readJsonFromFile(p('spl-generate/model.yaml')),
-    readJsonFromFile(p('spl-generate/config.yaml'))
+    readJsonFromFile(p('spl-generate/model.json')),
+    readJsonFromFile(p('spl-generate/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('spl-generate/product.yaml'))
+    readJsonFromFile(p('spl-generate/product.json'))
   );
 
   assertEqualFilesInFolders(p('spl-generate/expected'), p('tmp/simpleProduct'));
@@ -282,13 +276,13 @@ test('From list of strings with nesting', () => {
 test('Create folder', () => {
   const engine = new DerivationEngine(
     p('spl-generate-folder/code'),
-    readJsonFromFile(p('spl-generate-folder/model.yaml')),
-    readJsonFromFile(p('spl-generate-folder/config.yaml'))
+    readJsonFromFile(p('spl-generate-folder/model.json')),
+    readJsonFromFile(p('spl-generate-folder/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('spl-generate-folder/product.yaml'))
+    readJsonFromFile(p('spl-generate-folder/product.json'))
   );
 
   assertEqualFilesInFolders(p('spl-generate-folder/expected'), p('tmp/simpleProduct'));
@@ -297,13 +291,13 @@ test('Create folder', () => {
 test('Checking escape of first character of end delimiter', () => {
   const engine = new DerivationEngine(
     p('spl-generate-escape/code'),
-    readJsonFromFile(p('spl-generate-escape/model.yaml')),
-    readJsonFromFile(p('spl-generate-escape/config.yaml'))
+    readJsonFromFile(p('spl-generate-escape/model.json')),
+    readJsonFromFile(p('spl-generate-escape/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('spl-generate-escape/product.yaml'))
+    readJsonFromFile(p('spl-generate-escape/product.json'))
   );
 
   assertEqualFilesInFolders(p('spl-generate-escape/expected'), p('tmp/simpleProduct'));
@@ -312,13 +306,13 @@ test('Checking escape of first character of end delimiter', () => {
 test('Omitting empty files', () => {
   const engine = new DerivationEngine(
     p('simpleSPLwithEmptyFiles/code'),
-    readJsonFromFile(p('simpleSPLwithEmptyFiles/model.yaml')),
-    readJsonFromFile(p('simpleSPLwithEmptyFiles/config.yaml'))
+    readJsonFromFile(p('simpleSPLwithEmptyFiles/model.json')),
+    readJsonFromFile(p('simpleSPLwithEmptyFiles/config.json'))
   );
 
   engine.generateProduct(
     p('tmp/simpleProduct'),
-    readJsonFromFile(p('simpleSPLwithEmptyFiles/product.yaml'))
+    readJsonFromFile(p('simpleSPLwithEmptyFiles/product.json'))
   );
 
   assertEqualFilesInFolders(p('simpleSPLwithEmptyFiles/expected'), p('tmp/simpleProduct'));
