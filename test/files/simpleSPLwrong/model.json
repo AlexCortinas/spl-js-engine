@@ -1,22 +1,28 @@
 {
-    "featureModel": {
-        "struct": {
-            "name": "SimpleSPL",
-            "mandatory": true,
-            "abstract": true,
-            "type": "and",
-            "features": [{
-                "name": "featureA"
-            }, {
-                "name": "featureB"
-            }, {
-                "name": "featureC"
-            }]
+  "featureModel": {
+    "struct": {
+      "name": "SimpleSPL",
+      "mandatory": true,
+      "abstract": true,
+      "type": "and",
+      "features": [
+        {
+          "name": "featureA"
         },
-        "constraints": [{
-            "type": "implies",
-            "first": "featureA",
-            "second": "featureC"
-        }]
-    }
+        {
+          "name": "featureB"
+        },
+        {
+          "name": "featureC"
+        }
+      ]
+    },
+    "constraints": [
+      {
+        "type": "implies",
+        "first": "featureA",
+        "second": "featureC"
+      }
+    ]
+  }
 }

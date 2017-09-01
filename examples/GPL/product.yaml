@@ -1,9 +1,0 @@
-features:
-  - prog
-  - benchmark
-  - undirected
-  - weighted
-  - gNoEdges
-  - bfs
-  - connected
-data:
