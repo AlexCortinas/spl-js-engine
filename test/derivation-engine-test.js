@@ -15,12 +15,6 @@ test('Create a product without feature selection or any custom data', () => {
   assertEqualFilesInFolders(p('simpleSPL/code'), p('tmp/simpleProduct'));
 });
 
-test('Trying to create a product without code path', () => {
-  assert.throws(() => {
-    new DerivationEngine();
-  }, /Code path is required to create a Derivation Engine/);
-});
-
 test('Create a product', () => {
   const engine = new DerivationEngine(
     p('simpleSPL/code'),
