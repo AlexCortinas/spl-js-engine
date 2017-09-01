@@ -16,8 +16,7 @@
     "meow": "^3.7.0",
     "strip-bom": "^3.0.0",
     "xml-writer": "^1.6.0",
-    "xmldoc": "^0.4.0",
-    "yamljs": "^0.2.7"
+    "xmldoc": "^0.4.0"
   },
   "description": "Software Product Line JavaScript Derivation Engine",
   "devDependencies": {
