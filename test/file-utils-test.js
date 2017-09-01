@@ -63,10 +63,3 @@ test('Read JSON file', () => {
   };
   assert.deepEqual(readJsonFromFile(p('simpleSPL/model.json')), expected);
 });
-
-test('Read YAML file', () => {
-  assert.deepEqual(
-    readJsonFromFile(p('simpleSPL/model.yaml')),
-    readJsonFromFile(p('simpleSPL/model.json'))
-  );
-});
