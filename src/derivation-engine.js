@@ -11,9 +11,24 @@ const _fileName = f => path.basename(f);
 const _dir = f => path.dirname(f);
 
 export default class DerivationEngine {
-  constructor() {
+  constructor(codePath, featureModel, config, extraJS) {
     this.featureModel = null;
     this.ignore = [];
+    this.templateEngine = new TemplateEngine({}, extraJS);
+    this.codePath = codePath;
+
+    if (featureModel) {
+      this.setFeatureModel(featureModel);
+    }
+
+    if (config) {
+      this.setConfig(config);
+    }
+
+    if (extraJS) {
+      this.extraJS = extraJS;
+    }
+
   }
 
   generateZip(product = {}) {
