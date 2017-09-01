@@ -6,9 +6,9 @@
       --help            # Print this info and generator's options and usage
       --version         # Print version?
       --featureModel    # [Required] Path to the feature model representation
-                            (json, yaml or xml).
-      --product         # Path to the product specification (json or yaml).
-      --config          # Path to the platform configuration (json or yaml).
+                            (json or xml).
+      --product         # Path to the product specification (json).
+      --config          # Path to the platform configuration (json).
       --extra           # Path to the extra js file
       --code            # [Required] Path to the annotated code.
       --output          # Path to the output folder of the product. Default is
