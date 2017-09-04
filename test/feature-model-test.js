@@ -649,15 +649,94 @@ test('getting all features', () => {
   assert.deepEqual(
     fm.getFeatures(),
     {
-      'MyCalculator': [{
-        'Base': [{
-          'Operations': ['Add', 'Subtract', 'Multiply', 'Divide']
+      name: 'MyCalculator',
+      type: 'AND',
+      features: [{
+        name: 'Base',
+        type: 'AND',
+        features: [{
+          name: 'Operations',
+          type: 'OR',
+          features: [{
+            name: 'Add',
+            type: 'FEATURE'
+          }, {
+            name: 'Subtract',
+            type: 'FEATURE'
+          }, {
+            name: 'Multiply',
+            type: 'FEATURE'
+          }, {
+            name: 'Divide',
+            type: 'FEATURE'
+          }]
         }, {
-          'Capabilities': ['Decimal']
+          name: 'Capabilities',
+          type: 'OR',
+          features: [{
+            name: 'Decimal',
+            type: 'FEATURE'
+          }]
         }]
       }]
     }
   );
+});
+
+test('get feature model with hidden features', () => {
+  const expected = {
+    name: 'MyCalculator',
+    type: 'AND',
+    features: [{
+      name: 'Base',
+      type: 'AND',
+      features: [{
+        name: 'Operations',
+        type: 'OR',
+        features: [{
+          name: 'Add',
+          hidden: true,
+          type: 'FEATURE'
+        }, {
+          name: 'Subtract',
+          type: 'FEATURE'
+        }, {
+          name: 'Multiply',
+          type: 'FEATURE'
+        }, {
+          name: 'Divide',
+          type: 'FEATURE'
+        }]
+      }, {
+        name: 'Capabilities',
+        type: 'OR',
+        hidden: true,
+        features: [{
+          name: 'Decimal',
+          type: 'FEATURE'
+        }]
+      }]
+    }]
+  };
+
+  let fm = new FeatureModel('MyCalculator');
+  const base = fm.and({name: 'Base', mandatory: true});
+  const operations = base.and({name: 'Operations', abstract: true});
+  const capabilities = base.and({name: 'Capabilities', abstract: true, hidden: true});
+
+  operations.or([{ name: 'Add', hidden: true}, 'Subtract', 'Multiply', 'Divide']);
+  capabilities.or('Decimal');
+  assert.deepEqual(fm.getFeatures(), expected);
+
+  fm = FeatureModel.fromJson(
+    readJsonFromFile(p('feature-model/model-with-hidden-features.json'))
+  );
+  assert.deepEqual(fm.getFeatures(), expected);
+
+  fm = FeatureModel.fromXml(
+    f('feature-model/model-with-hidden-features.xml')
+  );
+  assert.deepEqual(fm.getFeatures(), expected);
 });
 
 function _createMyCalculatorFM() {
