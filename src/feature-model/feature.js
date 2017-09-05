@@ -1,10 +1,11 @@
 import TYPE from './feature-type';
 
 export default class Feature {
-  constructor(name, {mandatory = false, abstract = false}, parent = null) {
+  constructor(name, {mandatory = false, abstract = false, hidden = false}, parent = null) {
     this.name = name;
     this.mandatory = mandatory;
     this.abstract = abstract;
+    this.hidden = hidden;
     this.parent = parent;
 
     this.features = [];
@@ -76,12 +77,19 @@ export default class Feature {
   ///////////////////////
 
   getFeatures() {
-    if (this.features.length == 0) {
-      return this.name;
+    const ret = {
+      name: this.name,
+      type: this.type
+    };
+
+    if (this.hidden) {
+      ret.hidden = true;
     }
 
-    const ret = {};
-    ret[this.name] = this.features.map(el => el.getFeatures());
+    if (this.features.length > 0) {
+      ret.features = this.features.map(el => el.getFeatures());
+    }
+
     return ret;
   }
 
