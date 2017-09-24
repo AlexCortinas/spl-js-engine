@@ -11,7 +11,7 @@ const _fileName = f => path.basename(f);
 const _dir = f => path.dirname(f);
 
 export default class DerivationEngine {
-  constructor(codePath, featureModel, config, extraJS) {
+  constructor(codePath, featureModel, config, extraJS, modelTransformation) {
     this.featureModel = null;
     this.ignore = [];
     this.templateEngine = new TemplateEngine({}, extraJS);
@@ -29,9 +29,16 @@ export default class DerivationEngine {
       this.extraJS = extraJS;
     }
 
+    if (modelTransformation) {
+      this.setModelTransformation(modelTransformation);
+    }
+
   }
 
   generateZip(product = {}) {
+    if (this.modelTransformation) {
+      product = this.modelTransformation(product);
+    }
     const features = {};
     const data = product.data || {};
     let fileContent;
@@ -85,6 +92,9 @@ export default class DerivationEngine {
   }
 
   generateProduct(outputPath, product = {}) {
+    if (this.modelTransformation) {
+      product = this.modelTransformation(product);
+    }
     const features = {};
     const data = product.data || {};
     let fileContent;
@@ -134,7 +144,17 @@ export default class DerivationEngine {
     promises.push(this.zip.files['model.xml'].async('string').then(model => {
       this.setFeatureModel(model);
     }));
+    const modelTransformationFile = this.zip.files['transformation.js'];
+    if (modelTransformationFile) {
+      promises.push(modelTransformationFile.async('string').then(mt => {
+        this.setModelTransformation(eval(mt));
+      }));
+    }
     return Promise.all(promises);
+  }
+
+  setModelTransformation(mt) {
+    this.modelTransformation = mt;
   }
 
   setFeatureModel(featureModel) {
