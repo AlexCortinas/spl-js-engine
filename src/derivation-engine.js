@@ -76,7 +76,7 @@ export default class DerivationEngine {
             .forEach(r => {
               const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
               const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
-              if (generatedContent) {
+              if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
                 return output.file(generatedFilePath, generatedContent);
               }
             });
@@ -116,7 +116,8 @@ export default class DerivationEngine {
       if (!this.fileIsText(fPath)) {
         writeFile(
           fPath.replace(this.codePath, outputPath),
-          readFile(fPath, true)
+          readFile(fPath, true),
+          true
         );
         return;
       }
