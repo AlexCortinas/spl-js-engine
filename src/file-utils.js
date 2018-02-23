@@ -19,7 +19,7 @@ export function readFile(filePath, bin = false) {
 }
 
 export function writeFile(filePath, data, bin = false) {
-  if (!bin && !data) return;
+  if (!bin && (!data || !data.trim())) return;
   mkDirRecursively(path.dirname(filePath));
   fs.writeFileSync(filePath, data, bin ? null : 'utf8');
 }
