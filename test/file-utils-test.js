@@ -28,7 +28,10 @@ test('Walking directory', () => {
     p('dir-to-walk')
   ];
   walkDir(p('dir-to-walk'), (filePath) => result.push(filePath));
-  assert.deepEqual(result, expected);
+  assert.deepEqual(
+    expected.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' ')), 
+    result.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' '))
+  );
 });
 
 test('Testing writeFile', () => {
