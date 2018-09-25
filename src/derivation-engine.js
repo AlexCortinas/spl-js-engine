@@ -11,7 +11,7 @@ const _fileName = f => path.basename(f);
 const _dir = f => path.dirname(f);
 
 export default class DerivationEngine {
-  constructor(codePath, featureModel, config, extraJS, modelTransformation) {
+  constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
     this.featureModel = null;
     this.ignore = [];
     this.templateEngine = new TemplateEngine({}, extraJS);
@@ -33,6 +33,7 @@ export default class DerivationEngine {
       this.setModelTransformation(modelTransformation);
     }
 
+    this.verbose = verbose;
   }
 
   generateZip(product = {}) {
@@ -41,7 +42,6 @@ export default class DerivationEngine {
     }
     const features = {};
     const data = product.data || {};
-    let fileContent;
 
     if (product.features) {
       this.featureModel
@@ -87,10 +87,6 @@ export default class DerivationEngine {
     return Promise.all(promises).then(() => output);
   }
 
-  writeToZip(zip, path, content) {
-
-  }
-
   generateProduct(outputPath, product = {}) {
     if (this.modelTransformation) {
       product = this.modelTransformation(product);
@@ -126,6 +122,13 @@ export default class DerivationEngine {
       fileGenerator
         .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), outputPath, {})
         .forEach(r => {
+          if (this.verbose) {
+            console.log('');
+            console.log('Input file.....: ' + fPath);
+            console.log('File name..: ' + r.fileName);
+            console.log('Output file: ' + _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName);
+          }
+
           writeFile(
             _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName,
             processor.process(r.fileContent, _extension(fPath), r.context));

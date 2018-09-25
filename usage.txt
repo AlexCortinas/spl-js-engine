@@ -13,3 +13,4 @@
       --code            # [Required] Path to the annotated code.
       --output          # Path to the output folder of the product. Default is
                             'output'.
+      --verbose         # Show the progress and the generated files

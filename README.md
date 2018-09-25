@@ -26,9 +26,10 @@ cd examples/MyCalculator
 spl-js-engine --featureModel model.json \
     --product product.json \
     --config config.json \
-    --js extra.js \
+    --extra extra.js \
     --code code \
     --output output
+    [--verbose]
 ```
 
 Running the generated product:

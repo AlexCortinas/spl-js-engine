@@ -12,7 +12,8 @@ export function cli() {
     code,
     extra,
     output = 'output',
-    modelTransformation = null
+    modelTransformation = null,
+    verbose = false
   } = cli.flags;
 
   if (cli.flags.help || !code || !featureModel) {
@@ -33,7 +34,7 @@ export function cli() {
     evaluedMT = eval(readFile(modelTransformation));
   }
 
-  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra), evaluedMT);
+  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra), evaluedMT, verbose);
 
   let productJson = {};
   if (product) {
