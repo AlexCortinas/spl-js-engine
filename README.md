@@ -21,7 +21,7 @@ A simple web-based calculator made with Spring Boot and Angular
 
 Generation of the product:
 
-```
+```bash
 cd examples/MyCalculator
 spl-js-engine --featureModel model.json \
     --product product.json \
