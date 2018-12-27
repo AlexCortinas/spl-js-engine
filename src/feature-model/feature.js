@@ -86,6 +86,10 @@ export default class Feature {
       ret.hidden = true;
     }
 
+    if (this.mandatory) {
+      ret.mandatory = true;
+    }
+
     if (this.features.length > 0) {
       ret.features = this.features.map(el => el.getFeatures());
     }

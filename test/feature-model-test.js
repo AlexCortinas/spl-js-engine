@@ -649,9 +649,11 @@ test('getting all features', () => {
   assert.deepEqual(
     fm.getFeatures(),
     {
+      mandatory: true,
       name: 'MyCalculator',
       type: 'AND',
       features: [{
+        mandatory: true,
         name: 'Base',
         type: 'AND',
         features: [{
@@ -685,9 +687,11 @@ test('getting all features', () => {
 
 test('get feature model with hidden features', () => {
   const expected = {
+    mandatory: true,
     name: 'MyCalculator',
     type: 'AND',
     features: [{
+      mandatory: true,
       name: 'Base',
       type: 'AND',
       features: [{
