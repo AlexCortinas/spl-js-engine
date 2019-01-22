@@ -81,7 +81,7 @@ export default class DerivationEngine {
                 console.log('');
                 console.log('Input file.....: ' + fPath);
                 console.log('File name..: ' + r.fileName);
-                console.log('Output file: ' + _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName);
+                console.log('Output file: ' + _dir(fPath.replace(this.codePath, '')) + '/' + r.fileName);
               }
               const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
               const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
@@ -200,7 +200,39 @@ export default class DerivationEngine {
     }
   }
 
-  analyseAnnotations() {
+  _analyseAnnotationsZip(opts) {
+    const zipType = opts.type || 'blob';
+
+    const report = new AnalysisReport(this.featureModel);
+    const analyser = this.templateEngine.createAnalyser();
+
+    const promises = [];
+
+    // only taking files in 'code/'
+    const codePath = 'code/';
+    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(codePath));
+
+    filePaths.forEach(fPath => {
+      promises.push( // storing all promises to wait for then later
+        this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : zipType).then(fileContent => {
+          if (fileContent == '') return; // avoiding folders
+
+          if (!this.fileIsText(fPath)) return; // avoiding binary files
+
+          report.addAnalysis(
+            fPath,
+            analyser.analyse(fileContent, _extension(fPath))
+          );
+
+          return;
+        })
+      );
+    });
+
+    return Promise.all(promises).then(() => report);
+  }
+
+  _analyseAnnotationsPath() {
     const report = new AnalysisReport(this.featureModel);
     const analyser = this.templateEngine.createAnalyser();
 
@@ -216,6 +248,14 @@ export default class DerivationEngine {
     }, this.ignore);
 
     return report;
+  }
+
+  analyseAnnotations(opts) {
+    if (this.zip) {
+      return this._analyseAnnotationsZip(opts);
+    } else {
+      return this._analyseAnnotationsPath();
+    }
   }
 
   fileIsText(fPath) {

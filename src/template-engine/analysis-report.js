@@ -110,17 +110,28 @@ export default class AnalysisReport {
       .map(featureName => this.featureModel.get(featureName))
       .filter(feature => !feature.abstract)
       .map(feature => feature.name);
+    const expectedWithoutChildren = this.featureModel.featureList
+      .map(featureName => this.featureModel.get(featureName))
+      .filter(feature => !feature.abstract)
+      .filter(feature => feature.features.length == 0)
+      .map(feature => feature.name);
 
     const res = {
-      abound: found.filter(f => expected.indexOf(f) == -1),
-      missing: expected.filter(f => found.indexOf(f) == -1)
+      surplus: {
+        desc: 'features found in code but not in feature model',
+        values: found.filter(f => expected.indexOf(f) == -1)
+      },
+      missing: {
+        desc: 'child features found in feature model but not in code',
+        values: expectedWithoutChildren.filter(f => found.indexOf(f) == -1)
+      }
     };
 
     // features found in code but not in feature model are errors
-    res.errors = res.abound.length;
+    res.surplus.count = res.surplus.values.length;
 
     // feature in feature model not found are warnings
-    res.warnings = res.missing.length;
+    res.missing.count = res.missing.values.length;
 
     return res;
   }
@@ -130,12 +141,12 @@ export default class AnalysisReport {
     const expected = propertyNames(productData.data);
 
     const res = {
-      abound: found.filter(f => expected.indexOf(f) == -1),
+      surplus: found.filter(f => expected.indexOf(f) == -1),
       missing: expected.filter(f => found.indexOf(f) == -1)
     };
 
     // data parameters found in code but not in product spec are errors
-    res.errors = res.abound.length;
+    res.errors = res.surplus.length;
 
     //data parameters in product spec but not in code are warnings
     res.warnings = res.missing.length;

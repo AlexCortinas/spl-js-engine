@@ -118,14 +118,25 @@ test('Compare feature model vs analysed code results', () => {
 
   assert.deepEqual(
     report.checkAnnotatedFeaturesConsistency(),
-    {errors: 0, warnings: 0, abound: [], missing: []}
+    {
+      surplus: {
+        desc: 'features found in code but not in feature model',
+        values: [],
+        count: 0
+      },
+      missing: {
+        desc: 'child features found in feature model but not in code',
+        values: [],
+        count: 0
+      }
+    }
   );
 
   assert.deepEqual(
     report.checkAnnotatedDataConsistency(
       readJsonFromFile(p('simpleSPLwithData/product.json'))
     ),
-    {errors: 0, warnings: 0, abound: [], missing: []}
+    {errors: 0, warnings: 0, surplus: [], missing: []}
   );
 });
 
@@ -142,9 +153,16 @@ test('Compare fanalysis results in a not consistent project', () => {
   assert.deepEqual(
     report.checkAnnotatedFeaturesConsistency(),
     {
-      errors: 2, warnings: 1,
-      abound: ['featureWrong', 'anotherFeatureWrong'],
-      missing: ['featureA']
+      surplus: {
+        desc: 'features found in code but not in feature model',
+        values: ['featureWrong', 'anotherFeatureWrong'],
+        count: 2
+      },
+      missing: {
+        desc: 'child features found in feature model but not in code',
+        values: ['featureA'],
+        count: 1
+      }
     }
   );
 
@@ -154,7 +172,7 @@ test('Compare fanalysis results in a not consistent project', () => {
     ),
     {
       errors: 2, warnings: 1,
-      abound: ['wrongValue', 'anotherWrongValue'],
+      surplus: ['wrongValue', 'anotherWrongValue'],
       missing: ['aValue']
     }
   );
@@ -187,14 +205,25 @@ test('Consistency results for complex data', () => {
 
   assert.deepEqual(
     report.checkAnnotatedFeaturesConsistency(),
-    {errors: 0, warnings: 0, abound: [], missing: []}
+    {
+      surplus: {
+        desc: 'features found in code but not in feature model',
+        values: [],
+        count: 0
+      },
+      missing: {
+        desc: 'child features found in feature model but not in code',
+        values: [],
+        count: 0
+      }
+    }
   );
 
   assert.deepEqual(
     report.checkAnnotatedDataConsistency(
       readJsonFromFile(p('simpleSPLwithDataComplex/product.json'))
     ),
-    {errors: 0, warnings: 0, abound: [], missing: []}
+    {errors: 0, warnings: 0, surplus: [], missing: []}
   );
 });
 
