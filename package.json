@@ -27,7 +27,8 @@
     "babel-register": "6.26.0",
     "eslint": "2.7.0",
     "mocha": "5.2.0",
-    "pretty-data": "0.40.0"
+    "pretty-data": "0.40.0",
+    "watch": "1.0.2"
   },
   "homepage": "https://github.com/AlexCortinas/spl-js-engine",
   "license": "MIT",
@@ -41,7 +42,8 @@
     "build": "babel src --out-dir dist",
     "eslint": "eslint src/** test/** || exit 0",
     "prepublish": "npm run build",
-    "test": "mocha --ui qunit --compilers js:babel-register"
+    "test": "mocha --ui qunit --compilers js:babel-register",
+    "watch": "watch \"npm run build\" src"
   },
   "version": "2.0.2"
 }
