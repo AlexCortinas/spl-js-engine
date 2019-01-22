@@ -36,7 +36,10 @@ export default class DerivationEngine {
     this.verbose = verbose;
   }
 
-  generateZip(product = {}) {
+  generateZip(product = {}, opts = {}) {
+    this.verbose = opts.verbose;
+    const zipType = opts.type || 'blob';
+
     if (this.modelTransformation) {
       product = this.modelTransformation(product);
     }
@@ -63,7 +66,7 @@ export default class DerivationEngine {
 
     filePaths.forEach(fPath => {
       promises.push( // storing all promises to wait for then later
-        this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : 'blob').then(fileContent => {
+        this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : zipType).then(fileContent => {
           if (fileContent == '') return ; // avoiding folders
 
           if (!this.fileIsText(fPath)) { // binary files
@@ -74,6 +77,12 @@ export default class DerivationEngine {
           fileGenerator
             .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), '', {})
             .forEach(r => {
+              if (this.verbose) {
+                console.log('');
+                console.log('Input file.....: ' + fPath);
+                console.log('File name..: ' + r.fileName);
+                console.log('Output file: ' + _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName);
+              }
               const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
               const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
               if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
