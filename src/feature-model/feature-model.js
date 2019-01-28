@@ -4,6 +4,7 @@ import Feature from './feature';
 import ConstraintSet from './constraints/constraint-set.js';
 import TYPE from './feature-type';
 import Constraint from './constraints/constraint.js';
+import FeatureSelectionError from './feature-selection-error';
 
 export default class FeatureModel extends Feature {
   constructor(name) {
@@ -61,7 +62,7 @@ export default class FeatureModel extends Feature {
    * Returns the whole set of features required from a set of selected,
    * taking into account the constraints and relationships between features.
    *
-   * It is possible to create a product just constrafrom a few features, but
+   * It is possible to create a product just from a few features, but
    * then the rest of the minimum required (the mandatory ones, for example),
    * must be added using this method.
    *
@@ -97,7 +98,16 @@ export default class FeatureModel extends Feature {
       }
     }
 
-    this::_validateAltFeaturesFromSelection(namesOfSelectedFeatures);
+    try {
+      this::_validateAltFeaturesFromSelection(namesOfSelectedFeatures);
+    } catch (ex) {
+      if (ex.message) {
+        throw new FeatureSelectionError(ex.message, namesOfSelectedFeatures, ex);
+      } else {
+        throw new FeatureSelectionError(ex, namesOfSelectedFeatures);
+      }
+    }
+
     return namesOfSelectedFeatures;
   }
 
@@ -243,8 +253,13 @@ function _validateAltFeaturesFromSelection(selectedFeatures) {
           .filter(f2 => f1 != f2 && f1.parent == f2.parent)
           .length > 0)
 
-        throw 'selected more than one features in alternative ' +
-        'feature ' + f1.parent.name;
+        throw {
+          message: 'selected more than one features in alternative ' +
+        'feature ' + f1.parent.name,
+          featureName: f1.name,
+          featureType: f1.parent.type,
+          errorType: 'TOO_MANY_CHILDS'
+        };
     });
 
   // checking if mandatory xor/or feature has no child selected
@@ -252,7 +267,12 @@ function _validateAltFeaturesFromSelection(selectedFeatures) {
     .filter(f1 => f1.type === TYPE.XOR || f1.type === TYPE.OR)
     .forEach(f1 => {
       if (features.filter(f2 => f2.parent === f1).length < 1)
-        throw 'missing child feature selected for mandatory ' +
-        f1.type + ' feature ' + f1.name;
+        throw {
+          message: 'missing child feature selected for mandatory ' +
+        f1.type + ' feature ' + f1.name,
+          featureName: f1.name,
+          featureType: f1.type,
+          errorType: 'MISSING_CHILD'
+        };
     });
 }
