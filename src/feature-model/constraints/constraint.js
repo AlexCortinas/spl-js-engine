@@ -214,14 +214,6 @@ class AndConstraint extends BinaryConstraint {
   }
 
   evaluate(helper) {
-    if (!this.first.evaluate(helper) && this.first.constructor.name == 'FeatureConstraint') {
-      helper.add(this.first.toString());
-    }
-
-    if (!this.second.evaluate(helper) && this.second.constructor.name == 'FeatureConstraint') {
-      helper.add(this.second.toString());
-    }
-
     return this.first.evaluate(helper) && this.second.evaluate(helper);
   }
 

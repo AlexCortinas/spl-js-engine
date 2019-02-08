@@ -611,7 +611,7 @@ test('testing iff will not throw exception since it is expanded [2]', () => {
   );
 });
 
-test('and expand', () => {
+test('And does not expand', () => {
   const expected = ['fm', 'featureA', 'featureB'];
 
   const fm = new FeatureModel('fm');
@@ -619,15 +619,17 @@ test('and expand', () => {
   fm.addConstraint(
     fm.constraint('featureA').and(fm.constraint('featureB')));
 
-  assert.deepEqual(fm.completeFeatureSelection([]).sort(), expected.sort());
-  assert.deepEqual(fm.completeFeatureSelection(['featureA']).sort(), expected.sort());
-  assert.deepEqual(fm.completeFeatureSelection(['featureB']).sort(), expected.sort());
+
+  assert.throws(() => {
+    assert.deepEqual(fm.completeFeatureSelection(['featureA']).sort(), expected.sort());
+  });
+  assert.throws(() => {
+    assert.deepEqual(fm.completeFeatureSelection(['featureB']).sort(), expected.sort());
+  });
 });
 
-test('Should not throw an exception for not adding the second feature of an ' +
-  'and constraint since it is expanded', () => {
-
-  const expected = ['MyCalculator', 'Base', 'Operations', 'Add', 'Subtract'];
+test('Should throw an exception for not adding the second feature of an ' +
+  'and constraint since it does not expand', () => {
 
   const fm = _createMyCalculatorFM();
 
@@ -635,10 +637,9 @@ test('Should not throw an exception for not adding the second feature of an ' +
     fm.constraint('Add').and(fm.constraint('Subtract'))
   );
 
-  assert.deepEqual(
-    fm.completeFeatureSelection(['Add']).sort(),
-    expected.sort()
-  );
+  assert.throws(() => {
+    fm.completeFeatureSelection(['Add']);
+  });
 });
 
 suite('#FeatureModel Get Features:');
