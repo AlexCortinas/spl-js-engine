@@ -29,7 +29,7 @@ Generation of the product:
 
 ```bash
 cd examples/MyCalculator
-spl-js-engine --featureModel model.json \
+[npx] spl-js-engine --featureModel model.json \
     --product product.json \
     --config config.json \
     --extra extra.js \
