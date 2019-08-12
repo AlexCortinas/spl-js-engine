@@ -54,7 +54,7 @@ export function walkDir(pathToWalk, cb, ignore = []) {
     if (stat.isFile()) {
       cb(fullFilePath, false);
     } else if (stat.isDirectory()) {
-      walkDir(fullFilePath, cb);
+      walkDir(fullFilePath, cb, ignore);
     }
   });
 
