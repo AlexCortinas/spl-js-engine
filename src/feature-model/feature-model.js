@@ -21,7 +21,7 @@ export default class FeatureModel extends Feature {
 
   get(featureName) {
     if (!this.exists(featureName)) {
-      throw `feature ${featureName} not found`;
+      throw new FeatureSelectionError(`feature ${featureName} not found`);
     }
 
     return super.get(featureName);

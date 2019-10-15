@@ -45,5 +45,5 @@
     "test": "mocha --ui qunit --compilers js:babel-register",
     "watch": "watch \"npm run build\" src"
   },
-  "version": "2.1.1"
+  "version": "2.1.2"
 }
