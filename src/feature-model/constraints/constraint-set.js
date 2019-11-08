@@ -1,5 +1,6 @@
 import EvaluationHelper from './evaluation-helper';
 import Constraint from './constraint';
+import FeatureSelectionError from '../feature-selection-error';
 
 export default class constraintSet {
   constructor() {
@@ -24,7 +25,7 @@ export default class constraintSet {
       this.constraints.filter(c => !c.evaluate(helper)).join(', ');
 
     if (constraintsNotMet) {
-      throw `Constraints ${constraintsNotMet} not met`;
+      throw new FeatureSelectionError(`Constraints ${constraintsNotMet} not met`);
     }
 
     return helper.added;
