@@ -362,3 +362,20 @@ test('Omitting empty files with double annotation', () => {
 
   assertEqualFilesInFolders(p('simpleSPLwithEmptyFiles2/expected'), p('tmp/simpleProduct'));
 });
+
+test('Model transformation', () => {
+  const engine = new DerivationEngine(
+    p('simpleSPLwithTransformation/code'),
+    readJsonFromFile(p('simpleSPLwithTransformation/model.json')),
+    readJsonFromFile(p('simpleSPLwithTransformation/config.json')),
+    '',
+    readFile(p('simpleSPLwithTransformation/transformation.js'))
+  );
+
+  engine.generateProduct(
+    p('tmp/simpleProduct'),
+    readJsonFromFile(p('simpleSPLwithTransformation/product.json'))
+  );
+
+  assertEqualFilesInFolders(p('simpleSPLwithTransformation/expected'), p('tmp/simpleProduct'));
+});
