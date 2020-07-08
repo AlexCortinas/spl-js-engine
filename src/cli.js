@@ -29,12 +29,12 @@ export function cli() {
     configJson = readJsonFromFile(config);
   }
 
-  let evaluedMT = null;
+  let mt = null;
   if (modelTransformation) {
-    evaluedMT = eval(readFile(modelTransformation));
+    mt = readFile(modelTransformation);
   }
 
-  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra), evaluedMT, verbose);
+  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra), mt, verbose);
 
   let productJson = {};
   if (product) {

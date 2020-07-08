@@ -69,9 +69,10 @@ export default class DerivationEngine {
     const modelTransformationFile = this.zip.files['transformation.js'];
     if (modelTransformationFile) {
       promises.push(modelTransformationFile.async('string').then(mt => {
-        this.setModelTransformation(eval(mt));
+        this.setModelTransformation(mt);
       }));
     }
+
     return Promise.all(promises);
   }
 
@@ -185,7 +186,7 @@ export default class DerivationEngine {
   }
 
   setModelTransformation(mt) {
-    this.modelTransformation = mt;
+    this.modelTransformation = eval(mt);
   }
 
   setFeatureModel(featureModel) {
