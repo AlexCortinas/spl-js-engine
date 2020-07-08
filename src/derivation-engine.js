@@ -12,6 +12,24 @@ const _dir = f => path.dirname(f);
 
 export default class DerivationEngine {
   constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
+    if (typeof codePath === 'object' && codePath.zip) {
+      this.loadZip(codePath.zip, codePath);
+    } else {
+      if (typeof codePath === 'object') {
+        ({
+          codePath,
+          featureModel,
+          config,
+          extraJS,
+          modelTransformation,
+          verbose
+        } = codePath);
+      }
+      this.loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose);
+    }
+  }
+
+  loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
     this.featureModel = null;
     this.ignore = [];
     this.templateEngine = new TemplateEngine({}, extraJS);
@@ -34,6 +52,27 @@ export default class DerivationEngine {
     }
 
     this.verbose = verbose;
+  }
+
+  loadZip(zipFile, opts = {}) {
+    var promises = [];
+    this.zip = zipFile;
+    promises.push(this.zip.files['extra.js'].async('string').then(extrajs => {
+      this.templateEngine = new TemplateEngine({}, extrajs);
+    }));
+    promises.push(this.zip.files['config.json'].async('string').then(config => {
+      this.setConfig(JSON.parse(config));
+    }));
+    promises.push(this.zip.files['model.xml'].async('string').then(model => {
+      this.setFeatureModel(model);
+    }));
+    const modelTransformationFile = this.zip.files['transformation.js'];
+    if (modelTransformationFile) {
+      promises.push(modelTransformationFile.async('string').then(mt => {
+        this.setModelTransformation(eval(mt));
+      }));
+    }
+    return Promise.all(promises);
   }
 
   generateZip(product = {}, opts = {}) {
@@ -143,27 +182,6 @@ export default class DerivationEngine {
             processor.process(r.fileContent, _extension(fPath), r.context));
         });
     }, this.ignore);
-  }
-
-  loadZip(zipFile) {
-    var promises = [];
-    this.zip = zipFile;
-    promises.push(this.zip.files['extra.js'].async('string').then(extrajs => {
-      this.templateEngine = new TemplateEngine({}, extrajs);
-    }));
-    promises.push(this.zip.files['config.json'].async('string').then(config => {
-      this.setConfig(JSON.parse(config));
-    }));
-    promises.push(this.zip.files['model.xml'].async('string').then(model => {
-      this.setFeatureModel(model);
-    }));
-    const modelTransformationFile = this.zip.files['transformation.js'];
-    if (modelTransformationFile) {
-      promises.push(modelTransformationFile.async('string').then(mt => {
-        this.setModelTransformation(eval(mt));
-      }));
-    }
-    return Promise.all(promises);
   }
 
   setModelTransformation(mt) {
