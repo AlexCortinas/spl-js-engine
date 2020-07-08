@@ -29,9 +29,16 @@ export default class DerivationEngine {
     }
   }
 
+  /**
+   *
+   * @param String codePath - path to the annotated code
+   * @param JSON|XML featureModel - feature model in json or xml text
+   * @param Object config - json with config options
+   * @param JS extraJS - javascript text that work as helper functions during the derivation
+   * @param JSFunction modelTransformation - javascript text with a function that transforms the product
+   * @param boolean verbose - global verbose flag (boolean)
+   */
   loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
-    this.featureModel = null;
-    this.ignore = [];
     this.templateEngine = new TemplateEngine({}, extraJS);
     this.codePath = codePath;
 
@@ -39,12 +46,9 @@ export default class DerivationEngine {
       this.setFeatureModel(featureModel);
     }
 
+    this.ignore = [];
     if (config) {
       this.setConfig(config);
-    }
-
-    if (extraJS) {
-      this.extraJS = extraJS;
     }
 
     if (modelTransformation) {
@@ -54,19 +58,35 @@ export default class DerivationEngine {
     this.verbose = verbose;
   }
 
+  /**
+   *
+   * @param {zip} zipFile
+   * @param {
+   *          featureModel: path to feature model within the zip file,
+   *          config: path to config within the zip file,
+   *          extraJS: path to extra.js within the zip file,
+   *          verbose: global verbose flag (boolean)
+   *        } opts
+   */
   loadZip(zipFile, opts = {}) {
-    var promises = [];
     this.zip = zipFile;
-    promises.push(this.zip.files['extra.js'].async('string').then(extrajs => {
+    opts.featureModel = opts.featureModel || 'model.xml';
+    opts.config = opts.config || 'config.json';
+    opts.extraJS = opts.extraJS || 'extra.js';
+    opts.modelTransformation = opts.modelTransformation || 'transformation.js'
+    this.verbose = opts.verbose;
+
+    const promises = [];
+    promises.push(this.zip.files[opts.extraJS].async('string').then(extrajs => {
       this.templateEngine = new TemplateEngine({}, extrajs);
     }));
-    promises.push(this.zip.files['config.json'].async('string').then(config => {
+    promises.push(this.zip.files[opts.config].async('string').then(config => {
       this.setConfig(JSON.parse(config));
     }));
-    promises.push(this.zip.files['model.xml'].async('string').then(model => {
+    promises.push(this.zip.files[opts.featureModel].async('string').then(model => {
       this.setFeatureModel(model);
     }));
-    const modelTransformationFile = this.zip.files['transformation.js'];
+    const modelTransformationFile = this.zip.files[opts.modelTransformation];
     if (modelTransformationFile) {
       promises.push(modelTransformationFile.async('string').then(mt => {
         this.setModelTransformation(mt);
