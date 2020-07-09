@@ -13,7 +13,7 @@ const _dir = f => path.dirname(f);
 export default class DerivationEngine {
   constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
     if (typeof codePath === 'object' && codePath.zip) {
-      this.loadZip(codePath.zip, codePath);
+      return this.loadZip(codePath.zip, codePath).then(() => this);
     } else {
       if (typeof codePath === 'object') {
         ({
@@ -25,7 +25,7 @@ export default class DerivationEngine {
           verbose
         } = codePath);
       }
-      this.loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose);
+      return this.loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose);
     }
   }
 
@@ -77,9 +77,13 @@ export default class DerivationEngine {
     this.verbose = opts.verbose;
 
     const promises = [];
-    promises.push(this.zip.files[opts.extraJS].async('string').then(extrajs => {
-      this.templateEngine = new TemplateEngine({}, extrajs);
-    }));
+    if (this.zip.files[opts.extraJS]) {
+      promises.push(this.zip.files[opts.extraJS].async('string').then(extrajs => {
+        this.templateEngine = new TemplateEngine({}, extrajs);
+      }));
+    } else {
+      this.templateEngine = new TemplateEngine({}, '');
+    }
     promises.push(this.zip.files[opts.config].async('string').then(config => {
       this.setConfig(JSON.parse(config));
     }));
@@ -96,113 +100,120 @@ export default class DerivationEngine {
     return Promise.all(promises);
   }
 
-  generateZip(product = {}, opts = {}) {
+  /**
+   *
+   * @param JSON product - json spec of the product
+   * @param {
+   *          type = local | zip,
+   *          zipType: String,
+   *          verbose: Boolean - local verbose flag,
+   *          outputPath: String
+   *        } opts
+   *
+   */
+  generate(product = {}, opts = {}) {
     this.verbose = opts.verbose;
-    const zipType = opts.type || 'blob';
+    opts.type = opts.type || 'zip';
+    opts.zipType = opts.zipType || 'blob';
 
     if (this.modelTransformation) {
       product = this.modelTransformation(product);
     }
-    const features = {};
+    const features = this._prepareFeatures(product.features);
     const data = product.data || {};
-
-    if (product.features) {
-      this.featureModel
-        .completeFeatureSelection(product.features)
-        .forEach(f => {
-          features[f] = true;
-        });
-    }
-
     const fileGenerator = this.templateEngine.createFileGenerator(features, data);
     const processor = this.templateEngine.createProcessor(features, data);
 
-    const output = new JSZip();
-    const promises = [];
+    if (opts.type == 'zip') {
+      const output = new JSZip();
+      const promises = [];
 
-    // only taking files in 'code/'
-    const codePath = 'code/';
-    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(codePath));
+      // only taking files in 'code/'
+      const codePath = 'code/';
+      const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(codePath));
 
-    filePaths.forEach(fPath => {
-      promises.push( // storing all promises to wait for then later
-        this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : zipType).then(fileContent => {
-          if (fileContent == '') return ; // avoiding folders
+      filePaths.forEach(fPath => {
+        promises.push( // storing all promises to wait for then later
+          this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : opts.zipType).then(fileContent => {
+            if (fileContent == '') return ; // avoiding folders
 
-          if (!this.fileIsText(fPath)) { // binary files
-            // FIXME: the filter of binary files is not working properly with files without extension
-            return output.file(fPath.substr(5), fileContent);
-          }
+            if (!this.fileIsText(fPath)) { // binary files
+              // FIXME: the filter of binary files is not working properly with files without extension
+              return output.file(fPath.substr(5), fileContent);
+            }
 
-          fileGenerator
-            .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), '', {})
-            .forEach(r => {
-              if (this.verbose) {
-                console.log('');
-                console.log('Input file.....: ' + fPath);
-                console.log('File name..: ' + r.fileName);
-                console.log('Output file: ' + _dir(fPath.replace(this.codePath, '')) + '/' + r.fileName);
-              }
-              const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
-              const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
-              if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
-                return output.file(generatedFilePath, generatedContent);
-              }
-            });
-        })
-      );
-    });
+            fileGenerator
+              .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), '', {})
+              .forEach(r => {
+                if (this.verbose) {
+                  console.log('');
+                  console.log('Input file.....: ' + fPath);
+                  console.log('File name..: ' + r.fileName);
+                  console.log('Output file: ' + _dir(fPath.replace(this.codePath, '')) + '/' + r.fileName);
+                }
+                const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
+                const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
+                if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
+                  return output.file(generatedFilePath, generatedContent);
+                }
+              });
+          })
+        );
+      });
 
-    return Promise.all(promises).then(() => output);
+      return Promise.all(promises).then(() => output);
+    } else {
+      let fileContent;
+      walkDir(this.codePath, (fPath, isFolder) => {
+        if (isFolder) return;
+
+        if (!this.fileIsText(fPath)) {
+          writeFile(
+            fPath.replace(this.codePath, opts.outputPath),
+            readFile(fPath, true),
+            true
+          );
+          return;
+        }
+
+        fileContent = readFile(fPath);
+        fileGenerator
+          .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), opts.outputPath, {})
+          .forEach(r => {
+            if (this.verbose) {
+              console.log('');
+              console.log('Input file.....: ' + fPath);
+              console.log('File name..: ' + r.fileName);
+              console.log('Output file: ' + _dir(fPath.replace(this.codePath, opts.outputPath)) + '/' + r.fileName);
+            }
+
+            writeFile(
+              _dir(fPath.replace(this.codePath, opts.outputPath)) + '/' + r.fileName,
+              processor.process(r.fileContent, _extension(fPath), r.context));
+          });
+      }, this.ignore);
+
+      return Promise.all([]);
+    }
+  }
+
+  _prepareFeatures(productFeatures) {
+    if (!productFeatures) return {};
+    const features = {};
+    this.featureModel
+      .completeFeatureSelection(productFeatures)
+      .forEach((f) => {
+        features[f] = true;
+      });
+    return features;
+  }
+
+  generateZip(product = {}, opts = {}) {
+    return this.generate(product, { type: 'zip', zipType: opts.type, verbose: opts.verbose });
   }
 
   generateProduct(outputPath, product = {}) {
-    if (this.modelTransformation) {
-      product = this.modelTransformation(product);
-    }
-    const features = {};
-    const data = product.data || {};
-    let fileContent;
-
-    if (product.features) {
-      this.featureModel
-        .completeFeatureSelection(product.features)
-        .forEach(f => {
-          features[f] = true;
-        });
-    }
-
-    const fileGenerator = this.templateEngine.createFileGenerator(features, data);
-    const processor = this.templateEngine.createProcessor(features, data);
-
-    walkDir(this.codePath, (fPath, isFolder) => {
-      if (isFolder) return;
-
-      if (!this.fileIsText(fPath)) {
-        writeFile(
-          fPath.replace(this.codePath, outputPath),
-          readFile(fPath, true),
-          true
-        );
-        return;
-      }
-
-      fileContent = readFile(fPath);
-      fileGenerator
-        .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), outputPath, {})
-        .forEach(r => {
-          if (this.verbose) {
-            console.log('');
-            console.log('Input file.....: ' + fPath);
-            console.log('File name..: ' + r.fileName);
-            console.log('Output file: ' + _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName);
-          }
-
-          writeFile(
-            _dir(fPath.replace(this.codePath, outputPath)) + '/' + r.fileName,
-            processor.process(r.fileContent, _extension(fPath), r.context));
-        });
-    }, this.ignore);
+    return this.generate(product, { type: 'local', outputPath: outputPath });
   }
 
   setModelTransformation(mt) {
