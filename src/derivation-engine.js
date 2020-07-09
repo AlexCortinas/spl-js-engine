@@ -1,128 +1,9 @@
-import {readFile, writeFile, walkDir} from './file-utils';
 import FeatureModel from './feature-model/feature-model';
 import TemplateEngine from './template-engine/template-engine';
 import AnalysisReport from './template-engine/analysis-report';
-import path from 'path';
-import isTextOrBinary from 'istextorbinary';
-import JSZip from 'jszip';
-
-const _extension = f => f.substring(f.lastIndexOf('.') + 1);
-const _fileName = f => path.basename(f);
-const _dir = f => path.dirname(f);
-
-
-class Output {
-  constructor() {}
-
-  // eslint-disable-next-line no-unused-vars
-  add(fPath, fContent, bin) {}
-  get() {}
-}
-
-class ZipOutput extends Output {
-  constructor() {
-    super();
-    this.zip = JSZip();
-  }
-
-  add(fPath, fContent) {
-    this.zip.file(fPath, fContent);
-  }
-
-  get() {
-    this.zip;
-  }
-}
-
-class LocalOutput extends Output {
-  constructor(outputPath) {
-    super();
-    this.outputPath = outputPath;
-  }
-
-  add(fPath, fContent, bin = false) {
-    writeFile(this.outputPath + path.sep + fPath, fContent, bin);
-  }
-
-  get() {
-    return this.outputPath;
-  }
-}
-
-class Input {
-  constructor() {
-    this.handledExtensions = [];
-  }
-
-  addHandledExtension(extension) {
-    this.handledExtensions.push(extension);
-  }
-
-  fileIsText(fPath) {
-    return this.handledExtensions.indexOf(_extension(fPath)) != -1 || isTextOrBinary.isTextSync(fPath);
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  exists(path) {}
-  // eslint-disable-next-line no-unused-vars
-  get(path) {}
-  setIgnorePattern(){}
-  // eslint-disable-next-line no-unused-vars
-  forEachCodeFile(cb) {}
-}
-
-class ZipInput extends Input {
-  constructor(zipFile, codePath) {
-    super();
-    this.zip = zipFile;
-    this.codePath = codePath;
-  }
-
-  exists(path) {
-    return this.zip.files[path] != null;
-  }
-
-  get(path) {
-    return this.zip.files[path].async('string');
-  }
-
-  forEachCodeFile(cb) {
-    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(this.codePath));
-    const promises = [];
-
-    filePaths.forEach(fPath => {
-      const isText = this.fileIsText(fPath);
-
-      promises.push(this.zip.files[fPath].async(isText ? 'string' : 'blob').then(fContent => {
-        return cb(fPath.replace(this.codePath, ''), fContent, isText);
-      }));
-    });
-
-    return Promise.all(promises);
-  }
-}
-
-class LocalInput extends Input {
-  constructor(codePath) {
-    super();
-    this.codePath = codePath;
-    this.ignore = [];
-  }
-
-  setIgnorePattern(ignoreArray) {
-    this.ignore = ignoreArray;
-  }
-
-  forEachCodeFile(cb) {
-    walkDir(this.codePath, (fPath, isFolder) => {
-      if (isFolder) return;
-      const isText = this.fileIsText(fPath);
-
-      return cb(fPath.replace(this.codePath, ''), readFile(fPath, !isText), isText);
-    }, this.ignore);
-    return Promise.all([]);
-  }
-}
+import {LocalOutput, ZipOutput} from './output';
+import {LocalInput, ZipInput} from './input';
+import {getExtension, getFolder, getFileName} from './file-utils';
 
 export default class DerivationEngine {
   constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
@@ -240,16 +121,16 @@ export default class DerivationEngine {
       }
 
       fileGenerator
-        .filesToCreate(fContent, _extension(fPath), _fileName(fPath), '', {})
+        .filesToCreate(fContent, getExtension(fPath), getFileName(fPath), '', {})
         .forEach(r => {
           if (this.verbose) {
             console.log('');
             console.log('Input file.....: ' + fPath);
             console.log('File name..: ' + r.fileName);
-            console.log('Output file: ' + _dir(fPath) + '/' + r.fileName);
+            console.log('Output file: ' + getFolder(fPath) + '/' + r.fileName);
           }
-          const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
-          const generatedFilePath = (_dir(fPath) + '/' + r.fileName).replace('./', '');
+          const generatedContent = processor.process(r.fileContent, getExtension(fPath), r.context);
+          const generatedFilePath = (getFolder(fPath) + '/' + r.fileName).replace('./', '');
           if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
             return this.output.add(generatedFilePath, generatedContent);
           }
@@ -309,7 +190,7 @@ export default class DerivationEngine {
 
     return this.input.forEachCodeFile((fPath, fContent, isText) => {
       if (!isText) return;
-      return report.addAnalysis(fPath, analyser.analyse(fContent, _extension(fPath)));
+      return report.addAnalysis(fPath, analyser.analyse(fContent, getExtension(fPath)));
     }).then(() => report);
   }
 }
