@@ -16,15 +16,21 @@ class Output {
 
   // eslint-disable-next-line no-unused-vars
   add(fPath, fContent, bin) {}
+  get() {}
 }
 
 class ZipOutput extends Output {
   constructor() {
     super();
+    this.zip = JSZip();
   }
 
   add(fPath, fContent) {
     this.zip.file(fPath, fContent);
+  }
+
+  get() {
+    this.zip;
   }
 }
 
@@ -36,6 +42,10 @@ class LocalOutput extends Output {
 
   add(fPath, fContent, bin = false) {
     writeFile(this.outputPath + path.sep + fPath, fContent, bin);
+  }
+
+  get() {
+    return this.outputPath;
   }
 }
 
@@ -49,7 +59,7 @@ class Input {
   }
 
   fileIsText(fPath) {
-    return this.handledExtensions.indexOf(fPath) != -1 || isTextOrBinary.isTextSync(fPath);
+    return this.handledExtensions.indexOf(_extension(fPath)) != -1 || isTextOrBinary.isTextSync(fPath);
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -293,65 +303,13 @@ export default class DerivationEngine {
     }
   }
 
-  _analyseAnnotationsZip(opts) {
-    const zipType = opts.type || 'blob';
-
+  analyseAnnotations() {
     const report = new AnalysisReport(this.featureModel);
     const analyser = this.templateEngine.createAnalyser();
 
-    const promises = [];
-
-    // only taking files in 'code/'
-    const codePath = 'code/';
-    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(codePath));
-
-    filePaths.forEach(fPath => {
-      promises.push( // storing all promises to wait for then later
-        this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : zipType).then(fileContent => {
-          if (fileContent == '') return; // avoiding folders
-
-          if (!this.fileIsText(fPath)) return; // avoiding binary files
-
-          report.addAnalysis(
-            fPath,
-            analyser.analyse(fileContent, _extension(fPath))
-          );
-
-          return;
-        })
-      );
-    });
-
-    return Promise.all(promises).then(() => report);
-  }
-
-  _analyseAnnotationsPath() {
-    const report = new AnalysisReport(this.featureModel);
-    const analyser = this.templateEngine.createAnalyser();
-
-    walkDir(this.codePath, (fPath, isFolder) => {
-      if (!isFolder) {
-        if (this.fileIsText(fPath)) {
-          report.addAnalysis(
-            fPath.replace(`${this.codePath}${path.sep}`, ''),
-            analyser.analyse(readFile(fPath), _extension(fPath))
-          );
-        }
-      }
-    }, this.ignore);
-
-    return report;
-  }
-
-  analyseAnnotations(opts) {
-    if (this.zip) {
-      return this._analyseAnnotationsZip(opts);
-    } else {
-      return this._analyseAnnotationsPath();
-    }
-  }
-
-  fileIsText(fPath) {
-    return this.templateEngine.delimiterFor(_extension(fPath)) || isTextOrBinary.isTextSync(fPath);
+    return this.input.forEachCodeFile((fPath, fContent, isText) => {
+      if (!isText) return;
+      return report.addAnalysis(fPath, analyser.analyse(fContent, _extension(fPath)));
+    }).then(() => report);
   }
 }
