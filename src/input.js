@@ -1,6 +1,7 @@
 import isTextOrBinary from 'istextorbinary';
-import {readFile, walkDir} from './file-utils';
+import {readFile, walkDir, isNode} from './file-utils';
 import {getExtension} from './file-utils';
+import path from 'path';
 
 class Input {
   constructor() {
@@ -19,7 +20,8 @@ class Input {
   exists(path) {}
   // eslint-disable-next-line no-unused-vars
   get(path) {}
-  setIgnorePattern(){}
+  // eslint-disable-next-line no-unused-vars
+  setIgnorePattern(ignoreArray){}
   // eslint-disable-next-line no-unused-vars
   forEachCodeFile(cb) {}
 }
@@ -29,6 +31,8 @@ export class ZipInput extends Input {
     super();
     this.zip = zipFile;
     this.codePath = codePath;
+    this.ignore = [];
+    this.zipType = isNode ? 'nodebuffer' : 'blob';
   }
 
   exists(path) {
@@ -39,14 +43,21 @@ export class ZipInput extends Input {
     return this.zip.files[path].async('string');
   }
 
+  setIgnorePattern(ignoreArray) {
+    this.ignore = ignoreArray;
+  }
+
   forEachCodeFile(cb) {
-    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(this.codePath));
+    const filePaths = Object.keys(this.zip.files)
+      .filter(fPath => fPath.startsWith(this.codePath))
+      .filter(fPath => !this.zip.files[fPath].dir)
+      .filter(fPath => !fPath.split(path.sep).filter(f => this.ignore.includes(f)).length);
     const promises = [];
 
     filePaths.forEach(fPath => {
       const isText = this.fileIsText(fPath);
 
-      promises.push(this.zip.files[fPath].async(isText ? 'string' : 'blob').then(fContent => {
+      promises.push(this.zip.files[fPath].async(isText ? 'string' : this.zipType).then(fContent => {
         return cb(fPath.replace(this.codePath, ''), fContent, isText);
       }));
     });

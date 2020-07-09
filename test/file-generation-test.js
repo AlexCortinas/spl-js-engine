@@ -1,5 +1,6 @@
-import {DerivationEngine, readJsonFromFile} from '../src/index';
+import {DerivationEngine, readJsonFromFile, readFile} from '../src/index';
 import {getTestPath as p, removeTmpFolder, assertEqualFilesInFolders} from './test-utils';
+import JSZip from 'jszip';
 
 suite('#FileGeneration - checks that using zip or local files is the sames');
 
@@ -19,4 +20,21 @@ test('Destructuring parameters', async () => {
   );
 
   assertEqualFilesInFolders(p('simpleSPL/expected'), p('tmp/simpleProduct'));
+});
+
+test('Generate local from zip', (done) => {
+  JSZip.loadAsync(readFile(p('simpleSPL.zip'), true)).then((zip) => {
+    new DerivationEngine({
+      zip,
+      featureModel: 'model.json'
+    }).then((engine) => {
+      engine.generateProduct(
+        p('tmp/simpleProduct'),
+        readJsonFromFile(p('simpleSPL/product.json'))
+      ).then(() => {
+        assertEqualFilesInFolders(p('simpleSPL/expected'), p('tmp/simpleProduct'));
+        done();
+      });
+    });
+  }).catch(e => done(e));
 });

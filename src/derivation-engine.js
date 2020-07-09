@@ -99,7 +99,6 @@ export default class DerivationEngine {
   generate(product = {}, opts = {}) {
     this.verbose = opts.verbose;
     opts.type = opts.type || 'zip';
-    opts.zipType = opts.zipType || 'blob';
 
     if (this.modelTransformation) {
       product = this.modelTransformation(product);
