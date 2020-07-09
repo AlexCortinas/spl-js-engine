@@ -10,11 +10,148 @@ const _extension = f => f.substring(f.lastIndexOf('.') + 1);
 const _fileName = f => path.basename(f);
 const _dir = f => path.dirname(f);
 
+
+class Output {
+  constructor() {}
+
+  // eslint-disable-next-line no-unused-vars
+  add(fPath, fContent, bin) {}
+}
+
+class ZipOutput extends Output {
+  constructor() {
+    super();
+  }
+
+  add(fPath, fContent) {
+    this.zip.file(fPath, fContent);
+  }
+}
+
+class LocalOutput extends Output {
+  constructor(outputPath) {
+    super();
+    this.outputPath = outputPath;
+  }
+
+  add(fPath, fContent, bin = false) {
+    writeFile(this.outputPath + path.sep + fPath, fContent, bin);
+  }
+}
+
+class Input {
+  constructor() {
+    this.handledExtensions = [];
+  }
+
+  addHandledExtension(extension) {
+    this.handledExtensions.push(extension);
+  }
+
+  fileIsText(fPath) {
+    return this.handledExtensions.indexOf(fPath) != -1 || isTextOrBinary.isTextSync(fPath);
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  exists(path) {}
+  // eslint-disable-next-line no-unused-vars
+  get(path) {}
+  setIgnorePattern(){}
+  // eslint-disable-next-line no-unused-vars
+  forEachCodeFile(cb) {}
+}
+
+class ZipInput extends Input {
+  constructor(zipFile, codePath) {
+    super();
+    this.zip = zipFile;
+    this.codePath = codePath;
+  }
+
+  exists(path) {
+    return this.zip.files[path] != null;
+  }
+
+  get(path) {
+    return this.zip.files[path].async('string');
+  }
+
+  forEachCodeFile(cb) {
+    const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(this.codePath));
+    const promises = [];
+
+    filePaths.forEach(fPath => {
+      const isText = this.fileIsText(fPath);
+
+      promises.push(this.zip.files[fPath].async(isText ? 'string' : 'blob').then(fContent => {
+        return cb(fPath.replace(this.codePath, ''), fContent, isText);
+      }));
+    });
+
+    return Promise.all(promises);
+  }
+}
+
+class LocalInput extends Input {
+  constructor(codePath) {
+    super();
+    this.codePath = codePath;
+    this.ignore = [];
+  }
+
+  setIgnorePattern(ignoreArray) {
+    this.ignore = ignoreArray;
+  }
+
+  forEachCodeFile(cb) {
+    walkDir(this.codePath, (fPath, isFolder) => {
+      if (isFolder) return;
+      const isText = this.fileIsText(fPath);
+
+      return cb(fPath.replace(this.codePath, ''), readFile(fPath, !isText), isText);
+    }, this.ignore);
+    return Promise.all([]);
+  }
+}
+
 export default class DerivationEngine {
   constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
+    const promises = [];
+
     if (typeof codePath === 'object' && codePath.zip) {
-      return this.loadZip(codePath.zip, codePath).then(() => this);
+      // codePath is in fact an object with all the params
+      /**
+       *
+       * @param {zip} zipFile
+       * @param {
+       *          featureModel: path to feature model within the zip file,
+       *          config: path to config within the zip file,
+       *          extraJS: path to extra.js within the zip file,
+       *          verbose: global verbose flag (boolean)
+       *        } opts
+       */
+      this.input = new ZipInput(codePath.zip, codePath.codePath || 'code');
+      if (this.input.exists(codePath.extraJS || 'extra.js')) {
+        promises.push(this.input.get(codePath.extraJS || 'extra.js').then(content => extraJS = content));
+      }
+      promises.push(this.input.get(codePath.featureModel || 'model.xml').then(content => featureModel = content));
+      promises.push(this.input.get(codePath.config || 'config.json').then(content => config = JSON.parse(content)));
+      if (this.input.exists(codePath.modelTransformation || 'transformation.js')) {
+        promises.push(this.input.get(codePath.modelTransformation || 'transformation.js')
+          .then(content => modelTransformation = content));
+      }
+      verbose = codePath.verbose;
+
     } else {
+      /**
+       *
+       * @param String codePath - path to the annotated code
+       * @param JSON|XML featureModel - feature model in json or xml text
+       * @param Object config - json with config options
+       * @param JS extraJS - javascript text that work as helper functions during the derivation
+       * @param JSFunction modelTransformation - javascript text with a function that transforms the product
+       * @param boolean verbose - global verbose flag (boolean)
+       */
       if (typeof codePath === 'object') {
         ({
           codePath,
@@ -25,79 +162,36 @@ export default class DerivationEngine {
           verbose
         } = codePath);
       }
-      return this.loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose);
+      this.input = new LocalInput(codePath);
     }
+
+    return Promise.all(promises).then(() => {
+      this.templateEngine = new TemplateEngine({}, extraJS);
+
+      if (featureModel) {
+        this.setFeatureModel(featureModel);
+      }
+
+      if (config) {
+        this.setConfig(config);
+      }
+
+      if (modelTransformation) {
+        this.setModelTransformation(modelTransformation);
+      }
+
+      this.verbose = verbose;
+    }).then(() => {
+      return this;
+    });
   }
 
-  /**
-   *
-   * @param String codePath - path to the annotated code
-   * @param JSON|XML featureModel - feature model in json or xml text
-   * @param Object config - json with config options
-   * @param JS extraJS - javascript text that work as helper functions during the derivation
-   * @param JSFunction modelTransformation - javascript text with a function that transforms the product
-   * @param boolean verbose - global verbose flag (boolean)
-   */
-  loadLocal(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
-    this.templateEngine = new TemplateEngine({}, extraJS);
-    this.codePath = codePath;
-
-    if (featureModel) {
-      this.setFeatureModel(featureModel);
-    }
-
-    this.ignore = [];
-    if (config) {
-      this.setConfig(config);
-    }
-
-    if (modelTransformation) {
-      this.setModelTransformation(modelTransformation);
-    }
-
-    this.verbose = verbose;
+  generateZip(product = {}, opts = {}) {
+    return this.generate(product, { type: 'zip', zipType: opts.type, verbose: opts.verbose });
   }
 
-  /**
-   *
-   * @param {zip} zipFile
-   * @param {
-   *          featureModel: path to feature model within the zip file,
-   *          config: path to config within the zip file,
-   *          extraJS: path to extra.js within the zip file,
-   *          verbose: global verbose flag (boolean)
-   *        } opts
-   */
-  loadZip(zipFile, opts = {}) {
-    this.zip = zipFile;
-    opts.featureModel = opts.featureModel || 'model.xml';
-    opts.config = opts.config || 'config.json';
-    opts.extraJS = opts.extraJS || 'extra.js';
-    opts.modelTransformation = opts.modelTransformation || 'transformation.js'
-    this.verbose = opts.verbose;
-
-    const promises = [];
-    if (this.zip.files[opts.extraJS]) {
-      promises.push(this.zip.files[opts.extraJS].async('string').then(extrajs => {
-        this.templateEngine = new TemplateEngine({}, extrajs);
-      }));
-    } else {
-      this.templateEngine = new TemplateEngine({}, '');
-    }
-    promises.push(this.zip.files[opts.config].async('string').then(config => {
-      this.setConfig(JSON.parse(config));
-    }));
-    promises.push(this.zip.files[opts.featureModel].async('string').then(model => {
-      this.setFeatureModel(model);
-    }));
-    const modelTransformationFile = this.zip.files[opts.modelTransformation];
-    if (modelTransformationFile) {
-      promises.push(modelTransformationFile.async('string').then(mt => {
-        this.setModelTransformation(mt);
-      }));
-    }
-
-    return Promise.all(promises);
+  generateProduct(outputPath, product = {}) {
+    return this.generate(product, { type: 'local', outputPath: outputPath });
   }
 
   /**
@@ -125,76 +219,32 @@ export default class DerivationEngine {
     const processor = this.templateEngine.createProcessor(features, data);
 
     if (opts.type == 'zip') {
-      const output = new JSZip();
-      const promises = [];
-
-      // only taking files in 'code/'
-      const codePath = 'code/';
-      const filePaths = Object.keys(this.zip.files).filter(fPath => fPath.startsWith(codePath));
-
-      filePaths.forEach(fPath => {
-        promises.push( // storing all promises to wait for then later
-          this.zip.files[fPath].async(this.fileIsText(fPath) ? 'string' : opts.zipType).then(fileContent => {
-            if (fileContent == '') return ; // avoiding folders
-
-            if (!this.fileIsText(fPath)) { // binary files
-              // FIXME: the filter of binary files is not working properly with files without extension
-              return output.file(fPath.substr(5), fileContent);
-            }
-
-            fileGenerator
-              .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), '', {})
-              .forEach(r => {
-                if (this.verbose) {
-                  console.log('');
-                  console.log('Input file.....: ' + fPath);
-                  console.log('File name..: ' + r.fileName);
-                  console.log('Output file: ' + _dir(fPath.replace(this.codePath, '')) + '/' + r.fileName);
-                }
-                const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
-                const generatedFilePath = (_dir(fPath.replace(codePath, '')) + '/' + r.fileName).replace('./', '');
-                if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
-                  return output.file(generatedFilePath, generatedContent);
-                }
-              });
-          })
-        );
-      });
-
-      return Promise.all(promises).then(() => output);
+      this.output = new ZipOutput();
     } else {
-      let fileContent;
-      walkDir(this.codePath, (fPath, isFolder) => {
-        if (isFolder) return;
-
-        if (!this.fileIsText(fPath)) {
-          writeFile(
-            fPath.replace(this.codePath, opts.outputPath),
-            readFile(fPath, true),
-            true
-          );
-          return;
-        }
-
-        fileContent = readFile(fPath);
-        fileGenerator
-          .filesToCreate(fileContent, _extension(fPath), _fileName(fPath), opts.outputPath, {})
-          .forEach(r => {
-            if (this.verbose) {
-              console.log('');
-              console.log('Input file.....: ' + fPath);
-              console.log('File name..: ' + r.fileName);
-              console.log('Output file: ' + _dir(fPath.replace(this.codePath, opts.outputPath)) + '/' + r.fileName);
-            }
-
-            writeFile(
-              _dir(fPath.replace(this.codePath, opts.outputPath)) + '/' + r.fileName,
-              processor.process(r.fileContent, _extension(fPath), r.context));
-          });
-      }, this.ignore);
-
-      return Promise.all([]);
+      this.output = new LocalOutput(opts.outputPath);
     }
+
+    return this.input.forEachCodeFile((fPath, fContent, isText) => {
+      if (!isText) {
+        return this.output.add(fPath, fContent, true);
+      }
+
+      fileGenerator
+        .filesToCreate(fContent, _extension(fPath), _fileName(fPath), '', {})
+        .forEach(r => {
+          if (this.verbose) {
+            console.log('');
+            console.log('Input file.....: ' + fPath);
+            console.log('File name..: ' + r.fileName);
+            console.log('Output file: ' + _dir(fPath) + '/' + r.fileName);
+          }
+          const generatedContent = processor.process(r.fileContent, _extension(fPath), r.context);
+          const generatedFilePath = (_dir(fPath) + '/' + r.fileName).replace('./', '');
+          if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
+            return this.output.add(generatedFilePath, generatedContent);
+          }
+        });
+    }).then(() => this.output.get());
   }
 
   _prepareFeatures(productFeatures) {
@@ -206,14 +256,6 @@ export default class DerivationEngine {
         features[f] = true;
       });
     return features;
-  }
-
-  generateZip(product = {}, opts = {}) {
-    return this.generate(product, { type: 'zip', zipType: opts.type, verbose: opts.verbose });
-  }
-
-  generateProduct(outputPath, product = {}) {
-    return this.generate(product, { type: 'local', outputPath: outputPath });
   }
 
   setModelTransformation(mt) {
@@ -240,13 +282,14 @@ export default class DerivationEngine {
     if (Array.isArray(config.delimiters)) {
       config.delimiters.forEach(d => {
         d.extension.forEach(e => {
+          this.input.addHandledExtension(e);
           this.templateEngine.addDelimiter(e, d.start, d.end);
         });
       });
     }
 
     if (Array.isArray(config.ignore)) {
-      this.ignore = config.ignore;
+      this.input.setIgnorePattern(config.ignore);
     }
   }
 
