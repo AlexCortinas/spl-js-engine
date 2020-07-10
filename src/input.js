@@ -1,4 +1,4 @@
-import isTextOrBinary from 'istextorbinary';
+import {isText} from 'istextorbinary';
 import {readFile, walkDir, isNode} from './file-utils';
 import {getExtension} from './file-utils';
 import path from 'path';
@@ -13,7 +13,7 @@ class Input {
   }
 
   fileIsText(fPath) {
-    return this.handledExtensions.indexOf(getExtension(fPath)) != -1 || isTextOrBinary.isTextSync(fPath);
+    return this.handledExtensions.indexOf(getExtension(fPath)) != -1 || isText(fPath);
   }
 
   // eslint-disable-next-line no-unused-vars
