@@ -21,7 +21,7 @@ export class ZipOutput extends Output {
   }
 
   get() {
-    this.zip;
+    return this.zip;
   }
 }
 
