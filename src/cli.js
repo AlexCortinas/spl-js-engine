@@ -34,19 +34,19 @@ export function cli() {
     mt = readFile(modelTransformation);
   }
 
-  const engine = new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra), mt, verbose);
+  new DerivationEngine(code, readFile(featureModel), configJson, readFile(extra), mt, verbose).then((engine) => {
+    let productJson = {};
+    if (product) {
+      productJson = readJsonFromFile(product);
+    }
 
-  let productJson = {};
-  if (product) {
-    productJson = readJsonFromFile(product);
-  }
+    if (cli.input.indexOf('validate') != -1) {
+      validate(engine, productJson);
+    }
 
-  if (cli.input.indexOf('validate') != -1) {
-    validate(engine, productJson);
-  }
-
-  engine.generateProduct(output, productJson);
-  console.log(`Product generated at ${output}`);
+    engine.generateProduct(output, productJson);
+    console.log(`Product generated at ${output}`);
+  });
 }
 
 function validate(engine, productJson) {
