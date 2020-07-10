@@ -80,11 +80,11 @@ test('Get features and parameters of an annotated project', async () => {
   assert.deepEqual(
     report.long(),
     {
-      '/index.html': {
+      'index.html': {
         feature: {featureA: 1, featureB: 1, featureC: 1},
         data: {}
       },
-      '/main.js': {
+      'main.js': {
         feature: {featureA: 1},
         data: {aValue: 1, bValue: 1}
       }
@@ -93,17 +93,17 @@ test('Get features and parameters of an annotated project', async () => {
 
   assert.deepEqual(
     report.filesByFeature('featureA'),
-    ['/index.html', '/main.js']
+    ['index.html', 'main.js']
   );
 
   assert.deepEqual(
     report.filesByFeature('featureB'),
-    ['/index.html']
+    ['index.html']
   );
 
   assert.deepEqual(
     report.filesByData('aValue'),
-    ['/main.js']
+    ['main.js']
   );
 });
 

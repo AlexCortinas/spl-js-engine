@@ -56,9 +56,8 @@ export class ZipInput extends Input {
 
     filePaths.forEach(fPath => {
       const isText = this.fileIsText(fPath);
-
       promises.push(this.zip.files[fPath].async(isText ? 'string' : this.zipType).then(fContent => {
-        return cb(fPath.replace(this.codePath, ''), fContent, isText);
+        return cb(fPath.replace(this.codePath + path.sep, ''), fContent, isText);
       }));
     });
 
@@ -82,7 +81,7 @@ export class LocalInput extends Input {
       if (isFolder) return;
       const isText = this.fileIsText(fPath);
 
-      return cb(fPath.replace(this.codePath, ''), readFile(fPath, !isText), isText);
+      return cb(fPath.replace(this.codePath + path.sep, ''), readFile(fPath, !isText), isText);
     }, this.ignore);
     return Promise.all([]);
   }
