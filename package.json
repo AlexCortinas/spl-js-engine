@@ -42,7 +42,7 @@
     "build": "babel src --out-dir dist",
     "eslint": "eslint src/** test/** || exit 0",
     "prepublish": "npm run build",
-    "test": "mocha --ui qunit --compilers js:babel-register",
+    "test": "mocha --ui qunit --compilers js:babel-register --require babel-polyfill",
     "watch": "watch \"npm run build\" src"
   },
   "version": "2.1.3"
