@@ -6,7 +6,7 @@ export default class Engine {
     if (!this.delimiters.default) {
       this.delimiters.default = new Delimiter();
     }
-    this.extraJS = extraJS;
+    this.extraJS = extraJS || '';
   }
 
   getDelimiter(extension = 'default') {
