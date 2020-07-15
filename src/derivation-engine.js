@@ -78,7 +78,7 @@ export default class DerivationEngine {
   }
 
   generateZip(product = {}, opts = {}) {
-    return this.generate(product, { type: 'zip', zipType: opts.type, verbose: opts.verbose });
+    return this.generate(product, { type: 'zip', verbose: opts.verbose });
   }
 
   generateProduct(outputPath, product = {}) {
@@ -90,7 +90,6 @@ export default class DerivationEngine {
    * @param JSON product - json spec of the product
    * @param {
    *          type = local | zip,
-   *          zipType: String,
    *          verbose: Boolean - local verbose flag,
    *          outputPath: String
    *        } opts
