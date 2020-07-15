@@ -2,6 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import stripBom from 'strip-bom';
 
+export const getExtension = f => f.substring(f.lastIndexOf('.') + 1);
+export const getFileName = f => path.basename(f);
+export const getFolder = f => path.dirname(f);
+export const isNode = typeof window === 'undefined';
+
 export function existsFile(filePath) {
   try {
     return fs.statSync(filePath);

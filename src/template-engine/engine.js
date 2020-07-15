@@ -6,7 +6,7 @@ export default class Engine {
     if (!this.delimiters.default) {
       this.delimiters.default = new Delimiter();
     }
-    this.extraJS = extraJS;
+    this.extraJS = extraJS || '';
   }
 
   getDelimiter(extension = 'default') {
@@ -19,8 +19,9 @@ export default class Engine {
   getTemplateHelperMethods() {
     return `function normalize(str, upper) {
                     return str
-                        .normalize('NFKD').replace(/[\u0300-\u036F]/g, '')
-                        .replace( /[-_]+/g, ' ')
+                        .normalize('NFKD')
+                        .replace(/[\u0300-\u036F]/g, '')
+                        .replace(/[-_]+/g, ' ')
                         .replace(/[^\\w\\s]/gi, '')
                         .replace(/\\s(.)/g, function($1) { return $1.toUpperCase(); })
                         .replace(/\\s/g, '')
