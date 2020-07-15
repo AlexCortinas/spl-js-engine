@@ -15,16 +15,13 @@ export function cli() {
     output = 'output',
     modelTransformation = null,
     verbose = false,
-    zip
+    zip,
+    outputType = 'folder'
   } = cli.flags;
   const validation = cli.input.indexOf('validate') != -1;
 
   if (cli.flags.help || (!(code && featureModel) && !zip)) {
-    console.log(
-      fs.readFileSync(
-        path.join(__dirname, '../usage.txt'), 'utf8')
-    );
-    process.exit(0);
+    help();
   }
 
   const enginePromise = zip ?
@@ -32,7 +29,7 @@ export function cli() {
       cliZip(zipFile, code, featureModel, config, extra, modelTransformation, verbose)) :
     cliLocal(code, featureModel, config, extra, modelTransformation, verbose);
 
-  return enginePromise.then((engine) => {
+  enginePromise.then((engine) => {
     let productJson = {};
     if (product) {
       productJson = readJsonFromFile(product);
@@ -42,11 +39,36 @@ export function cli() {
       validate(engine, productJson);
     }
 
-    return engine.generateProduct(output, productJson).then(() => {
-      console.log(`Product generated at ${output}`);
-      return;
-    });
+    if (outputType == 'folder') {
+      engine.generateProduct(output, productJson).then(finish);
+    } else if (outputType == 'zip') {
+      let outputZip = output;
+      if (!outputZip.endsWith('.zip')) outputZip += '.zip';
+
+      fs.mkdirSync(path.dirname(outputZip), { recursive: true });
+      engine.generateZip(productJson).then((zip) => {
+        zip
+          .generateNodeStream({type:'nodebuffer', streamFiles: true})
+          .pipe(fs.createWriteStream(outputZip))
+          .on('finish', () => finish(outputZip));
+      });
+    } else {
+      help();
+    }
   });
+}
+
+function help() {
+  console.log(
+    fs.readFileSync(
+      path.join(__dirname, '../usage.txt'), 'utf8')
+  );
+  process.exit(0);
+}
+
+function finish(outputZip) {
+  console.log(`Product generated at ${outputZip}`);
+  process.exit(0);
 }
 
 function cliZip(zip, code, featureModel, config, extra, modelTransformation, verbose) {

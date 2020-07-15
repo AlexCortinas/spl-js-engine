@@ -7,13 +7,12 @@
       --version         # Print version
       --zip             # Path to the zip folder with the platform files.
       --code            # Path to the annotated code.
-      --featureModel    # Path to the feature model representation
-                            (json or xml).
+      --featureModel    # Path to the feature model representation (json or xml).
       --product         # Path to the product specification (json).
       --config          # Path to the platform configuration (json).
       --extra           # Path to the extra js file
-      --output          # Path to the output folder of the product. Default is
-                            'output'.
+      --output          # Path to the output folder of the product. Default is 'output'.
+      --outputType      # Generating a folder ('folder') or a zip ('zip'). Default is 'folder'.
       --verbose         # Show the progress and the generated files
 
     There are two posibilities: loading a zip or loading a local folder. For the former, the 'zip' parameter is required, and the rest of the parameters are paths relative to the root folder of the zip. For the latter, 'code' and 'featureModel' are both requried.
