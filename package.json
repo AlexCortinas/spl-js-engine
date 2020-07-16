@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "istextorbinary": "5.7.0",
-    "jszip": "3.5.0",
+    "jszip": "3.1.5",
     "meow": "7.0.1",
     "strip-bom": "4.0.0",
     "xml-writer": "1.7.0",
@@ -44,5 +44,5 @@
     "test": "mocha --ui qunit --compilers js:babel-register --require babel-polyfill",
     "watch": "watch \"npm run build\" src"
   },
-  "version": "3.0.0"
+  "version": "3.0.1"
 }
