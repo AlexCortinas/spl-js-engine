@@ -96,7 +96,7 @@ export default class DerivationEngine {
    *
    */
   generate(product = {}, opts = {}) {
-    this.verbose = opts.verbose;
+    this.verbose = opts.verbose || this.verbose;
     opts.type = opts.type || 'zip';
 
     if (this.modelTransformation) {
