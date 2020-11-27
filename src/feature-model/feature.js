@@ -58,7 +58,7 @@ export default class Feature {
 
   // Alternative is just another name for XOR
   alt(features) {
-    this.xor(features);
+    return this.xor(features);
   }
 
   get(featureName) {
