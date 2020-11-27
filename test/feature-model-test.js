@@ -744,6 +744,27 @@ test('get feature model with hidden features', () => {
   assert.deepEqual(fm.getFeatures(), expected);
 });
 
+test('testing xml generating with alt', () => {
+  const fm = new FeatureModel('fm');
+  fm.alt({ name: 'a1' });
+  fm.alt({ name: 'a2' });
+  fm.get('a1').and('b');
+  fm.get('b').and('c1');
+
+  const expected = f('feature-model/model-with-xor.xml');
+  // Using pretty-data to sort the xml in order to compare
+  assert.strictEqual(pd.xml(expected), pd.xml(fm.toXml() + '\n'));
+});
+
+test('testing xml parsing for bug and undefined: importing the model', () => {
+  const fm = FeatureModel.fromXml(
+    f('feature-model/model-with-alt.xml')
+  );
+  const expected = f('feature-model/model-with-xor.xml');
+  // Using pretty-data to sort the xml in order to compare
+  assert.strictEqual(pd.xml(expected), pd.xml(fm.toXml() + '\n'));
+});
+
 function _createMyCalculatorFM() {
   const fm = new FeatureModel('MyCalculator');
   const base = fm.and({name: 'Base', mandatory: true});
