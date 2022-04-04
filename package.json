@@ -44,5 +44,5 @@
     "test": "mocha --ui qunit --compilers js:babel-register --require babel-polyfill",
     "watch": "watch \"npm run build\" src"
   },
-  "version": "3.0.3"
+  "version": "3.0.4"
 }
