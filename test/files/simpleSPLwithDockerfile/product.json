@@ -1,0 +1,9 @@
+{
+  "features": [
+    "featureA",
+    "featureC"
+  ],
+  "data": {
+    "port": 3000
+  }
+}
