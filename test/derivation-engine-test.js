@@ -259,6 +259,21 @@ test('Avoid checking "binarity" of extensions in config', async () => {
   assertEqualFilesInFolders(p('checkBinary/expected-including'), p('tmp/checkBinary'));
 });
 
+test('Create a product with a file without extension', async () => {
+  const engine = await new DerivationEngine(
+    p('simpleSPLwithDockerfile/code'),
+    readJsonFromFile(p('simpleSPLwithDockerfile/model.json')),
+    readJsonFromFile(p('simpleSPLwithDockerfile/config.json'))
+  );
+
+  engine.generateProduct(
+    p('tmp/simpleProduct'),
+    readJsonFromFile(p('simpleSPLwithDockerfile/product.json'))
+  );
+
+  assertEqualFilesInFolders(p('simpleSPLwithDockerfile/expected'), p('tmp/simpleProduct'));
+});
+
 suite('#DerivationEngine: Analysis tools');
 
 beforeEach(removeTmpFolder);
