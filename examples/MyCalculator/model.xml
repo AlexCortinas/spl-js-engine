@@ -16,15 +16,15 @@
 	</properties>
 	<struct>
 		<and abstract="true" mandatory="true" name="MyCalculator">
-			<and mandatory="true" name="Base">
-				<or abstract="true" name="Operations">
-					<feature name="Add"/>
-					<feature name="Subtract"/>
-					<feature name="Multiply"/>
-					<feature name="Divide"/>
+			<and mandatory="true" name="base">
+				<or abstract="true" name="operations">
+					<feature name="add"/>
+					<feature name="subtract"/>
+					<feature name="multiply"/>
+					<feature name="divide"/>
 				</or>
-				<and abstract="true" name="Capabilities">
-					<feature mandatory="true" name="Decimal"/>
+				<and abstract="true" name="capabilities">
+					<feature mandatory="true" name="decimal"/>
 				</and>
 			</and>
 		</and>
