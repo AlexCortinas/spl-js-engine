@@ -69,20 +69,42 @@ export function walkDir(pathToWalk, cb, ignore = []) {
   cb(pathToWalk, true);
 }
 
-export function readJsonFromFile(path) {
-  const stat = existsFile(path);
+export function readJsonFromFile(fPath) {
+  const stat = existsFile(fPath);
 
   if (!stat || !stat.isFile()) {
-    throw `${path} is not a file`;
+    throw `${fPath} is not a file`;
   }
 
-  const fileContent = readFile(path);
+  const fileContent = readFile(fPath);
 
   try {
-    return JSON.parse(fileContent);
+    return extendProductJson(JSON.parse(fileContent), path.dirname(fPath));
   } catch (e) {
     // nothing to do
   }
 
   return undefined;
+}
+
+function extendProductJson(json, basepath) {
+  Object.keys(json).forEach(k => {
+    if (json[k]) {
+      if (typeof json[k] == 'object') {
+        json[k] = extendProductJson(json[k], basepath);
+      } else if (typeof json[k] == 'string' && json[k].substr(0,9) == '@include:') {
+        json[k] = readFile(basepath + path.sep + json[k].substr(9));
+        try {
+          // if it is a json, we parse it; otherwise, we will use the plain text
+          json[k] = JSON.parse(json[k]);
+        } catch (e) {
+          // we remove the blank extra line of the file if it exists
+          if (json[k].substr(-1) == '\n') {
+            json[k] = json[k].slice(0, -1);
+          }
+        }
+      }
+    }
+  });
+  return json;
 }
