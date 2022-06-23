@@ -108,3 +108,42 @@ test('Generate zip from local', (done) => {
   }).catch(e => done(e));
 });
 
+test('Generate local from zip extending JSON', (done) => {
+  JSZip.loadAsync(readFile(p('simpleSPLwithIncludes.zip'), true)).then((zip) => {
+    new DerivationEngine({
+      zip,
+      featureModel: 'model.json'
+    }).then((engine) => {
+      engine.generateProduct(
+        p('tmp/simpleSPLwithIncludes'),
+        readJsonFromFile(p('simpleSPLwithIncludes/product.json'))
+      ).then(() => {
+        assertEqualFilesInFolders(p('simpleSPLwithIncludes/expected'), p('tmp/simpleSPLwithIncludes'));
+        done();
+      });
+    });
+  }).catch(e => done(e));
+});
+
+test('Generate zip from zip extending JSON', (done) => {
+  JSZip.loadAsync(readFile(p('simpleSPLwithIncludes.zip'), true)).then((zip) => {
+    new DerivationEngine({ zip, featureModel: 'model.json' }).then(engine => {
+      engine.generateZip(readJsonFromFile(p('simpleSPLwithIncludes/product.json'))).then((outputZipFile) => {
+        fs.mkdirSync(p('tmp/simpleSPLwithIncludes'), { recursive: true });
+        const promises = [];
+        Object.keys(outputZipFile.files)
+          .filter(fPath => !outputZipFile.files[fPath].dir)
+          .forEach((fPath) => {
+            fs.mkdirSync(p('tmp/simpleSPLwithIncludes/' + path.dirname(fPath)), { recursive: true });
+            promises.push(outputZipFile.files[fPath].async('nodebuffer').then((fContent) => {
+              fs.writeFileSync(p('tmp/simpleSPLwithIncludes/') + fPath, fContent);
+            }));
+          });
+        Promise.all(promises).then(() => {
+          assertEqualFilesInFolders(p('simpleSPLwithIncludes/expected'), p('tmp/simpleSPLwithIncludes'));
+          done();
+        });
+      });
+    });
+  }).catch(e => done(e));
+});
