@@ -1,0 +1,12 @@
+{
+  "features": [
+    "featureA",
+    "featureC"
+  ],
+  "data": {
+    "aValue": "aaa",
+    "bValue": "bbb",
+    "more": "@include:includes/more.json",
+    "title": "@include:includes/title.txt"
+  }
+}
