@@ -226,3 +226,24 @@ test('Omitting empty files with double annotation', async () => {
 
   assertEqualFilesInFolders(p('simpleSPLwithEmptyFiles2/expected'), p('tmp/simpleProduct'));
 });
+
+suite('#DerivationEngine: Includes in the product specification');
+
+beforeEach(removeTmpFolder);
+afterEach(removeTmpFolder);
+
+test('Create a product with includes', async () => {
+  const engine = await new DerivationEngine(
+    p('simpleSPLwithIncludes/code'),
+    readJsonFromFile(p('simpleSPLwithIncludes/model.json')),
+    readJsonFromFile(p('simpleSPLwithIncludes/config.json'))
+  );
+
+  engine.generateProduct(
+    p('tmp/simpleProduct'),
+    readJsonFromFile(p('simpleSPLwithIncludes/product.json'))
+  );
+
+  assertEqualFilesInFolders(
+    p('simpleSPLwithIncludes/expected'), p('tmp/simpleProduct'));
+});

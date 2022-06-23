@@ -29,7 +29,7 @@ test('Walking directory', () => {
   ];
   walkDir(p('dir-to-walk'), (filePath) => result.push(filePath));
   assert.deepEqual(
-    expected.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' ')), 
+    expected.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' ')),
     result.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' '))
   );
 });
@@ -65,4 +65,27 @@ test('Read JSON file', () => {
     }
   };
   assert.deepEqual(readJsonFromFile(p('simpleSPL/model.json')), expected);
+});
+
+test('Extend product JSON file', () => {
+  const expected = {
+    features: [
+      'featureA',
+      'featureC'
+    ],
+    data: {
+      aValue: 'aaa',
+      bValue: 'bbb',
+      more: {
+        cValue: 'ccc',
+        dValue: 'ddd',
+        andmore: {
+          eValue: 'eee',
+          fValue: 'fff'
+        }
+      },
+      title: 'Included text example!'
+    }
+  };
+  assert.deepEqual(readJsonFromFile(p('simpleSPLwithIncludes/product.json')), expected);
 });
