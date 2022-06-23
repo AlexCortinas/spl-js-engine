@@ -1,7 +1,7 @@
 import assert from 'assert';
 import {TemplateEngine} from '../src/index';
 
-suite('TemplateEngine analysis feature');
+suite('#TemplateEngine analysis feature');
 
 test('create analyser', () => {
   const te = new TemplateEngine();

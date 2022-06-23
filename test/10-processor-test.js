@@ -2,7 +2,7 @@ import assert from 'assert';
 import {TemplateEngine} from '../src/index';
 import {getTestFileContent as f} from './test-utils';
 
-suite('TemplateEngine process feature');
+suite('#TemplateEngine process feature');
 
 test('create processor', () => {
   const te = new TemplateEngine();
@@ -118,7 +118,7 @@ test('process testing normalizer', () => {
 
 });
 
-suite('TemplateEngine process custom delimiters');
+suite('#TemplateEngine process custom delimiters');
 
 test('process text with custom delimiters', () => {
   const te = new TemplateEngine({
@@ -180,7 +180,7 @@ test('process different text with different custom delimiters', () => {
   );
 });
 
-suite('TemplateEngine process data');
+suite('#TemplateEngine process data');
 
 test('simple data', () => {
   const te = new TemplateEngine();
