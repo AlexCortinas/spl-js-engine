@@ -118,6 +118,21 @@ test('process testing normalizer', () => {
 
 });
 
+test('process testing camelToSnake', () => {
+  const te = new TemplateEngine();
+  const p = te.createProcessor();
+
+  assert.strictEqual(p.process('/*%= camelToSnake("asdf") %*/'), 'asdf');
+  assert.strictEqual(p.process('/*%= camelToSnake("asdfAsdf") %*/'), 'asdf_asdf');
+  assert.strictEqual(p.process('/*%= camelToSnake("asdfAsdfAsdf") %*/'), 'asdf_asdf_asdf');
+  assert.strictEqual(p.process('/*%= camelToSnake("asdfAsdfAsdfAsdf") %*/'), 'asdf_asdf_asdf_asdf');
+  assert.strictEqual(p.process('/*%= camelToSnake("asdf_asdf_asdf_asdf") %*/'), 'asdf_asdf_asdf_asdf');
+  assert.strictEqual(p.process('/*%= camelToSnake("España") %*/'), 'españa');
+  assert.strictEqual(p.process('/*%= camelToSnake("María") %*/'), 'maría');
+  assert.strictEqual(p.process('/*%= camelToSnake("MaríaJosé") %*/'), 'maría_josé');
+
+});
+
 suite('#TemplateEngine process custom delimiters');
 
 test('process text with custom delimiters', () => {
