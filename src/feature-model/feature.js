@@ -20,8 +20,8 @@ export default class Feature {
     }
 
     if (mandatory && this.parent &&
-      (this.parent.type === TYPE.XOR || this.parent.type === TYPE.OR)) {
-      // If the parent is an OR or XOR, this feature cannot be mandatory.
+      (this.parent.type === TYPE.ALT || this.parent.type === TYPE.OR)) {
+      // If the parent is an OR or ALT, this feature cannot be mandatory.
       // At first, this was not taken into account, but FeatureIDE XML
       // structure for feature models sets the optional and alternative
       // features as mandatory.
@@ -51,14 +51,14 @@ export default class Feature {
     return this::_add(features);
   }
 
-  xor(features) {
-    this.type = TYPE.XOR;
+  alt(features) {
+    this.type = TYPE.ALT;
     return this::_add(features);
   }
 
-  // Alternative is just another name for XOR
-  alt(features) {
-    return this.xor(features);
+  // xor is just another name for alt
+  xor(features) {
+    return this.alt(features);
   }
 
   get(featureName) {
@@ -134,13 +134,13 @@ export default class Feature {
       });
     }
 
-    if (this.type === TYPE.OR || this.type === TYPE.XOR) {
+    if (this.type === TYPE.OR || this.type === TYPE.ALT) {
       if (!hasChildren) {
-        throw 'OR and XOR features must have children';
+        throw 'OR and ALT features must have children';
       } else {
         this.features.forEach(function (f) {
           if (f.mandatory) {
-            throw 'features with OR and XOR parent cannot be ' +
+            throw 'features with OR and ALT parent cannot be ' +
             'mandatory';
           }
         });
@@ -153,7 +153,7 @@ export default class Feature {
   /////////////////////////////
 
   static fromXml(xml, parent, type) {
-    // parent[type] is parent.{and, or, xor},
+    // parent[type] is parent.{and, or, alt},
     // so we are creating a new child feature
     const newFeature = parent[type](xml.attr);
 
@@ -193,7 +193,7 @@ export default class Feature {
   //////////////////////////////
 
   static fromJson(json, parent, type) {
-    // parent[type] is parent.{and, or, xor},
+    // parent[type] is parent.{and, or, alt},
     // so we are creating a new child feature
     const newFeature = parent[type](json);
 

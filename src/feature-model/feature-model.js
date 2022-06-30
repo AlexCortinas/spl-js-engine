@@ -247,7 +247,7 @@ function _validateAltFeaturesFromSelection(selectedFeatures) {
   const features = this::_getFeaturesFromNames(selectedFeatures);
 
   // cheking if two alternative features has been selected at the same time
-  features.filter(f1 => f1.parent && f1.parent.type === TYPE.XOR)
+  features.filter(f1 => f1.parent && f1.parent.type === TYPE.ALT)
     .forEach(f1 => {
       if (features
           .filter(f2 => f1 != f2 && f1.parent == f2.parent)
@@ -262,9 +262,9 @@ function _validateAltFeaturesFromSelection(selectedFeatures) {
         };
     });
 
-  // checking if mandatory xor/or feature has no child selected
+  // checking if mandatory alt/or feature has no child selected
   features.filter(f1 => f1.mandatory || selectedFeatures.indexOf(f1.name) != -1)
-    .filter(f1 => f1.type === TYPE.XOR || f1.type === TYPE.OR)
+    .filter(f1 => f1.type === TYPE.ALT || f1.type === TYPE.OR)
     .forEach(f1 => {
       if (features.filter(f2 => f2.parent === f1).length < 1)
         throw {
