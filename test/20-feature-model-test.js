@@ -76,18 +76,18 @@ test('Should throw an error for a mandatory feature under an OR ' +
 
   assert.throws(() => {
     fm.validateFeatureModel();
-  }, /features with OR and XOR parent cannot be mandatory/);
+  }, /features with OR and ALT parent cannot be mandatory/);
 });
 
-test('Should create a new feature model with a xor features and 2 ' +
+test('Should create a new feature model with a alt features and 2 ' +
   'alternatives', () => {
 
   const fm = new FeatureModel('FMName');
 
-  fm.xor('f1');
-  fm.xor('f2');
+  fm.alt('f1');
+  fm.alt('f2');
 
-  assert.strictEqual(fm.toString(), 'FMName: { f1 XOR f2 }');
+  assert.strictEqual(fm.toString(), 'FMName: { f1 ALT f2 }');
   assert.doesNotThrow(() => {
     fm.validateFeatureModel();
   });
@@ -96,9 +96,9 @@ test('Should create a new feature model with a xor features and 2 ' +
 test('Should throw an exception for having an abstract node as leaf', () => {
   const fm = new FeatureModel('FMName');
 
-  fm.xor(['f1', {name: 'f2', abstract: true}]);
+  fm.alt(['f1', {name: 'f2', abstract: true}]);
 
-  assert.strictEqual(fm.toString(), 'FMName: { f1 XOR _f2 }');
+  assert.strictEqual(fm.toString(), 'FMName: { f1 ALT _f2 }');
 
   assert.throws(() => {
     fm.validateFeatureModel();
@@ -110,11 +110,11 @@ test('Should throw an exception by having an OR node without children', () => {
 
   fm.and('f1');
   // trick to provoke fail
-  fm.features[0].type = 'XOR';
+  fm.features[0].type = 'ALT';
 
   assert.throws(() => {
     fm.validateFeatureModel();
-  }, /OR and XOR features must have children/);
+  }, /OR and ALT features must have children/);
 });
 
 test('MyCalculator MD test', () => {
@@ -134,7 +134,7 @@ test('Should throw an exception for adding a feature with a repeated ' +
   'name', () => {
 
   const fm = new FeatureModel('FMName');
-  fm.and('f1').xor('f2');
+  fm.and('f1').alt('f2');
 
   assert.throws(() => {
     fm.get('f2').or('f1');
@@ -252,7 +252,7 @@ test('Should throw exception of feature not found', () => {
 test('Should throw exception of features is alternative', () => {
   const fm = new FeatureModel('FM');
 
-  fm.xor(['f1', 'f2', 'f3']);
+  fm.alt(['f1', 'f2', 'f3']);
 
   assert.throws(() => {
     fm.completeFeatureSelection(['f1', 'f2']);
@@ -267,8 +267,8 @@ test('Should throw exception of features is alternative (2)', () => {
 
   const f3 = f1.or('f3');
   f1.or('f4');
-  f3.xor('f5');
-  f3.xor('f6');
+  f3.alt('f5');
+  f3.alt('f6');
 
   assert.throws(() => {
     fm.completeFeatureSelection(['f5', 'f6']);
@@ -314,12 +314,12 @@ test('Should include the mandatory features of included ones [2]', () => {
   let allSelected;
 
   fm.and('f1').and(['f2', {name: 'f3', mandatory: true}]);
-  fm.get('f2').xor(['f4', 'f5']);
+  fm.get('f2').alt(['f4', 'f5']);
   fm.get('f5').and(['f6', {name: 'f7', mandatory: true}]);
 
   assert.strictEqual(
     fm.toString(),
-    'FM: { f1: { f2: { f4 XOR f5: { f6 AND +f7 } } AND +f3 } }'
+    'FM: { f1: { f2: { f4 ALT f5: { f6 AND +f7 } } AND +f3 } }'
   );
   assert.doesNotThrow(() => {
     allSelected = fm.completeFeatureSelection(featuresSelected);
@@ -331,7 +331,7 @@ test('Should throw an exception for alternative paths selected', () => {
   const fm = new FeatureModel('fm');
   const featuresSelected = ['f3', 'f6'];
 
-  fm.xor(['f1', 'f2']);
+  fm.alt(['f1', 'f2']);
   fm.get('f1').and(['f3', {name: 'f4', mandatory: true}]);
   fm.get('f2').and('f5').or(['f6', 'f7']);
 
@@ -340,17 +340,17 @@ test('Should throw an exception for alternative paths selected', () => {
   }, /selected more than one features in alternative feature fm/);
 });
 
-test('Should throw an exception for not xor option selected on mandatory ' +
+test('Should throw an exception for not alt option selected on mandatory ' +
   'one', () => {
 
   const fm = new FeatureModel('fm');
 
   fm.and({name: 'fand', mandatory: true})
-    .xor(['f1', 'f2', 'f3']);
+    .alt(['f1', 'f2', 'f3']);
 
   assert.throws(() => {
     fm.completeFeatureSelection([]);
-  }, /missing child feature selected for mandatory XOR feature fand/);
+  }, /missing child feature selected for mandatory ALT feature fand/);
 });
 
 test('Should throw an exception for not or option selected on mandatory ' +
@@ -744,23 +744,32 @@ test('get feature model with hidden features', () => {
   assert.deepEqual(fm.getFeatures(), expected);
 });
 
-test('testing xml generating with alt', () => {
+test('testing xml generating with xor', () => {
   const fm = new FeatureModel('fm');
-  fm.alt({ name: 'a1' });
-  fm.alt({ name: 'a2' });
+  fm.xor({ name: 'a1' });
+  fm.xor({ name: 'a2' });
   fm.get('a1').and('b');
   fm.get('b').and('c1');
 
-  const expected = f('feature-model/model-with-xor.xml');
+  const expected = f('feature-model/model-with-alt.xml');
   // Using pretty-data to sort the xml in order to compare
   assert.strictEqual(pd.xml(expected), pd.xml(fm.toXml() + '\n'));
 });
 
-test('testing xml parsing for bug and undefined: importing the model', () => {
+test('testing xml parsing for using old xor in xml instead of alt', () => {
   const fm = FeatureModel.fromXml(
-    f('feature-model/model-with-alt.xml')
+    f('feature-model/model-with-xor.xml')
   );
-  const expected = f('feature-model/model-with-xor.xml');
+  const expected = f('feature-model/model-with-alt.xml');
+  // Using pretty-data to sort the xml in order to compare
+  assert.strictEqual(pd.xml(expected), pd.xml(fm.toXml() + '\n'));
+});
+
+test('testing xml parsing for using old xor in json instead of alt', () => {
+  const fm = FeatureModel.fromJson(
+    readJsonFromFile(p('feature-model/model-with-xor.json'))
+  );
+  const expected = f('feature-model/model-with-alt.xml');
   // Using pretty-data to sort the xml in order to compare
   assert.strictEqual(pd.xml(expected), pd.xml(fm.toXml() + '\n'));
 });

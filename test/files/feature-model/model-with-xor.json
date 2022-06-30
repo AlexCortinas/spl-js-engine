@@ -1,0 +1,32 @@
+{
+  "featureModel": {
+    "struct": {
+      "name": "fm",
+      "mandatory": true,
+      "abstract": true,
+      "type": "xor",
+      "features": [
+        {
+          "name": "a1",
+          "mandatory": true,
+          "type": "and",
+          "features": [
+            {
+              "name": "b",
+              "type": "and",
+              "features": [
+                {
+                  "name": "c1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "a2"
+        }
+      ]
+    },
+    "constraints": []
+  }
+}
