@@ -13,7 +13,7 @@
                 "name": "search",
                 "abstract": false,
                 "mandatory": false,
-                "type": "xor",
+                "type": "alt",
                 "features": [{
                     "name": "dfs"
                 }, {
@@ -61,7 +61,7 @@
                 "name": "implementation",
                 "abstract": true,
                 "mandatory": true,
-                "type": "xor",
+                "type": "alt",
                 "features": [{
                     "name": "gnOnlyNeighbors"
                 }, {

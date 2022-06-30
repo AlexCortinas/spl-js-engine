@@ -53,7 +53,7 @@ export default class Constraint {
       return NegatedConstraint.fromJson(json);
     case 'or':
       return OrConstraint.fromJson(json);
-    case 'xor':
+    case 'alt':
       return XorConstraint.fromJson(json);
     }
   }
@@ -80,7 +80,7 @@ export default class Constraint {
       return NegatedConstraint.fromXml(xml);
     case 'disj':
       return OrConstraint.fromXml(xml);
-    case 'xor':
+    case 'alt':
       return XorConstraint.fromXml(xml);
     }
   }
@@ -325,7 +325,7 @@ class IffConstraint extends BinaryConstraint {
 
 class XorConstraint extends BinaryConstraint {
   constructor(first, second) {
-    super(first, second, 'v', 'xor');
+    super(first, second, 'v', 'alt');
   }
 
   evaluate(helper) {
