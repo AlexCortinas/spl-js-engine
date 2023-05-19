@@ -1,3 +1,3 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 
-spl-js-engine --featureModel model.json --product product.json --config config.json --code GraphProductLine --output output
+npx spl-js-engine --featureModel model.json --product product.json --config config.json --code GraphProductLine --output output

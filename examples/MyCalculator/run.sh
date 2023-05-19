@@ -1,4 +1,4 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 
-spl-js-engine --featureModel model.json --product product.json --config config.json --extra extra.js --code code --output output
-spl-js-engine --featureModel model.json --product product.json --config config.json --extra extra.js --code code --output output --outputType zip
+npx spl-js-engine --featureModel model.json --product product.json --config config.json --extra extra.js --code code --output output
+npx spl-js-engine --featureModel model.json --product product.json --config config.json --extra extra.js --code code --output output --outputType zip

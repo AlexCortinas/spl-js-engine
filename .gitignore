@@ -39,3 +39,5 @@ examples/**/output.zip
 .idea
 *.un~
 .vscode
+.DS_Store
+.history
