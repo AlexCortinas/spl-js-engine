@@ -9,7 +9,5 @@ export {readJsonFromFile, readFile} from './file-utils.js';
 import {cli} from './cli.js';
 import path from "path";
 
-console.log(import.meta);
-
 const runningAsScript = import.meta.url.endsWith(path.basename(process.argv[1]));
 if (runningAsScript) cli();
