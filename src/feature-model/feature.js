@@ -1,4 +1,4 @@
-import TYPE from './feature-type';
+import TYPE from './feature-type.js';
 
 export default class Feature {
   constructor(name, {mandatory = false, abstract = false, hidden = false}, parent = null) {
@@ -43,17 +43,17 @@ export default class Feature {
   /////////////////////
   and(features) {
     this.type = TYPE.AND;
-    return this::_add(features);
+    return _add(features);
   }
 
   or(features) {
     this.type = TYPE.OR;
-    return this::_add(features);
+    return _add(features);
   }
 
   alt(features) {
     this.type = TYPE.ALT;
-    return this::_add(features);
+    return _add(features);
   }
 
   // xor is just another name for alt
@@ -242,7 +242,7 @@ export default class Feature {
 function _add(features) {
   if (Array.isArray(features)) {
     // features is an array with many features
-    features.forEach(f => this::_add(f));
+    features.forEach(f => _add(f));
     return;
   }
 

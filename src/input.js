@@ -1,6 +1,6 @@
 import {isText} from 'istextorbinary';
-import {readFile, walkDir, isNode} from './file-utils';
-import {getExtension} from './file-utils';
+import {readFile, walkDir, isNode} from './file-utils.js';
+import {getExtension} from './file-utils.js';
 import path from 'path';
 
 class Input {

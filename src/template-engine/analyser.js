@@ -16,7 +16,7 @@ export default class Analyser extends Engine {
         delimiter.feature.exec(match.slice(1).join(''))) !== null) {
 
         featureAux = featureMatch[0].replace('feature.', '');
-        if (!result.feature.hasOwnProperty(featureAux)) {
+        if (!Object.prototype.hasOwnProperty.call(result.feature, featureAux)) {
           result.feature[featureAux] = 0;
         }
         result.feature[featureAux]++;
@@ -25,7 +25,7 @@ export default class Analyser extends Engine {
         delimiter.data.exec(match.slice(1).join(''))) !== null) {
 
         featureAux = dataMatch[0].replace('data.', '');
-        if (!result.data.hasOwnProperty(featureAux)) {
+        if (!Object.prototype.hasOwnProperty.call(result.data, featureAux)) {
           result.data[featureAux] = 0;
         }
         result.data[featureAux]++;

@@ -13,14 +13,14 @@ export default class AnalysisReport {
 
     this.results.forEach((value) => {
       for (const featureName in value.feature) {
-        if (!ret.feature.hasOwnProperty(featureName)) {
+        if (!Object.prototype.hasOwnProperty.call(ret.feature, featureName)) {
           ret.feature[featureName] = 0;
         }
         ret.feature[featureName] += value.feature[featureName];
       }
 
       for (const dataName in value.data) {
-        if (!ret.data.hasOwnProperty(dataName)) {
+        if (!Object.prototype.hasOwnProperty.call(ret.data, dataName)) {
           ret.data[dataName] = 0;
         }
         ret.data[dataName] += value.data[dataName];

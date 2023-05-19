@@ -1,5 +1,5 @@
 import assert from 'assert';
-import {TemplateEngine} from '../src/index';
+import {TemplateEngine} from '../src/index.js';
 
 suite('#TemplateEngine analysis feature');
 

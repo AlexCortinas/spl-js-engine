@@ -1,6 +1,6 @@
 import assert from 'assert';
-import {existsFile, readJsonFromFile, readFile, walkDir, writeFile} from '../src/file-utils';
-import {getTestPath as p, removeTmpFolder} from './test-utils';
+import {existsFile, readJsonFromFile, readFile, walkDir, writeFile} from '../src/file-utils.js';
+import {getTestPath as p, removeTmpFolder} from './test-utils.js';
 
 suite('File Utils');
 

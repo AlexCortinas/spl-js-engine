@@ -1,7 +1,7 @@
 import assert from 'assert';
 import {pd} from 'pretty-data';
-import {FeatureModel, readJsonFromFile} from '../src/index';
-import {getTestPath as p, getTestFileContent as f} from './test-utils';
+import {FeatureModel, readJsonFromFile} from '../src/index.js';
+import {getTestPath as p, getTestFileContent as f} from './test-utils.js';
 
 suite('#FeatureModel Manual Creation');
 

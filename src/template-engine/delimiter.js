@@ -12,7 +12,7 @@ export default class Delimiter {
     this.start = startDelimiter;
     this.end = endDelimiter;
 
-    this.regular = new RegExp('(([ \\r\\t])+\|\\n\|^)' +
+    this.regular = new RegExp('(([ \\r\\t])+|\\n|^)' +
       _escapeRegExpStr(this.start) +
       '([^=])(([^' +
       _escapeRegExpStr(this.end[0]) +
@@ -20,7 +20,7 @@ export default class Delimiter {
       _escapeRegExpStr(this.end[0]) +
       ')+?)' +
       _escapeRegExpStr(this.end) +
-      '\\n\|' +
+      '\\n|' +
       _escapeRegExpStr(this.start) +
       '(([^' +
       // _escapeRegExpStr(this.end[0]) +

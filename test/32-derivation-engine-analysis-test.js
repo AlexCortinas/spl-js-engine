@@ -1,6 +1,6 @@
 import assert from 'assert';
-import {DerivationEngine, readJsonFromFile} from '../src/index';
-import {getTestPath as p, removeTmpFolder} from './test-utils';
+import {DerivationEngine, readJsonFromFile} from '../src/index.js';
+import {getTestPath as p, removeTmpFolder} from './test-utils.js';
 
 suite('#DerivationEngine: Analysis tools');
 

@@ -1,11 +1,11 @@
 import meow from 'meow';
 import fs from 'fs';
 import path from 'path';
-import {DerivationEngine, readJsonFromFile, readFile} from './index';
+import {DerivationEngine, readJsonFromFile, readFile} from './index.js';
 import JSZip from 'jszip';
 
 export function cli() {
-  const cli = meow({help: false});
+  const cli = meow({help: false, importMeta: import.meta});
   const {
     featureModel,
     product,

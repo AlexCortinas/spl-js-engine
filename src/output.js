@@ -1,4 +1,4 @@
-import {writeFile} from './file-utils';
+import {writeFile} from './file-utils.js';
 import JSZip from 'jszip';
 import path from 'path';
 

@@ -1,7 +1,7 @@
-import Processor from './processor';
-import Delimiter from './delimiter';
-import Analyser from './analyser';
-import FileGenerator from './file-generator';
+import Processor from './processor.js';
+import Delimiter from './delimiter.js';
+import Analyser from './analyser.js';
+import FileGenerator from './file-generator.js';
 
 export default class TemplateEngine {
   constructor({startDelimiter, endDelimiter} = {}, extraJS = '') {

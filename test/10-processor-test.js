@@ -1,6 +1,6 @@
 import assert from 'assert';
-import {TemplateEngine} from '../src/index';
-import {getTestFileContent as f} from './test-utils';
+import {TemplateEngine} from '../src/index.js';
+import {getTestFileContent as f} from './test-utils.js';
 
 suite('#TemplateEngine process feature');
 

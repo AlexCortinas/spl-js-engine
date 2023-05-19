@@ -1,10 +1,10 @@
 import xmldoc from 'xmldoc';
 import XMLWriter from 'xml-writer';
-import Feature from './feature';
+import Feature from './feature.js';
 import ConstraintSet from './constraints/constraint-set.js';
-import TYPE from './feature-type';
+import TYPE from './feature-type.js';
 import Constraint from './constraints/constraint.js';
-import FeatureSelectionError from './feature-selection-error';
+import FeatureSelectionError from './feature-selection-error.js';
 
 export default class FeatureModel extends Feature {
   constructor(name) {
@@ -85,7 +85,7 @@ export default class FeatureModel extends Feature {
       auxLength = namesOfSelectedFeatures.length;
 
       namesOfSelectedFeatures =
-        this::_completeFeatureSelectionWithoutConstraints(
+        _completeFeatureSelectionWithoutConstraints(
           namesOfSelectedFeatures
         );
 
@@ -99,7 +99,7 @@ export default class FeatureModel extends Feature {
     }
 
     try {
-      this::_validateAltFeaturesFromSelection(namesOfSelectedFeatures);
+      _validateAltFeaturesFromSelection(namesOfSelectedFeatures);
     } catch (ex) {
       if (ex.message) {
         throw new FeatureSelectionError(ex.message, namesOfSelectedFeatures, ex);
@@ -224,7 +224,7 @@ function _getFeaturesFromNames(featureNames = []) {
 }
 
 function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
-  const featureSet = new Set(this::_getFeaturesFromNames(selectedFeatures));
+  const featureSet = new Set(_getFeaturesFromNames(selectedFeatures));
   let auxLenght = -1;
 
   while (auxLenght != featureSet.length) {
@@ -244,7 +244,7 @@ function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
 }
 
 function _validateAltFeaturesFromSelection(selectedFeatures) {
-  const features = this::_getFeaturesFromNames(selectedFeatures);
+  const features = _getFeaturesFromNames(selectedFeatures);
 
   // cheking if two alternative features has been selected at the same time
   features.filter(f1 => f1.parent && f1.parent.type === TYPE.ALT)

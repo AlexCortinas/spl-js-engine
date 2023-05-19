@@ -1,6 +1,6 @@
-import EvaluationHelper from './evaluation-helper';
-import Constraint from './constraint';
-import FeatureSelectionError from '../feature-selection-error';
+import EvaluationHelper from './evaluation-helper.js';
+import Constraint from './constraint.js';
+import FeatureSelectionError from '../feature-selection-error.js';
 
 export default class constraintSet {
   constructor() {

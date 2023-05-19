@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
-export DerivationEngine from './derivation-engine';
-export FeatureModel from './feature-model/feature-model';
-export TemplateEngine from './template-engine/template-engine';
+export {default as DerivationEngine} from './derivation-engine.js';
+export {default as FeatureModel} from './feature-model/feature-model.js';
+export {default as TemplateEngine} from './template-engine/template-engine.js';
 
-export {readJsonFromFile, readFile} from './file-utils';
+export {readJsonFromFile, readFile} from './file-utils.js';
 
-import {cli} from './cli';
+import {cli} from './cli.js';
+import path from "path";
 
-if (require.main === module) cli();
+console.log(import.meta);
+
+const runningAsScript = import.meta.url.endsWith(path.basename(process.argv[1]));
+if (runningAsScript) cli();

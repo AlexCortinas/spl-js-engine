@@ -1,5 +1,5 @@
-import {DerivationEngine, readJsonFromFile, readFile} from '../src/index';
-import {getTestPath as p, removeTmpFolder, assertEqualFilesInFolders} from './test-utils';
+import {DerivationEngine, readJsonFromFile, readFile} from '../src/index.js';
+import {getTestPath as p, removeTmpFolder, assertEqualFilesInFolders} from './test-utils.js';
 
 suite('#DerivationEngine');
 

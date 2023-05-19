@@ -1,9 +1,9 @@
-import FeatureModel from './feature-model/feature-model';
-import TemplateEngine from './template-engine/template-engine';
-import AnalysisReport from './template-engine/analysis-report';
-import {LocalOutput, ZipOutput} from './output';
-import {LocalInput, ZipInput} from './input';
-import {getExtension, getFolder, getFileName} from './file-utils';
+import FeatureModel from './feature-model/feature-model.js';
+import TemplateEngine from './template-engine/template-engine.js';
+import AnalysisReport from './template-engine/analysis-report.js';
+import {LocalOutput, ZipOutput} from './output.js';
+import {LocalInput, ZipInput} from './input.js';
+import {getExtension, getFolder, getFileName} from './file-utils.js';
 
 export default class DerivationEngine {
   constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
