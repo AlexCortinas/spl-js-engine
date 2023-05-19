@@ -43,17 +43,17 @@ export default class Feature {
   /////////////////////
   and(features) {
     this.type = TYPE.AND;
-    return _add(features);
+    return this._add(features);
   }
 
   or(features) {
     this.type = TYPE.OR;
-    return _add(features);
+    return this._add(features);
   }
 
   alt(features) {
     this.type = TYPE.ALT;
-    return _add(features);
+    return this._add(features);
   }
 
   // xor is just another name for alt
@@ -233,30 +233,30 @@ export default class Feature {
 
     return json;
   }
-}
 
-/////////////////////
-// Private Methods //
-/////////////////////
+  /////////////////////
+  // Private Methods //
+  /////////////////////
 
-function _add(features) {
-  if (Array.isArray(features)) {
-    // features is an array with many features
-    features.forEach(f => _add(f));
-    return;
+  _add(features) {
+    if (Array.isArray(features)) {
+      // features is an array with many features
+      features.forEach(f => this._add(f));
+      return;
+    }
+
+    let newNode = null;
+    if (typeof features == 'string') {
+      // features is the name of a new feature
+      newNode = new Feature(features, {}, this);
+    } else {
+      // features is the JSON of a new feature
+      newNode = new Feature(features.name, features, this);
+    }
+
+    this.features.push(newNode);
+    return newNode;
   }
-
-  let newNode = null;
-  if (typeof features == 'string') {
-    // features is the name of a new feature
-    newNode = new Feature(features, {}, this);
-  } else {
-    // features is the JSON of a new feature
-    newNode = new Feature(features.name, features, this);
-  }
-
-  this.features.push(newNode);
-  return newNode;
 }
 
 function _compareString(s1, s2) {
