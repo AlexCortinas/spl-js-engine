@@ -29,7 +29,8 @@ public class CalculatorResource {
 			if (request.getSecond() == 0) {
 				return new ResponseEntity<ResultJSON>(new ResultJSON(), HttpStatus.BAD_REQUEST);
 			}
-		}/*% } %*/
+		}
+    /*% } %*/
 
 		return new ResponseEntity<ResultJSON>(new ResultJSON(calculatorService.calculate(request.getFirst(),
 				request.getSecond(), request.getOperation())), HttpStatus.OK);
