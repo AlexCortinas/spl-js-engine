@@ -31,8 +31,8 @@
   },
   "scripts": {
     "lint": "npm-run-all lint_eslint lint_prettier",
-    "lint_eslint": "eslint --ext js,vue --fix src",
-    "lint_prettier": "prettier --write --ignore-unknown src",
+    "lint_eslint": "eslint --ext js,vue --fix src test",
+    "lint_prettier": "prettier --write --ignore-unknown src test",
     "test": "mocha --ui qunit"
   },
   "type": "module",
