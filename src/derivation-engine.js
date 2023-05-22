@@ -4,6 +4,7 @@ import AnalysisReport from './template-engine/analysis-report.js';
 import {LocalOutput, ZipOutput} from './output.js';
 import {LocalInput, ZipInput} from './input.js';
 import {getExtension, getFolder, getFileName} from './file-utils.js';
+import _eval from "eval";
 
 export default class DerivationEngine {
   constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
@@ -148,7 +149,7 @@ export default class DerivationEngine {
   }
 
   setModelTransformation(mt) {
-    this.modelTransformation = eval(mt);
+    this.modelTransformation = _eval(mt, "transformation.js");
   }
 
   setFeatureModel(featureModel) {

@@ -4,12 +4,13 @@
     "spl-js-engine": "./src/index.js"
   },
   "dependencies": {
+    "eval": "^0.1.8",
     "istextorbinary": "^6.0.0",
     "jszip": "^3.10.1",
     "meow": "^12.0.1",
     "strip-bom": "^5.0.0",
     "xml-writer": "^1.7.0",
-    "xmldoc": "^1.3.0"
+    "xmldoc": "^0.5.1"
   },
   "description": "Software Product Line JavaScript Derivation Engine",
   "devDependencies": {

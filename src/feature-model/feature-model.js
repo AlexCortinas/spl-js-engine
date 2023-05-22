@@ -85,7 +85,7 @@ export default class FeatureModel extends Feature {
       auxLength = namesOfSelectedFeatures.length;
 
       namesOfSelectedFeatures =
-        _completeFeatureSelectionWithoutConstraints(
+        this._completeFeatureSelectionWithoutConstraints(
           namesOfSelectedFeatures
         );
 
@@ -99,7 +99,7 @@ export default class FeatureModel extends Feature {
     }
 
     try {
-      _validateAltFeaturesFromSelection(namesOfSelectedFeatures);
+      this._validateAltFeaturesFromSelection(namesOfSelectedFeatures);
     } catch (ex) {
       if (ex.message) {
         throw new FeatureSelectionError(ex.message, namesOfSelectedFeatures, ex);
@@ -213,66 +213,66 @@ export default class FeatureModel extends Feature {
 
     return json;
   }
-}
 
-/////////////////////
-// Private Methods //
-/////////////////////
+  /////////////////////
+  // Private Methods //
+  /////////////////////
 
-function _getFeaturesFromNames(featureNames = []) {
-  return featureNames.map(f => this.get(f));
-}
-
-function _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
-  const featureSet = new Set(_getFeaturesFromNames(selectedFeatures));
-  let auxLenght = -1;
-
-  while (auxLenght != featureSet.length) {
-    auxLenght = featureSet.length;
-
-    featureSet.forEach(f => {
-      if (f.parent != null) {
-        featureSet.add(f.parent);
-      }
-      f.features
-        .filter(child => child.mandatory)
-        .forEach(child => featureSet.add(child));
-    });
+  _getFeaturesFromNames(featureNames = []) {
+    return featureNames.map(f => this.get(f));
   }
 
-  return [...featureSet].map(f => f.name);
-}
+  _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
+    const featureSet = new Set(this._getFeaturesFromNames(selectedFeatures));
+    let auxLenght = -1;
 
-function _validateAltFeaturesFromSelection(selectedFeatures) {
-  const features = _getFeaturesFromNames(selectedFeatures);
+    while (auxLenght != featureSet.length) {
+      auxLenght = featureSet.length;
 
-  // cheking if two alternative features has been selected at the same time
-  features.filter(f1 => f1.parent && f1.parent.type === TYPE.ALT)
-    .forEach(f1 => {
-      if (features
-          .filter(f2 => f1 != f2 && f1.parent == f2.parent)
-          .length > 0)
+      featureSet.forEach(f => {
+        if (f.parent != null) {
+          featureSet.add(f.parent);
+        }
+        f.features
+          .filter(child => child.mandatory)
+          .forEach(child => featureSet.add(child));
+      });
+    }
 
-        throw {
-          message: 'selected more than one features in alternative ' +
-        'feature ' + f1.parent.name,
-          featureName: f1.name,
-          featureType: f1.parent.type,
-          errorType: 'TOO_MANY_CHILDS'
-        };
-    });
+    return [...featureSet].map(f => f.name);
+  }
 
-  // checking if mandatory alt/or feature has no child selected
-  features.filter(f1 => f1.mandatory || selectedFeatures.indexOf(f1.name) != -1)
-    .filter(f1 => f1.type === TYPE.ALT || f1.type === TYPE.OR)
-    .forEach(f1 => {
-      if (features.filter(f2 => f2.parent === f1).length < 1)
-        throw {
-          message: 'missing child feature selected for mandatory ' +
-        f1.type + ' feature ' + f1.name,
-          featureName: f1.name,
-          featureType: f1.type,
-          errorType: 'MISSING_CHILD'
-        };
-    });
+  _validateAltFeaturesFromSelection(selectedFeatures) {
+    const features = this._getFeaturesFromNames(selectedFeatures);
+
+    // cheking if two alternative features has been selected at the same time
+    features.filter(f1 => f1.parent && f1.parent.type === TYPE.ALT)
+      .forEach(f1 => {
+        if (features
+            .filter(f2 => f1 != f2 && f1.parent == f2.parent)
+            .length > 0)
+
+          throw {
+            message: 'selected more than one features in alternative ' +
+          'feature ' + f1.parent.name,
+            featureName: f1.name,
+            featureType: f1.parent.type,
+            errorType: 'TOO_MANY_CHILDS'
+          };
+      });
+
+    // checking if mandatory alt/or feature has no child selected
+    features.filter(f1 => f1.mandatory || selectedFeatures.indexOf(f1.name) != -1)
+      .filter(f1 => f1.type === TYPE.ALT || f1.type === TYPE.OR)
+      .forEach(f1 => {
+        if (features.filter(f2 => f2.parent === f1).length < 1)
+          throw {
+            message: 'missing child feature selected for mandatory ' +
+          f1.type + ' feature ' + f1.name,
+            featureName: f1.name,
+            featureType: f1.type,
+            errorType: 'MISSING_CHILD'
+          };
+      });
+  }
 }
