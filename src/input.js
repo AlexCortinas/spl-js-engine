@@ -1,7 +1,7 @@
-import {isText} from 'istextorbinary';
-import {readFile, walkDir, isNode} from './file-utils.js';
-import {getExtension} from './file-utils.js';
-import path from 'path';
+import { isText } from "istextorbinary";
+import { readFile, walkDir, isNode } from "./file-utils.js";
+import { getExtension } from "./file-utils.js";
+import path from "path";
 
 class Input {
   constructor() {
@@ -13,7 +13,9 @@ class Input {
   }
 
   fileIsText(fPath) {
-    return this.handledExtensions.indexOf(getExtension(fPath)) != -1 || isText(fPath);
+    return (
+      this.handledExtensions.indexOf(getExtension(fPath)) != -1 || isText(fPath)
+    );
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -21,7 +23,7 @@ class Input {
   // eslint-disable-next-line no-unused-vars
   get(path) {}
   // eslint-disable-next-line no-unused-vars
-  setIgnorePattern(ignoreArray){}
+  setIgnorePattern(ignoreArray) {}
   // eslint-disable-next-line no-unused-vars
   forEachCodeFile(cb) {}
 }
@@ -32,7 +34,7 @@ export class ZipInput extends Input {
     this.zip = zipFile;
     this.codePath = codePath;
     this.ignore = [];
-    this.zipType = isNode ? 'nodebuffer' : 'blob';
+    this.zipType = isNode ? "nodebuffer" : "blob";
   }
 
   exists(path) {
@@ -40,7 +42,7 @@ export class ZipInput extends Input {
   }
 
   get(path) {
-    return this.zip.files[path].async('string');
+    return this.zip.files[path].async("string");
   }
 
   setIgnorePattern(ignoreArray) {
@@ -49,16 +51,27 @@ export class ZipInput extends Input {
 
   forEachCodeFile(cb) {
     const filePaths = Object.keys(this.zip.files)
-      .filter(fPath => fPath.startsWith(this.codePath))
-      .filter(fPath => !this.zip.files[fPath].dir)
-      .filter(fPath => !fPath.split(path.sep).filter(f => this.ignore.includes(f)).length);
+      .filter((fPath) => fPath.startsWith(this.codePath))
+      .filter((fPath) => !this.zip.files[fPath].dir)
+      .filter(
+        (fPath) =>
+          !fPath.split(path.sep).filter((f) => this.ignore.includes(f)).length
+      );
     const promises = [];
 
-    filePaths.forEach(fPath => {
+    filePaths.forEach((fPath) => {
       const isText = this.fileIsText(fPath);
-      promises.push(this.zip.files[fPath].async(isText ? 'string' : this.zipType).then(fContent => {
-        return cb(fPath.replace(this.codePath + path.sep, ''), fContent, isText);
-      }));
+      promises.push(
+        this.zip.files[fPath]
+          .async(isText ? "string" : this.zipType)
+          .then((fContent) => {
+            return cb(
+              fPath.replace(this.codePath + path.sep, ""),
+              fContent,
+              isText
+            );
+          })
+      );
     });
 
     return Promise.all(promises);
@@ -77,16 +90,20 @@ export class LocalInput extends Input {
   }
 
   forEachCodeFile(cb) {
-    walkDir(this.codePath, (fPath, isFolder) => {
-      if (isFolder) return;
-      const isText = this.fileIsText(fPath);
+    walkDir(
+      this.codePath,
+      (fPath, isFolder) => {
+        if (isFolder) return;
+        const isText = this.fileIsText(fPath);
 
-      return cb(
-        fPath.replace(this.codePath + path.sep, ''),
-        readFile(fPath, !isText),
-        isText
-      );
-    }, this.ignore);
+        return cb(
+          fPath.replace(this.codePath + path.sep, ""),
+          readFile(fPath, !isText),
+          isText
+        );
+      },
+      this.ignore
+    );
     return Promise.all([]);
   }
 }

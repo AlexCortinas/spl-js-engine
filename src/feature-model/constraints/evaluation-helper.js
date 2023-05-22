@@ -5,8 +5,10 @@ export default class EvaluationHelper {
   }
 
   toString() {
-    return [...this._added].map(c => `+${c}`).join(', ') +
-      [...this._rejected].map(c => `-${c}`).join(', ');
+    return (
+      [...this._added].map((c) => `+${c}`).join(", ") +
+      [...this._rejected].map((c) => `-${c}`).join(", ")
+    );
   }
 
   isAdded(featureName) {

@@ -1,37 +1,38 @@
-import assert from 'assert';
-import {TemplateEngine} from '../src/index.js';
+import assert from "assert";
+import { TemplateEngine } from "../src/index.js";
 
-suite('#TemplateEngine analysis feature');
+suite("#TemplateEngine analysis feature");
 
-test('create analyser', () => {
+test("create analyser", () => {
   const te = new TemplateEngine();
   const a = te.createAnalyser();
 
-  assert.deepEqual(a.analyse('asdf'), {feature: {}, data: {}});
+  assert.deepEqual(a.analyse("asdf"), { feature: {}, data: {} });
 });
 
-test('create analyser and analyse simple code with a feature', () => {
-  const te = new TemplateEngine();
-  const a = te.createAnalyser();
-
-  assert.deepEqual(
-    a.analyse('/*% if (feature.aFeature) { %*/ asdf /*% } %*/'),
-    {feature: {aFeature: 1}, data: {}}
-  );
-});
-
-test('create analyser and analyse simple code with 2 features', () => {
+test("create analyser and analyse simple code with a feature", () => {
   const te = new TemplateEngine();
   const a = te.createAnalyser();
 
   assert.deepEqual(
-    a.analyse('/*% if (feature.aFeature && feature.bFeature) { %*/ ' +
-      'asdf /*% } %*/'),
-    {feature: {aFeature: 1, bFeature: 1}, data: {}}
+    a.analyse("/*% if (feature.aFeature) { %*/ asdf /*% } %*/"),
+    { feature: { aFeature: 1 }, data: {} }
   );
 });
 
-test('analyse multi features if', () => {
+test("create analyser and analyse simple code with 2 features", () => {
+  const te = new TemplateEngine();
+  const a = te.createAnalyser();
+
+  assert.deepEqual(
+    a.analyse(
+      "/*% if (feature.aFeature && feature.bFeature) { %*/ " + "asdf /*% } %*/"
+    ),
+    { feature: { aFeature: 1, bFeature: 1 }, data: {} }
+  );
+});
+
+test("analyse multi features if", () => {
   const te = new TemplateEngine();
   const a = te.createAnalyser();
 
@@ -44,21 +45,21 @@ test('analyse multi features if', () => {
                 whatever
             /*% } %*/`
     ),
-    {feature: {aFeature: 2, anotherFeature: 1}, data: {}}
+    { feature: { aFeature: 2, anotherFeature: 1 }, data: {} }
   );
 });
 
-test('create analyser and analyse simple code with data', () => {
+test("create analyser and analyse simple code with data", () => {
   const te = new TemplateEngine();
   const a = te.createAnalyser();
 
-  assert.deepEqual(
-    a.analyse('/*%= data.aValue %*/'),
-    {feature: {}, data: {aValue: 1}}
-  );
+  assert.deepEqual(a.analyse("/*%= data.aValue %*/"), {
+    feature: {},
+    data: { aValue: 1 },
+  });
 });
 
-test('create analyser and analyse code with features and data', () => {
+test("create analyser and analyse code with features and data", () => {
   const te = new TemplateEngine();
   const a = te.createAnalyser();
 
@@ -71,6 +72,6 @@ test('create analyser and analyse code with features and data', () => {
               /*%= data.aValue %*/
             /*% } %*/`
     ),
-    {feature: {aFeature: 2, anotherFeature: 1}, data: {aValue: 2}}
+    { feature: { aFeature: 2, anotherFeature: 1 }, data: { aValue: 2 } }
   );
 });

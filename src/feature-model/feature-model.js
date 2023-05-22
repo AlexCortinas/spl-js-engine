@@ -1,14 +1,14 @@
-import xmldoc from 'xmldoc';
-import XMLWriter from 'xml-writer';
-import Feature from './feature.js';
-import ConstraintSet from './constraints/constraint-set.js';
-import TYPE from './feature-type.js';
-import Constraint from './constraints/constraint.js';
-import FeatureSelectionError from './feature-selection-error.js';
+import xmldoc from "xmldoc";
+import XMLWriter from "xml-writer";
+import Feature from "./feature.js";
+import ConstraintSet from "./constraints/constraint-set.js";
+import TYPE from "./feature-type.js";
+import Constraint from "./constraints/constraint.js";
+import FeatureSelectionError from "./feature-selection-error.js";
 
 export default class FeatureModel extends Feature {
   constructor(name) {
-    super(name, {mandatory: true, abstract: true});
+    super(name, { mandatory: true, abstract: true });
     this.featureList = [];
     this.constraintSet = new ConstraintSet();
 
@@ -40,9 +40,9 @@ export default class FeatureModel extends Feature {
   ///////////////////////////
 
   toString() {
-    let constraints = '';
+    let constraints = "";
     if (this.constraintSet.hasConstraints()) {
-      constraints = '\nConstraints: ' + this.constraintSet.toString();
+      constraints = "\nConstraints: " + this.constraintSet.toString();
     }
 
     // provided than feature model is always mandatory and abstract,
@@ -73,9 +73,10 @@ export default class FeatureModel extends Feature {
   completeFeatureSelection(namesOfSelectedFeatures) {
     this.validateFeatureModel();
 
-    if (!Array.isArray(namesOfSelectedFeatures) ||
-      namesOfSelectedFeatures.length == 0) {
-
+    if (
+      !Array.isArray(namesOfSelectedFeatures) ||
+      namesOfSelectedFeatures.length == 0
+    ) {
       namesOfSelectedFeatures = [this.name];
     }
 
@@ -89,12 +90,15 @@ export default class FeatureModel extends Feature {
           namesOfSelectedFeatures
         );
 
-      namesOfSelectedFeatures =
-        this.constraintSet.checkConstraints(namesOfSelectedFeatures);
+      namesOfSelectedFeatures = this.constraintSet.checkConstraints(
+        namesOfSelectedFeatures
+      );
 
       if (errorCounter++ > 1000) {
-        throw 'unknown error getting all the features from selection ' +
-        '(1000 iterations already made)';
+        throw (
+          "unknown error getting all the features from selection " +
+          "(1000 iterations already made)"
+        );
       }
     }
 
@@ -102,7 +106,11 @@ export default class FeatureModel extends Feature {
       this._validateAltFeaturesFromSelection(namesOfSelectedFeatures);
     } catch (ex) {
       if (ex.message) {
-        throw new FeatureSelectionError(ex.message, namesOfSelectedFeatures, ex);
+        throw new FeatureSelectionError(
+          ex.message,
+          namesOfSelectedFeatures,
+          ex
+        );
       } else {
         throw new FeatureSelectionError(ex, namesOfSelectedFeatures);
       }
@@ -137,11 +145,11 @@ export default class FeatureModel extends Feature {
 
   static fromXml(xml) {
     const doc = new xmldoc.XmlDocument(xml);
-    const struct = doc.childNamed('struct');
-    const constraints = doc.childNamed('constraints');
+    const struct = doc.childNamed("struct");
+    const constraints = doc.childNamed("constraints");
 
     if (struct == null) {
-      throw 'Error parsing xml';
+      throw "Error parsing xml";
     }
 
     let fm = new FeatureModel(struct.firstChild.attr.name);
@@ -165,14 +173,14 @@ export default class FeatureModel extends Feature {
     let struct;
     let constraints;
 
-    xmlWriter.startDocument('1.0', 'UTF-8');
+    xmlWriter.startDocument("1.0", "UTF-8");
 
-    feature = xmlWriter.startElement('featureModel');
-    struct = feature.startElement('struct');
+    feature = xmlWriter.startElement("featureModel");
+    struct = feature.startElement("struct");
     super.toXml(struct);
     struct.endElement();
 
-    constraints = feature.startElement('constraints');
+    constraints = feature.startElement("constraints");
     this.constraintSet.toXml(constraints);
     constraints.endElement();
 
@@ -205,8 +213,8 @@ export default class FeatureModel extends Feature {
     const json = {
       featureModel: {
         struct: super.toJson(),
-        constraints: []
-      }
+        constraints: [],
+      },
     };
 
     json.featureModel.constraints = this.constraintSet.toJson();
@@ -219,7 +227,7 @@ export default class FeatureModel extends Feature {
   /////////////////////
 
   _getFeaturesFromNames(featureNames = []) {
-    return featureNames.map(f => this.get(f));
+    return featureNames.map((f) => this.get(f));
   }
 
   _completeFeatureSelectionWithoutConstraints(selectedFeatures) {
@@ -229,49 +237,55 @@ export default class FeatureModel extends Feature {
     while (auxLenght != featureSet.length) {
       auxLenght = featureSet.length;
 
-      featureSet.forEach(f => {
+      featureSet.forEach((f) => {
         if (f.parent != null) {
           featureSet.add(f.parent);
         }
         f.features
-          .filter(child => child.mandatory)
-          .forEach(child => featureSet.add(child));
+          .filter((child) => child.mandatory)
+          .forEach((child) => featureSet.add(child));
       });
     }
 
-    return [...featureSet].map(f => f.name);
+    return [...featureSet].map((f) => f.name);
   }
 
   _validateAltFeaturesFromSelection(selectedFeatures) {
     const features = this._getFeaturesFromNames(selectedFeatures);
 
     // cheking if two alternative features has been selected at the same time
-    features.filter(f1 => f1.parent && f1.parent.type === TYPE.ALT)
-      .forEach(f1 => {
-        if (features
-            .filter(f2 => f1 != f2 && f1.parent == f2.parent)
-            .length > 0)
-
+    features
+      .filter((f1) => f1.parent && f1.parent.type === TYPE.ALT)
+      .forEach((f1) => {
+        if (
+          features.filter((f2) => f1 != f2 && f1.parent == f2.parent).length > 0
+        )
           throw {
-            message: 'selected more than one features in alternative ' +
-          'feature ' + f1.parent.name,
+            message:
+              "selected more than one features in alternative " +
+              "feature " +
+              f1.parent.name,
             featureName: f1.name,
             featureType: f1.parent.type,
-            errorType: 'TOO_MANY_CHILDS'
+            errorType: "TOO_MANY_CHILDS",
           };
       });
 
     // checking if mandatory alt/or feature has no child selected
-    features.filter(f1 => f1.mandatory || selectedFeatures.indexOf(f1.name) != -1)
-      .filter(f1 => f1.type === TYPE.ALT || f1.type === TYPE.OR)
-      .forEach(f1 => {
-        if (features.filter(f2 => f2.parent === f1).length < 1)
+    features
+      .filter((f1) => f1.mandatory || selectedFeatures.indexOf(f1.name) != -1)
+      .filter((f1) => f1.type === TYPE.ALT || f1.type === TYPE.OR)
+      .forEach((f1) => {
+        if (features.filter((f2) => f2.parent === f1).length < 1)
           throw {
-            message: 'missing child feature selected for mandatory ' +
-          f1.type + ' feature ' + f1.name,
+            message:
+              "missing child feature selected for mandatory " +
+              f1.type +
+              " feature " +
+              f1.name,
             featureName: f1.name,
             featureType: f1.type,
-            errorType: 'MISSING_CHILD'
+            errorType: "MISSING_CHILD",
           };
       });
   }

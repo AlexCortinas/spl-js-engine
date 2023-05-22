@@ -1,4 +1,4 @@
-import Engine from './engine.js';
+import Engine from "./engine.js";
 
 export default class Analyser extends Engine {
   constructor(delimiters = {}) {
@@ -7,24 +7,25 @@ export default class Analyser extends Engine {
 
   analyse(str, ext) {
     const delimiter = this.getDelimiter(ext);
-    const result = {feature: {}, data: {}};
+    const result = { feature: {}, data: {} };
     // let cursor = 0;
     let match, featureMatch, featureAux, dataMatch;
 
     while ((match = delimiter.regular.exec(str)) !== null) {
-      while ((featureMatch =
-        delimiter.feature.exec(match.slice(1).join(''))) !== null) {
-
-        featureAux = featureMatch[0].replace('feature.', '');
+      while (
+        (featureMatch = delimiter.feature.exec(match.slice(1).join(""))) !==
+        null
+      ) {
+        featureAux = featureMatch[0].replace("feature.", "");
         if (!Object.prototype.hasOwnProperty.call(result.feature, featureAux)) {
           result.feature[featureAux] = 0;
         }
         result.feature[featureAux]++;
       }
-      while ((dataMatch =
-        delimiter.data.exec(match.slice(1).join(''))) !== null) {
-
-        featureAux = dataMatch[0].replace('data.', '');
+      while (
+        (dataMatch = delimiter.data.exec(match.slice(1).join(""))) !== null
+      ) {
+        featureAux = dataMatch[0].replace("data.", "");
         if (!Object.prototype.hasOwnProperty.call(result.data, featureAux)) {
           result.data[featureAux] = 0;
         }

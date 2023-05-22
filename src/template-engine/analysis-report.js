@@ -9,7 +9,7 @@ export default class AnalysisReport {
   }
 
   short() {
-    const ret = {feature: {}, data: {}};
+    const ret = { feature: {}, data: {} };
 
     this.results.forEach((value) => {
       for (const featureName in value.feature) {
@@ -60,7 +60,7 @@ export default class AnalysisReport {
     this.results.forEach((value, key) => {
       for (const featureName in value.feature) {
         if (featureName == aFeature) {
-          ret.push({path: key, count: value.feature[featureName]});
+          ret.push({ path: key, count: value.feature[featureName] });
         }
       }
     });
@@ -79,7 +79,7 @@ export default class AnalysisReport {
     for (const featureName in aux) {
       ret.push({
         featureName: featureName,
-        count: aux[featureName]
+        count: aux[featureName],
       });
     }
 
@@ -107,24 +107,24 @@ export default class AnalysisReport {
   checkAnnotatedFeaturesConsistency() {
     const found = Object.keys(this.short().feature);
     const expected = this.featureModel.featureList
-      .map(featureName => this.featureModel.get(featureName))
-      .filter(feature => !feature.abstract)
-      .map(feature => feature.name);
+      .map((featureName) => this.featureModel.get(featureName))
+      .filter((feature) => !feature.abstract)
+      .map((feature) => feature.name);
     const expectedWithoutChildren = this.featureModel.featureList
-      .map(featureName => this.featureModel.get(featureName))
-      .filter(feature => !feature.abstract)
-      .filter(feature => feature.features.length == 0)
-      .map(feature => feature.name);
+      .map((featureName) => this.featureModel.get(featureName))
+      .filter((feature) => !feature.abstract)
+      .filter((feature) => feature.features.length == 0)
+      .map((feature) => feature.name);
 
     const res = {
       surplus: {
-        desc: 'features found in code but not in feature model',
-        values: found.filter(f => expected.indexOf(f) == -1)
+        desc: "features found in code but not in feature model",
+        values: found.filter((f) => expected.indexOf(f) == -1),
       },
       missing: {
-        desc: 'child features found in feature model but not in code',
-        values: expectedWithoutChildren.filter(f => found.indexOf(f) == -1)
-      }
+        desc: "child features found in feature model but not in code",
+        values: expectedWithoutChildren.filter((f) => found.indexOf(f) == -1),
+      },
     };
 
     // features found in code but not in feature model are errors
@@ -141,8 +141,8 @@ export default class AnalysisReport {
     const expected = propertyNames(productData.data);
 
     const res = {
-      surplus: found.filter(f => expected.indexOf(f) == -1),
-      missing: expected.filter(f => found.indexOf(f) == -1)
+      surplus: found.filter((f) => expected.indexOf(f) == -1),
+      missing: expected.filter((f) => found.indexOf(f) == -1),
     };
 
     // data parameters found in code but not in product spec are errors
@@ -162,7 +162,7 @@ export default class AnalysisReport {
       ret.push({
         feature: featureName,
         count: aux[featureName],
-        files: this.filesByFeatureLong(featureName, byCount)
+        files: this.filesByFeatureLong(featureName, byCount),
       });
     }
 
@@ -182,9 +182,9 @@ export default class AnalysisReport {
       element = {
         file: filePath,
         count: Object.keys(aux[filePath].feature).length,
-        features: []
+        features: [],
       };
-      element.features.push({feature: 'aFeature', count: 2});
+      element.features.push({ feature: "aFeature", count: 2 });
       ret.push(element);
     }
 
@@ -197,10 +197,8 @@ export default class AnalysisReport {
 }
 
 const sortByCount = (a, b) => {
-  if (a.count > b.count)
-    return -1;
-  if (a.count < b.count)
-    return 1;
+  if (a.count > b.count) return -1;
+  if (a.count < b.count) return 1;
   return 0;
 };
 
@@ -213,19 +211,15 @@ function propertyNames(obj, array, stack) {
     array = [];
   }
 
-  Object.keys(obj).forEach(property => {
-    if (typeof obj[property] == 'object') {
+  Object.keys(obj).forEach((property) => {
+    if (typeof obj[property] == "object") {
       propertyNames(
         obj[property],
         array,
-        stack ? stack + '.' + property
-          : property
+        stack ? stack + "." + property : property
       );
     } else {
-      array.push(
-        stack ? stack + '.' + property
-          : property
-      );
+      array.push(stack ? stack + "." + property : property);
     }
   });
 

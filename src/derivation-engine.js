@@ -1,16 +1,23 @@
-import FeatureModel from './feature-model/feature-model.js';
-import TemplateEngine from './template-engine/template-engine.js';
-import AnalysisReport from './template-engine/analysis-report.js';
-import {LocalOutput, ZipOutput} from './output.js';
-import {LocalInput, ZipInput} from './input.js';
-import {getExtension, getFolder, getFileName} from './file-utils.js';
+import FeatureModel from "./feature-model/feature-model.js";
+import TemplateEngine from "./template-engine/template-engine.js";
+import AnalysisReport from "./template-engine/analysis-report.js";
+import { LocalOutput, ZipOutput } from "./output.js";
+import { LocalInput, ZipInput } from "./input.js";
+import { getExtension, getFolder, getFileName } from "./file-utils.js";
 import _eval from "eval";
 
 export default class DerivationEngine {
-  constructor(codePath, featureModel, config, extraJS, modelTransformation, verbose) {
+  constructor(
+    codePath,
+    featureModel,
+    config,
+    extraJS,
+    modelTransformation,
+    verbose
+  ) {
     const promises = [];
 
-    if (typeof codePath === 'object' && codePath.zip) {
+    if (typeof codePath === "object" && codePath.zip) {
       // codePath is in fact an object with all the params
       /**
        *
@@ -22,18 +29,34 @@ export default class DerivationEngine {
        *          verbose: global verbose flag (boolean)
        *        } opts
        */
-      this.input = new ZipInput(codePath.zip, codePath.codePath || 'code');
-      if (this.input.exists(codePath.extraJS || 'extra.js')) {
-        promises.push(this.input.get(codePath.extraJS || 'extra.js').then(content => extraJS = content));
+      this.input = new ZipInput(codePath.zip, codePath.codePath || "code");
+      if (this.input.exists(codePath.extraJS || "extra.js")) {
+        promises.push(
+          this.input
+            .get(codePath.extraJS || "extra.js")
+            .then((content) => (extraJS = content))
+        );
       }
-      promises.push(this.input.get(codePath.featureModel || 'model.xml').then(content => featureModel = content));
-      promises.push(this.input.get(codePath.config || 'config.json').then(content => config = JSON.parse(content)));
-      if (this.input.exists(codePath.modelTransformation || 'transformation.js')) {
-        promises.push(this.input.get(codePath.modelTransformation || 'transformation.js')
-          .then(content => modelTransformation = content));
+      promises.push(
+        this.input
+          .get(codePath.featureModel || "model.xml")
+          .then((content) => (featureModel = content))
+      );
+      promises.push(
+        this.input
+          .get(codePath.config || "config.json")
+          .then((content) => (config = JSON.parse(content)))
+      );
+      if (
+        this.input.exists(codePath.modelTransformation || "transformation.js")
+      ) {
+        promises.push(
+          this.input
+            .get(codePath.modelTransformation || "transformation.js")
+            .then((content) => (modelTransformation = content))
+        );
       }
       verbose = codePath.verbose;
-
     } else {
       /**
        *
@@ -44,46 +67,48 @@ export default class DerivationEngine {
        * @param JSFunction modelTransformation - javascript text with a function that transforms the product
        * @param boolean verbose - global verbose flag (boolean)
        */
-      if (typeof codePath === 'object') {
+      if (typeof codePath === "object") {
         ({
           codePath,
           featureModel,
           config,
           extraJS,
           modelTransformation,
-          verbose
+          verbose,
         } = codePath);
       }
       this.input = new LocalInput(codePath);
     }
 
-    return Promise.all(promises).then(() => {
-      this.templateEngine = new TemplateEngine({}, extraJS);
+    return Promise.all(promises)
+      .then(() => {
+        this.templateEngine = new TemplateEngine({}, extraJS);
 
-      if (featureModel) {
-        this.setFeatureModel(featureModel);
-      }
+        if (featureModel) {
+          this.setFeatureModel(featureModel);
+        }
 
-      if (config) {
-        this.setConfig(config);
-      }
+        if (config) {
+          this.setConfig(config);
+        }
 
-      if (modelTransformation) {
-        this.setModelTransformation(modelTransformation);
-      }
+        if (modelTransformation) {
+          this.setModelTransformation(modelTransformation);
+        }
 
-      this.verbose = verbose;
-    }).then(() => {
-      return this;
-    });
+        this.verbose = verbose;
+      })
+      .then(() => {
+        return this;
+      });
   }
 
   generateZip(product = {}, opts = {}) {
-    return this.generate(product, { type: 'zip', verbose: opts.verbose });
+    return this.generate(product, { type: "zip", verbose: opts.verbose });
   }
 
   generateProduct(outputPath, product = {}) {
-    return this.generate(product, { type: 'local', outputPath: outputPath });
+    return this.generate(product, { type: "local", outputPath: outputPath });
   }
 
   /**
@@ -98,53 +123,75 @@ export default class DerivationEngine {
    */
   generate(product = {}, opts = {}) {
     this.verbose = opts.verbose || this.verbose;
-    opts.type = opts.type || 'zip';
+    opts.type = opts.type || "zip";
 
     if (this.modelTransformation) {
       product = this.modelTransformation(product);
     }
     const features = this._prepareFeatures(product.features);
     const data = product.data || {};
-    const fileGenerator = this.templateEngine.createFileGenerator(features, data);
+    const fileGenerator = this.templateEngine.createFileGenerator(
+      features,
+      data
+    );
     const processor = this.templateEngine.createProcessor(features, data);
 
-    if (opts.type == 'zip') {
+    if (opts.type == "zip") {
       this.output = new ZipOutput();
     } else {
       this.output = new LocalOutput(opts.outputPath);
     }
 
-    return this.input.forEachCodeFile((fPath, fContent, isText) => {
-      if (!isText) {
-        return this.output.add(fPath, fContent, true);
-      }
+    return this.input
+      .forEachCodeFile((fPath, fContent, isText) => {
+        if (!isText) {
+          return this.output.add(fPath, fContent, true);
+        }
 
-      fileGenerator
-        .filesToCreate(fContent, getExtension(fPath), getFileName(fPath), '', {})
-        .forEach(r => {
-          if (this.verbose) {
-            console.log('');
-            console.log('Input file.....: ' + fPath);
-            console.log('File name..: ' + r.fileName);
-            console.log('Output file: ' + getFolder(fPath) + '/' + r.fileName);
-          }
-          const generatedContent = processor.process(r.fileContent, getExtension(fPath), r.context);
-          const generatedFilePath = (getFolder(fPath) + '/' + r.fileName).replace('./', '');
-          if (generatedContent && (typeof(generatedContent) != 'string' || generatedContent.trim())) {
-            return this.output.add(generatedFilePath, generatedContent);
-          }
-        });
-    }).then(() => this.output.get());
+        fileGenerator
+          .filesToCreate(
+            fContent,
+            getExtension(fPath),
+            getFileName(fPath),
+            "",
+            {}
+          )
+          .forEach((r) => {
+            if (this.verbose) {
+              console.log("");
+              console.log("Input file.....: " + fPath);
+              console.log("File name..: " + r.fileName);
+              console.log(
+                "Output file: " + getFolder(fPath) + "/" + r.fileName
+              );
+            }
+            const generatedContent = processor.process(
+              r.fileContent,
+              getExtension(fPath),
+              r.context
+            );
+            const generatedFilePath = (
+              getFolder(fPath) +
+              "/" +
+              r.fileName
+            ).replace("./", "");
+            if (
+              generatedContent &&
+              (typeof generatedContent != "string" || generatedContent.trim())
+            ) {
+              return this.output.add(generatedFilePath, generatedContent);
+            }
+          });
+      })
+      .then(() => this.output.get());
   }
 
   _prepareFeatures(productFeatures) {
     if (!productFeatures) return {};
     const features = {};
-    this.featureModel
-      .completeFeatureSelection(productFeatures)
-      .forEach((f) => {
-        features[f] = true;
-      });
+    this.featureModel.completeFeatureSelection(productFeatures).forEach((f) => {
+      features[f] = true;
+    });
     return features;
   }
 
@@ -153,9 +200,9 @@ export default class DerivationEngine {
   }
 
   setFeatureModel(featureModel) {
-    if (!featureModel) throw 'feature model must be provided';
+    if (!featureModel) throw "feature model must be provided";
 
-    if (typeof featureModel == 'object') {
+    if (typeof featureModel == "object") {
       this.featureModel = FeatureModel.fromJson(featureModel);
     } else {
       try {
@@ -170,8 +217,8 @@ export default class DerivationEngine {
 
   setConfig(config) {
     if (Array.isArray(config.delimiters)) {
-      config.delimiters.forEach(d => {
-        d.extension.forEach(e => {
+      config.delimiters.forEach((d) => {
+        d.extension.forEach((e) => {
           this.input.addHandledExtension(e);
           this.templateEngine.addDelimiter(e, d.start, d.end);
         });
@@ -187,9 +234,14 @@ export default class DerivationEngine {
     const report = new AnalysisReport(this.featureModel);
     const analyser = this.templateEngine.createAnalyser();
 
-    return this.input.forEachCodeFile((fPath, fContent, isText) => {
-      if (!isText) return;
-      return report.addAnalysis(fPath, analyser.analyse(fContent, getExtension(fPath)));
-    }).then(() => report);
+    return this.input
+      .forEachCodeFile((fPath, fContent, isText) => {
+        if (!isText) return;
+        return report.addAnalysis(
+          fPath,
+          analyser.analyse(fContent, getExtension(fPath))
+        );
+      })
+      .then(() => report);
   }
 }
