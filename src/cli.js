@@ -1,11 +1,18 @@
+#!/usr/bin/env node
+
 import meow from 'meow';
 import fs from 'fs';
 import path from 'path';
 import {DerivationEngine, readJsonFromFile, readFile} from './index.js';
 import JSZip from 'jszip';
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const usage = fs.readFileSync(path.join(__dirname, "../usage.txt"), "utf8");
 
 export function cli() {
-  const cli = meow({help: false, importMeta: import.meta});
+  const cli = meow(usage, {importMeta: import.meta});
   const {
     featureModel,
     product,
@@ -20,8 +27,8 @@ export function cli() {
   } = cli.flags;
   const validation = cli.input.indexOf('validate') != -1;
 
-  if (cli.flags.help || (!(code && featureModel) && !zip)) {
-    help();
+  if (!(code && featureModel) && !zip) {
+    cli.showHelp();
   }
 
   const enginePromise = zip ?
@@ -53,17 +60,9 @@ export function cli() {
           .on('finish', () => finish(outputZip));
       });
     } else {
-      help();
+      this.showHelp();
     }
   });
-}
-
-function help() {
-  console.log(
-    fs.readFileSync(
-      path.join(__dirname, '../usage.txt'), 'utf8')
-  );
-  process.exit(0);
 }
 
 function finish(outputZip) {
@@ -117,3 +116,5 @@ function validate(engine, productJson) {
     console.log('============================');
   }
 }
+
+cli();

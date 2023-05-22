@@ -1,7 +1,7 @@
 {
   "author": "Álex Cortiñas",
   "bin": {
-    "spl-js-engine": "./src/index.js"
+    "spl-js-engine": "./src/cli.js"
   },
   "dependencies": {
     "eval": "^0.1.8",
