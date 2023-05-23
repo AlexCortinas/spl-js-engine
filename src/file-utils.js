@@ -1,14 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import stripBom from 'strip-bom';
+import fs from "fs";
+import path from "path";
+import stripBom from "strip-bom";
 
-export const getExtension = f => {
+export const getExtension = (f) => {
   f = getFileName(f);
-  return f.substring(f.lastIndexOf('.') + 1) || f;
+  return f.substring(f.lastIndexOf(".") + 1) || f;
 };
-export const getFileName = f => path.basename(f);
-export const getFolder = f => path.dirname(f);
-export const isNode = typeof window === 'undefined';
+export const getFileName = (f) => path.basename(f);
+export const getFolder = (f) => path.dirname(f);
+export const isNode = typeof window === "undefined";
 
 export function existsFile(filePath) {
   try {
@@ -22,14 +22,14 @@ export function readFile(filePath, bin = false) {
   if (bin) {
     return fs.readFileSync(filePath, null);
   } else {
-    return stripBom(fs.readFileSync(filePath, 'utf8'));
+    return stripBom(fs.readFileSync(filePath, "utf8"));
   }
 }
 
 export function writeFile(filePath, data, bin = false) {
   if (!bin && (!data || !data.trim())) return;
   mkDirRecursively(path.dirname(filePath));
-  fs.writeFileSync(filePath, data, bin ? null : 'utf8');
+  fs.writeFileSync(filePath, data, bin ? null : "utf8");
 }
 
 function mkDirRecursively(folderPath) {
@@ -53,18 +53,20 @@ export function walkDir(pathToWalk, cb, ignore = []) {
 
   if (!stat || stat.isFile()) return;
 
-  fs.readdirSync(pathToWalk).filter(function (path) {
-    return ignore.indexOf(path) == -1;
-  }).forEach((filePath) => {
-    const fullFilePath = `${pathToWalk}${path.sep}${filePath}`;
-    stat = fs.statSync(fullFilePath);
+  fs.readdirSync(pathToWalk)
+    .filter(function (path) {
+      return ignore.indexOf(path) == -1;
+    })
+    .forEach((filePath) => {
+      const fullFilePath = `${pathToWalk}${path.sep}${filePath}`;
+      stat = fs.statSync(fullFilePath);
 
-    if (stat.isFile()) {
-      cb(fullFilePath, false);
-    } else if (stat.isDirectory()) {
-      walkDir(fullFilePath, cb, ignore);
-    }
-  });
+      if (stat.isFile()) {
+        cb(fullFilePath, false);
+      } else if (stat.isDirectory()) {
+        walkDir(fullFilePath, cb, ignore);
+      }
+    });
 
   cb(pathToWalk, true);
 }
@@ -88,18 +90,21 @@ export function readJsonFromFile(fPath) {
 }
 
 function extendProductJson(json, basepath) {
-  Object.keys(json).forEach(k => {
+  Object.keys(json).forEach((k) => {
     if (json[k]) {
-      if (typeof json[k] == 'object') {
+      if (typeof json[k] == "object") {
         json[k] = extendProductJson(json[k], basepath);
-      } else if (typeof json[k] == 'string' && json[k].substr(0,9) == '@include:') {
+      } else if (
+        typeof json[k] == "string" &&
+        json[k].substr(0, 9) == "@include:"
+      ) {
         json[k] = readFile(basepath + path.sep + json[k].substr(9));
         try {
           // if it is a json, we parse it; otherwise, we will use the plain text
           json[k] = JSON.parse(json[k]);
         } catch (e) {
           // we remove the blank extra line of the file if it exists
-          if (json[k].substr(-1) == '\n') {
+          if (json[k].substr(-1) == "\n") {
             json[k] = json[k].slice(0, -1);
           }
         }

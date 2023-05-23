@@ -1,11 +1,5 @@
-#!/usr/bin/env node
+export { default as DerivationEngine } from "./derivation-engine.js";
+export { default as FeatureModel } from "./feature-model/feature-model.js";
+export { default as TemplateEngine } from "./template-engine/template-engine.js";
 
-export DerivationEngine from './derivation-engine';
-export FeatureModel from './feature-model/feature-model';
-export TemplateEngine from './template-engine/template-engine';
-
-export {readJsonFromFile, readFile} from './file-utils';
-
-import {cli} from './cli';
-
-if (require.main === module) cli();
+export { readJsonFromFile, readFile } from "./file-utils.js";

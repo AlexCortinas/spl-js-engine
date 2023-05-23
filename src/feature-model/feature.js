@@ -1,7 +1,11 @@
-import TYPE from './feature-type';
+import TYPE from "./feature-type.js";
 
 export default class Feature {
-  constructor(name, {mandatory = false, abstract = false, hidden = false}, parent = null) {
+  constructor(
+    name,
+    { mandatory = false, abstract = false, hidden = false },
+    parent = null
+  ) {
     this.name = name;
     this.mandatory = mandatory;
     this.abstract = abstract;
@@ -19,8 +23,11 @@ export default class Feature {
       featureModel.addFeatureToFeatureList(name);
     }
 
-    if (mandatory && this.parent &&
-      (this.parent.type === TYPE.ALT || this.parent.type === TYPE.OR)) {
+    if (
+      mandatory &&
+      this.parent &&
+      (this.parent.type === TYPE.ALT || this.parent.type === TYPE.OR)
+    ) {
       // If the parent is an OR or ALT, this feature cannot be mandatory.
       // At first, this was not taken into account, but FeatureIDE XML
       // structure for feature models sets the optional and alternative
@@ -43,17 +50,17 @@ export default class Feature {
   /////////////////////
   and(features) {
     this.type = TYPE.AND;
-    return this::_add(features);
+    return this._add(features);
   }
 
   or(features) {
     this.type = TYPE.OR;
-    return this::_add(features);
+    return this._add(features);
   }
 
   alt(features) {
     this.type = TYPE.ALT;
-    return this::_add(features);
+    return this._add(features);
   }
 
   // xor is just another name for alt
@@ -67,8 +74,8 @@ export default class Feature {
     }
 
     return this.features
-      .map(f => f.get(featureName))
-      .filter(f => f)
+      .map((f) => f.get(featureName))
+      .filter((f) => f)
       .pop();
   }
 
@@ -79,7 +86,7 @@ export default class Feature {
   getFeatures() {
     const ret = {
       name: this.name,
-      type: this.type
+      type: this.type,
     };
 
     if (this.hidden) {
@@ -91,7 +98,7 @@ export default class Feature {
     }
 
     if (this.features.length > 0) {
-      ret.features = this.features.map(el => el.getFeatures());
+      ret.features = this.features.map((el) => el.getFeatures());
     }
 
     return ret;
@@ -101,15 +108,14 @@ export default class Feature {
   // String Representation //
   ///////////////////////////
   toString() {
-    let str = (this.abstract ? '_' : '') +
-      (this.mandatory ? '+' : '') +
-      this.name;
+    let str =
+      (this.abstract ? "_" : "") + (this.mandatory ? "+" : "") + this.name;
 
     if (this.features.length > 0) {
       str +=
-        ': { ' +
-        this.features.map(f => f.toString()).join(` ${this.type} `) +
-        ' }';
+        ": { " +
+        this.features.map((f) => f.toString()).join(` ${this.type} `) +
+        " }";
     }
 
     return str;
@@ -125,23 +131,22 @@ export default class Feature {
     if (!hasChildren) {
       // Abstract feature cannot be leaf
       if (this.abstract) {
-        throw 'abstract feature cannot be leaf';
+        throw "abstract feature cannot be leaf";
       }
     } else {
       // Validate all its children features
-      this.features.forEach(f => {
+      this.features.forEach((f) => {
         f.validateFeature();
       });
     }
 
     if (this.type === TYPE.OR || this.type === TYPE.ALT) {
       if (!hasChildren) {
-        throw 'OR and ALT features must have children';
+        throw "OR and ALT features must have children";
       } else {
         this.features.forEach(function (f) {
           if (f.mandatory) {
-            throw 'features with OR and ALT parent cannot be ' +
-            'mandatory';
+            throw "features with OR and ALT parent cannot be " + "mandatory";
           }
         });
       }
@@ -171,12 +176,12 @@ export default class Feature {
     const type = this.type.toLowerCase();
     const feature = parentNode.startElement(type);
 
-    feature.writeAttribute('name', this.name);
+    feature.writeAttribute("name", this.name);
     if (this.mandatory) {
-      feature.writeAttribute('mandatory', 'true');
+      feature.writeAttribute("mandatory", "true");
     }
     if (this.abstract) {
-      feature.writeAttribute('abstract', 'true');
+      feature.writeAttribute("abstract", "true");
     }
 
     if (Array.isArray(this.features)) {
@@ -209,7 +214,7 @@ export default class Feature {
 
   toJson() {
     const json = {
-      name: this.name
+      name: this.name,
     };
 
     if (this.mandatory) {
@@ -233,37 +238,40 @@ export default class Feature {
 
     return json;
   }
-}
 
-/////////////////////
-// Private Methods //
-/////////////////////
+  /////////////////////
+  // Private Methods //
+  /////////////////////
 
-function _add(features) {
-  if (Array.isArray(features)) {
-    // features is an array with many features
-    features.forEach(f => this::_add(f));
-    return;
+  _add(features) {
+    if (Array.isArray(features)) {
+      // features is an array with many features
+      features.forEach((f) => this._add(f));
+      return;
+    }
+
+    let newNode = null;
+    if (typeof features == "string") {
+      // features is the name of a new feature
+      newNode = new Feature(features, {}, this);
+    } else {
+      // features is the JSON of a new feature
+      newNode = new Feature(features.name, features, this);
+    }
+
+    this.features.push(newNode);
+    return newNode;
   }
-
-  let newNode = null;
-  if (typeof features == 'string') {
-    // features is the name of a new feature
-    newNode = new Feature(features, {}, this);
-  } else {
-    // features is the JSON of a new feature
-    newNode = new Feature(features.name, features, this);
-  }
-
-  this.features.push(newNode);
-  return newNode;
 }
 
 function _compareString(s1, s2) {
-  if (typeof s1 != 'string' || typeof s2 != 'string' ||
-    s1 == null || s2 == null) {
-
-    throw '_compareString: parameter is undefined, null or non string';
+  if (
+    typeof s1 != "string" ||
+    typeof s2 != "string" ||
+    s1 == null ||
+    s2 == null
+  ) {
+    throw "_compareString: parameter is undefined, null or non string";
   }
   return s1.toLowerCase() === s2.toLowerCase();
 }

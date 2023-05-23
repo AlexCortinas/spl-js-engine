@@ -1,91 +1,97 @@
-import assert from 'assert';
-import {existsFile, readJsonFromFile, readFile, walkDir, writeFile} from '../src/file-utils';
-import {getTestPath as p, removeTmpFolder} from './test-utils';
+import assert from "assert";
+import {
+  existsFile,
+  readJsonFromFile,
+  readFile,
+  walkDir,
+  writeFile,
+} from "../src/file-utils.js";
+import { getTestPath as p, removeTmpFolder } from "./test-utils.js";
 
-suite('File Utils');
+suite("File Utils");
 
 before(removeTmpFolder);
 after(removeTmpFolder);
 
-test('Testing existsFile', () => {
-  assert.notEqual(existsFile(p('asdf.txt')), false);
+test("Testing existsFile", () => {
+  assert.notEqual(existsFile(p("asdf.txt")), false);
 });
 
-test('Testing readFile', () => {
-  assert.strictEqual(readFile(p('asdf.txt')), 'asdf\n');
+test("Testing readFile", () => {
+  assert.strictEqual(readFile(p("asdf.txt")), "asdf\n");
 });
 
-test('Walking directory', () => {
+test("Walking directory", () => {
   const result = [];
   const expected = [
-    p('dir-to-walk/foo/a'),
-    p('dir-to-walk/foo/b'),
-    p('dir-to-walk/foo/c/d'),
-    p('dir-to-walk/foo/c'),
-    p('dir-to-walk/foo'),
-    p('dir-to-walk/ignore/e'),
-    p('dir-to-walk/ignore'),
-    p('dir-to-walk')
+    p("dir-to-walk/foo/a"),
+    p("dir-to-walk/foo/b"),
+    p("dir-to-walk/foo/c/d"),
+    p("dir-to-walk/foo/c"),
+    p("dir-to-walk/foo"),
+    p("dir-to-walk/ignore/e"),
+    p("dir-to-walk/ignore"),
+    p("dir-to-walk"),
   ];
-  walkDir(p('dir-to-walk'), (filePath) => result.push(filePath));
+  walkDir(p("dir-to-walk"), (filePath) => result.push(filePath));
   assert.deepEqual(
-    expected.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' ')),
-    result.map(e => e.replace(/\//g, ' ').replace(/\\/g, ' '))
+    expected.map((e) => e.replace(/\//g, " ").replace(/\\/g, " ")),
+    result.map((e) => e.replace(/\//g, " ").replace(/\\/g, " "))
   );
 });
 
-test('Testing writeFile', () => {
-  writeFile(p('tmp/tmp/asdf.txt'), 'asdf\n');
-  writeFile(p('tmp/asdf.txt'), 'asdf\n');
-  assert.strictEqual(readFile(p('tmp/tmp/asdf.txt')), 'asdf\n');
-  assert.strictEqual(readFile(p('tmp/asdf.txt')), 'asdf\n');
+test("Testing writeFile", () => {
+  writeFile(p("tmp/tmp/asdf.txt"), "asdf\n");
+  writeFile(p("tmp/asdf.txt"), "asdf\n");
+  assert.strictEqual(readFile(p("tmp/tmp/asdf.txt")), "asdf\n");
+  assert.strictEqual(readFile(p("tmp/asdf.txt")), "asdf\n");
 });
 
-test('Read JSON file', () => {
+test("Read JSON file", () => {
   const expected = {
     featureModel: {
       struct: {
-        name: 'SimpleSPL',
+        name: "SimpleSPL",
         mandatory: true,
         abstract: true,
-        type: 'and',
+        type: "and",
         features: [
-          {name: 'featureA'},
-          {name: 'featureB'},
-          {name: 'featureC'}
-        ]
+          { name: "featureA" },
+          { name: "featureB" },
+          { name: "featureC" },
+        ],
       },
       constraints: [
         {
-          type: 'implies',
-          first: 'featureA',
-          second: 'featureC'
-        }
-      ]
-    }
+          type: "implies",
+          first: "featureA",
+          second: "featureC",
+        },
+      ],
+    },
   };
-  assert.deepEqual(readJsonFromFile(p('simpleSPL/model.json')), expected);
+  assert.deepEqual(readJsonFromFile(p("simpleSPL/model.json")), expected);
 });
 
-test('Extend product JSON file', () => {
+test("Extend product JSON file", () => {
   const expected = {
-    features: [
-      'featureA',
-      'featureC'
-    ],
+    features: ["featureA", "featureC"],
     data: {
-      aValue: 'aaa',
-      bValue: 'bbb',
+      aValue: "aaa",
+      bValue: "bbb",
       more: {
-        cValue: 'ccc',
-        dValue: 'ddd',
+        cValue: "ccc",
+        dValue: "ddd",
         andmore: {
-          eValue: 'eee',
-          fValue: 'fff'
-        }
+          eValue: "eee",
+          fValue: "fff",
+        },
       },
-      title: 'Included text example!'
-    }
+      title: "Included text example!",
+    },
   };
-  assert.deepEqual(readJsonFromFile(p('simpleSPLwithIncludes/product.json')), expected);
+  assert.deepEqual(
+    readJsonFromFile(p("simpleSPLwithIncludes/product.json")),
+    expected
+  );
 });

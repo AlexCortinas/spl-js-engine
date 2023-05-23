@@ -1,19 +1,17 @@
-import Delimiter from './delimiter.js';
+import Delimiter from "./delimiter.js";
 
 export default class Engine {
-  constructor(delimiters = {}, extraJS = '') {
+  constructor(delimiters = {}, extraJS = "") {
     this.delimiters = delimiters;
     if (!this.delimiters.default) {
       this.delimiters.default = new Delimiter();
     }
-    this.extraJS = extraJS || '';
+    this.extraJS = extraJS || "";
   }
 
-  getDelimiter(extension = 'default') {
-    if (this.delimiters[extension])
-      return this.delimiters[extension];
-    else
-      return this.delimiters.default;
+  getDelimiter(extension = "default") {
+    if (this.delimiters[extension]) return this.delimiters[extension];
+    else return this.delimiters.default;
   }
 
   getTemplateHelperMethods() {

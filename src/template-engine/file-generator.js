@@ -1,7 +1,7 @@
-import Engine from './engine.js';
+import Engine from "./engine.js";
 
 export default class FileGenerator extends Engine {
-  constructor(features = {}, data = {}, delimiters = {}, extraJS = '') {
+  constructor(features = {}, data = {}, delimiters = {}, extraJS = "") {
     super(delimiters, extraJS);
     this.features = features;
     this.data = data;
@@ -12,18 +12,38 @@ export default class FileGenerator extends Engine {
     const match = delimiter.exec(fileContent);
 
     if (!match) {
-      return [{fileContent, fileName, basePath, context}];
+      return [{ fileContent, fileName, basePath, context }];
     } else {
-      const f = new Function('feature', 'data', 'fileName', 'basePath', 'context',
-        this.getTemplateHelperMethods() + match[1]);
+      const f = new Function(
+        "feature",
+        "data",
+        "fileName",
+        "basePath",
+        "context",
+        this.getTemplateHelperMethods() + match[1]
+      );
       const fresults = f(this.features, this.data, fileName, basePath, context);
-      const newFileContent = fileContent.replace(delimiter, '').replace(/^[\n\r\t]/, '');
-      return flatten(fresults.map(
-        r => this.filesToCreate(newFileContent, extension, r.fileName, r.basePath, r.context)));
+      const newFileContent = fileContent
+        .replace(delimiter, "")
+        .replace(/^[\n\r\t]/, "");
+      return flatten(
+        fresults.map((r) =>
+          this.filesToCreate(
+            newFileContent,
+            extension,
+            r.fileName,
+            r.basePath,
+            r.context
+          )
+        )
+      );
     }
   }
 }
 
 function flatten(list) {
-  return list.reduce((a, b) => (Array.isArray(b) ? a.push(...flatten(b)) : a.push(b), a), []);
+  return list.reduce(
+    (a, b) => (Array.isArray(b) ? a.push(...flatten(b)) : a.push(b), a),
+    []
+  );
 }

@@ -1,6 +1,6 @@
-import {writeFile} from './file-utils';
-import JSZip from 'jszip';
-import path from 'path';
+import { writeFile } from "./file-utils.js";
+import JSZip from "jszip";
+import path from "path";
 
 class Output {
   constructor() {}

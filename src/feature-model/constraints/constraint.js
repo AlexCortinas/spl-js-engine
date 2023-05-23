@@ -1,6 +1,5 @@
 export default class Constraint {
-  constructor() {
-  }
+  constructor() {}
 
   static create(featureName) {
     this.id = null;
@@ -32,29 +31,29 @@ export default class Constraint {
   //////////////////////////////
 
   static fromJson(json) {
-    if (json == null || (typeof json != 'string' && json.type == null)) {
-      throw 'json cannot be parsed';
+    if (json == null || (typeof json != "string" && json.type == null)) {
+      throw "json cannot be parsed";
     }
 
-    if (typeof json == 'string') {
+    if (typeof json == "string") {
       return FeatureConstraint.fromJson(json);
     }
 
     switch (json.type) {
-    case 'and':
-      return AndConstraint.fromJson(json);
-    case 'feature':
-      return FeatureConstraint.fromJson(json);
-    case 'iff':
-      return IffConstraint.fromJson(json);
-    case 'implies':
-      return ImplicationConstraint.fromJson(json);
-    case 'not':
-      return NegatedConstraint.fromJson(json);
-    case 'or':
-      return OrConstraint.fromJson(json);
-    case 'alt':
-      return AltConstraint.fromJson(json);
+      case "and":
+        return AndConstraint.fromJson(json);
+      case "feature":
+        return FeatureConstraint.fromJson(json);
+      case "iff":
+        return IffConstraint.fromJson(json);
+      case "implies":
+        return ImplicationConstraint.fromJson(json);
+      case "not":
+        return NegatedConstraint.fromJson(json);
+      case "or":
+        return OrConstraint.fromJson(json);
+      case "alt":
+        return AltConstraint.fromJson(json);
     }
   }
 
@@ -64,24 +63,24 @@ export default class Constraint {
 
   static fromXml(xml) {
     if (xml == null) {
-      throw 'xml cannot be parsed';
+      throw "xml cannot be parsed";
     }
 
     switch (xml.name) {
-    case 'conj':
-      return AndConstraint.fromXml(xml);
-    case 'var':
-      return FeatureConstraint.fromXml(xml);
-    case 'eq':
-      return IffConstraint.fromXml(xml);
-    case 'imp':
-      return ImplicationConstraint.fromXml(xml);
-    case 'not':
-      return NegatedConstraint.fromXml(xml);
-    case 'disj':
-      return OrConstraint.fromXml(xml);
-    case 'alt':
-      return AltConstraint.fromXml(xml);
+      case "conj":
+        return AndConstraint.fromXml(xml);
+      case "var":
+        return FeatureConstraint.fromXml(xml);
+      case "eq":
+        return IffConstraint.fromXml(xml);
+      case "imp":
+        return ImplicationConstraint.fromXml(xml);
+      case "not":
+        return NegatedConstraint.fromXml(xml);
+      case "disj":
+        return OrConstraint.fromXml(xml);
+      case "alt":
+        return AltConstraint.fromXml(xml);
     }
   }
 }
@@ -106,13 +105,13 @@ class FeatureConstraint extends Constraint {
 
   toJson() {
     return {
-      type: 'feature',
-      feature: this.feature
+      type: "feature",
+      feature: this.feature,
     };
   }
 
   static fromJson(json) {
-    if (typeof json == 'string') {
+    if (typeof json == "string") {
       return new FeatureConstraint(json);
     }
 
@@ -120,7 +119,7 @@ class FeatureConstraint extends Constraint {
   }
 
   toXml(parentNode) {
-    const xml = parentNode.startElement('var');
+    const xml = parentNode.startElement("var");
     xml.text(this.feature);
     xml.endElement();
   }
@@ -141,7 +140,7 @@ class NegatedConstraint extends Constraint {
   }
 
   toString() {
-    return '!' + this.constraint;
+    return "!" + this.constraint;
   }
 
   /////////////////////////
@@ -150,8 +149,8 @@ class NegatedConstraint extends Constraint {
 
   toJson() {
     return {
-      type: 'not',
-      constraint: this.constraint.toJson()
+      type: "not",
+      constraint: this.constraint.toJson(),
     };
   }
 
@@ -160,7 +159,7 @@ class NegatedConstraint extends Constraint {
   }
 
   toXml(parentNode) {
-    const xml = parentNode.startElement('not');
+    const xml = parentNode.startElement("not");
     this.constraint.toXml(xml);
     xml.endElement();
   }
@@ -196,7 +195,7 @@ class BinaryConstraint extends Constraint {
     return {
       type: this.type,
       first: this.first.toJson(),
-      second: this.second.toJson()
+      second: this.second.toJson(),
     };
   }
 
@@ -210,7 +209,7 @@ class BinaryConstraint extends Constraint {
 
 class AndConstraint extends BinaryConstraint {
   constructor(first, second) {
-    super(first, second, 'AND', 'and', 'conj');
+    super(first, second, "AND", "and", "conj");
   }
 
   evaluate(helper) {
@@ -234,7 +233,7 @@ class AndConstraint extends BinaryConstraint {
 
 class OrConstraint extends BinaryConstraint {
   constructor(first, second) {
-    super(first, second, 'OR', 'or', 'disj');
+    super(first, second, "OR", "or", "disj");
   }
 
   evaluate(helper) {
@@ -258,17 +257,19 @@ class OrConstraint extends BinaryConstraint {
 
 class ImplicationConstraint extends BinaryConstraint {
   constructor(first, second) {
-    super(first, second, '=>', 'implies', 'imp');
+    super(first, second, "=>", "implies", "imp");
   }
 
   evaluate(helper) {
-    const equivalentConstraint =
-      new OrConstraint(new NegatedConstraint(this.first), this.second);
+    const equivalentConstraint = new OrConstraint(
+      new NegatedConstraint(this.first),
+      this.second
+    );
     let result = equivalentConstraint.evaluate(helper);
 
     if (!result) {
       if (this.first.evaluate(helper)) {
-        if (this.second.constructor.name == 'FeatureConstraint') {
+        if (this.second.constructor.name == "FeatureConstraint") {
           helper.add(this.second.toString());
         }
         result = equivalentConstraint.evaluate(helper);
@@ -295,15 +296,14 @@ class ImplicationConstraint extends BinaryConstraint {
 
 class IffConstraint extends BinaryConstraint {
   constructor(first, second) {
-    super(first, second, '<=>', 'iff', 'eq');
+    super(first, second, "<=>", "iff", "eq");
   }
 
   evaluate(helper) {
-    const equivalentConstraint =
-      new AndConstraint(
-        new ImplicationConstraint(this.first, this.second),
-        new ImplicationConstraint(this.second, this.first)
-      );
+    const equivalentConstraint = new AndConstraint(
+      new ImplicationConstraint(this.first, this.second),
+      new ImplicationConstraint(this.second, this.first)
+    );
 
     return equivalentConstraint.evaluate(helper);
   }
@@ -325,12 +325,13 @@ class IffConstraint extends BinaryConstraint {
 
 class AltConstraint extends BinaryConstraint {
   constructor(first, second) {
-    super(first, second, 'v', 'alt');
+    super(first, second, "v", "alt");
   }
 
   evaluate(helper) {
-    return this.first.evaluate(helper) ?
-      !this.second.evaluate(helper) : this.second.evaluate(helper);
+    return this.first.evaluate(helper)
+      ? !this.second.evaluate(helper)
+      : this.second.evaluate(helper);
   }
 
   static fromJson(json) {

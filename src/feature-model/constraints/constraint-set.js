@@ -1,6 +1,6 @@
-import EvaluationHelper from './evaluation-helper';
-import Constraint from './constraint';
-import FeatureSelectionError from '../feature-selection-error';
+import EvaluationHelper from "./evaluation-helper.js";
+import Constraint from "./constraint.js";
+import FeatureSelectionError from "../feature-selection-error.js";
 
 export default class constraintSet {
   constructor() {
@@ -21,18 +21,21 @@ export default class constraintSet {
   checkConstraints(namesOfSelectedFeatures) {
     const helper = new EvaluationHelper(namesOfSelectedFeatures);
 
-    const constraintsNotMet =
-      this.constraints.filter(c => !c.evaluate(helper)).join(', ');
+    const constraintsNotMet = this.constraints
+      .filter((c) => !c.evaluate(helper))
+      .join(", ");
 
     if (constraintsNotMet) {
-      throw new FeatureSelectionError(`Constraints ${constraintsNotMet} not met`);
+      throw new FeatureSelectionError(
+        `Constraints ${constraintsNotMet} not met`
+      );
     }
 
     return helper.added;
   }
 
   toString() {
-    return `[ ${this.constraints.join(', ')} ]`;
+    return `[ ${this.constraints.join(", ")} ]`;
   }
 
   //////////////////////////////
@@ -40,11 +43,11 @@ export default class constraintSet {
   //////////////////////////////
 
   toJson() {
-    return this.constraints.map(c => c.toJson());
+    return this.constraints.map((c) => c.toJson());
   }
 
   fromJson(json) {
-    json.forEach(c => this.addConstraint(Constraint.fromJson(c)));
+    json.forEach((c) => this.addConstraint(Constraint.fromJson(c)));
   }
 
   /////////////////////////////
@@ -52,15 +55,14 @@ export default class constraintSet {
   /////////////////////////////
 
   toXml(parentNode) {
-    this.constraints.forEach(c => {
-      const rule = parentNode.startElement('rule');
+    this.constraints.forEach((c) => {
+      const rule = parentNode.startElement("rule");
       c.toXml(rule);
       rule.endElement();
     });
   }
 
   fromXml(xml) {
-    xml.eachChild(c =>
-      this.addConstraint(Constraint.fromXml(c.firstChild)));
+    xml.eachChild((c) => this.addConstraint(Constraint.fromXml(c.firstChild)));
   }
 }
