@@ -5,8 +5,11 @@ import fs from "fs";
 import path from "path";
 import { DerivationEngine, readJsonFromFile, readFile } from "./index.js";
 import JSZip from "jszip";
+import { fileURLToPath } from "url";
 
-const usage = fs.readFileSync(path.join(process.cwd(), "usage.txt"), "utf8");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const usage = fs.readFileSync(path.join(__dirname, "../usage.txt"), "utf8");
 
 export function cli() {
   const cli = meow(usage, { importMeta: import.meta });
