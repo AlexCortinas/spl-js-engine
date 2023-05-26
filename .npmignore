@@ -1,8 +1,11 @@
-src
 .gitlab-ci.yml
 test
 examples
-.eslintrc.json
+.eslintrc.yml
+.nvmrc
 .eslintignore
 .editorconfig
 .gitattributes
+.husky
+.history
+.prettierignore
