@@ -148,6 +148,11 @@ export default class DerivationEngine {
           return this.output.add(fPath, fContent, true);
         }
 
+        if (this.verbose) {
+          console.log("");
+          console.log("Input file.....: " + fPath);
+        }
+
         fileGenerator
           .filesToCreate(
             fContent,
@@ -158,8 +163,6 @@ export default class DerivationEngine {
           )
           .forEach((r) => {
             if (this.verbose) {
-              console.log("");
-              console.log("Input file.....: " + fPath);
               console.log("File name..: " + r.fileName);
               console.log(
                 "Output file: " + getFolder(fPath) + "/" + r.fileName
