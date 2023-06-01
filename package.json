@@ -46,5 +46,5 @@
     "test": "mocha --ui qunit"
   },
   "type": "module",
-  "version": "4.0.2"
+  "version": "4.0.3"
 }
