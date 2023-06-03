@@ -80,16 +80,18 @@ export function readJsonFromFile(fPath) {
 
   const fileContent = readFile(fPath);
 
-  try {
-    return extendProductJson(JSON.parse(fileContent), path.dirname(fPath));
-  } catch (e) {
-    // nothing to do
-  }
+  return extendProductJson(JSON.parse(fileContent), path.dirname(fPath));
+}
 
-  return undefined;
+function _getPath(filePath, basepath) {
+  if (path.isAbsolute(filePath)) {
+    return filePath;
+  }
+  return basepath + path.sep + filePath;
 }
 
 function extendProductJson(json, basepath) {
+  let auxIncludePath;
   Object.keys(json).forEach((k) => {
     if (json[k]) {
       if (typeof json[k] == "object") {
@@ -98,7 +100,11 @@ function extendProductJson(json, basepath) {
         typeof json[k] == "string" &&
         json[k].substr(0, 9) == "@include:"
       ) {
-        json[k] = readFile(basepath + path.sep + json[k].substr(9));
+        auxIncludePath = _getPath(json[k].substr(9), basepath);
+        if (!fs.existsSync(auxIncludePath)) {
+          throw `@includes directive pointing a not existing path: ${auxIncludePath}`;
+        }
+        json[k] = readFile(auxIncludePath);
         try {
           // if it is a json, we parse it; otherwise, we will use the plain text
           json[k] = JSON.parse(json[k]);

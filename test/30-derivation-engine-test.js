@@ -1,9 +1,11 @@
+import fs from "fs";
 import { DerivationEngine, readJsonFromFile, readFile } from "../src/index.js";
 import {
   getTestPath as p,
   removeTmpFolder,
   assertEqualFilesInFolders,
 } from "./test-utils.js";
+import assert from "assert";
 
 suite("#DerivationEngine");
 
@@ -280,4 +282,35 @@ test("Create a product with includes", async () => {
     p("simpleSPLwithIncludes/expected"),
     p("tmp/simpleProduct")
   );
+});
+
+test("Check if @includes with absolute path works", async () => {
+  const originalFile = readFile(p("simpleSPLwithIncludes/product.json"));
+  const fullPath = `${process.cwd()}/${p("simpleSPLwithIncludes/includes")}`;
+  const newFileContent = originalFile.replaceAll(
+    "@include:includes",
+    `@include:${fullPath}`
+  );
+
+  fs.mkdirSync(p("tmp"));
+  fs.writeFileSync(
+    p("tmp/productWithAbslutePathIncludes.json"),
+    newFileContent,
+    "utf8"
+  );
+
+  const originalJsonFile = readJsonFromFile(
+    p("simpleSPLwithIncludes/product.json")
+  );
+  const newJsonFile = readJsonFromFile(
+    p("tmp/productWithAbslutePathIncludes.json")
+  );
+
+  assert.deepEqual(originalJsonFile, newJsonFile);
+});
+
+test("Provide an exception if there is a problem with @includes", async () => {
+  assert.throws(() => {
+    readJsonFromFile(p("simpleSPLwithIncludes/productWithErrors.json"));
+  }, /@includes directive pointing a not existing path/);
 });
