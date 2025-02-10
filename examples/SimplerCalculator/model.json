@@ -1,0 +1,55 @@
+{
+  "featureModel": {
+    "struct": {
+      "name": "MyCalculator",
+      "mandatory": true,
+      "abstract": true,
+      "type": "and",
+      "features": [
+        {
+          "name": "base",
+          "mandatory": true,
+          "type": "and",
+          "features": [
+            {
+              "name": "operations",
+              "abstract": true,
+              "type": "or",
+              "features": [
+                {
+                  "name": "add"
+                },
+                {
+                  "name": "subtract"
+                },
+                {
+                  "name": "multiply"
+                },
+                {
+                  "name": "divide"
+                }
+              ]
+            },
+            {
+              "name": "capabilities",
+              "abstract": true,
+              "type": "or",
+              "features": [
+                {
+                  "name": "complex"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "constraints": [
+      {
+        "type": "implies",
+        "first": "divide",
+        "second": "complex"
+      }
+    ]
+  }
+}
